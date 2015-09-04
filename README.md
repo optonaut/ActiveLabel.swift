@@ -23,26 +23,26 @@ label.textColor = .blackColor()
 
 ## API
 
-##### `ActiveLabel.mentionEnabled: Bool` (Default: `true`)
-##### `ActiveLabel.hashtagEnabled: Bool` (Default: `true`)
-##### `ActiveLabel.URLEnabled: Bool` (Default: `true`)
-##### `ActiveLabel.mentionColor: UIColor` (Default: `UIColor.blueColor()`)
-##### `ActiveLabel.hashtagColor: UIColor` (Default: `UIColor.blueColor()`)
-##### `ActiveLabel.URLColor: UIColor` (Default: `UIColor.blueColor()`)
+##### `mentionEnabled: Bool` (Default: `true`)
+##### `hashtagEnabled: Bool` (Default: `true`)
+##### `URLEnabled: Bool` (Default: `true`)
+##### `mentionColor: UIColor` (Default: `UIColor.blueColor()`)
+##### `hashtagColor: UIColor` (Default: `UIColor.blueColor()`)
+##### `URLColor: UIColor` (Default: `UIColor.blueColor()`)
 
-##### `ActiveLabel.handleMentionTap: (String) -> ()`
+##### `handleMentionTap: (String) -> ()`
 
 ```swift
 label.handleMentionTap { userHandle in print("\(userHandle) tapped") }
 ```
 
-##### `ActiveLabel.handleHashtagTap: (String) -> ()`
+##### `handleHashtagTap: (String) -> ()`
 
 ```swift
 label.handleHashtagTap { hashtag in print("\(hashtag) tapped") }
 ```
 
-##### `ActiveLabel.handleURLTap: (NSURL) -> ()`
+##### `handleURLTap: (NSURL) -> ()`
 
 ```swift
 label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
