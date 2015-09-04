@@ -22,9 +22,9 @@ label.text = "This is a post with #hashtags and a @userhandle."
 
 ## API
 
-#### `ActiveLabel.mentionColor: UIColor`
-#### `ActiveLabel.hashtagColor: UIColor`
-#### `ActiveLabel.URLColor: UIColor`
+##### `ActiveLabel.mentionColor: UIColor`
+##### `ActiveLabel.hashtagColor: UIColor`
+##### `ActiveLabel.URLColor: UIColor`
 
 ### `ActiveLabel.handleMentionTap: (String) -> ()`
 
@@ -32,13 +32,13 @@ label.text = "This is a post with #hashtags and a @userhandle."
 label.handleMentionTap { userHandle in print("\(userHandle) tapped") }
 ```
 
-#### `ActiveLabel.handleHashtagTap: (String) -> ()`
+##### `ActiveLabel.handleHashtagTap: (String) -> ()`
 
 ```swift
 label.handleHashtagTap { hashtag in print("\(hashtag) tapped") }
 ```
 
-#### `ActiveLabel.handleURLTap: (NSURL) -> ()`
+##### `ActiveLabel.handleURLTap: (NSURL) -> ()`
 
 ```swift
 label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
