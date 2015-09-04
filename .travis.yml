@@ -1,0 +1,6 @@
+language: objective-c
+
+#xcode_project: Swifternalization.xcodeproj
+#xcode_scheme: SwifternalizationTests
+osx_image: xcode7
+#xcode_sdk: iphonesimulator8.3 
