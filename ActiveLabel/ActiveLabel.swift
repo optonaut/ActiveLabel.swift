@@ -249,13 +249,13 @@ public class ActiveLabel: UILabel {
         for word in textString.componentsSeparatedByString(" ") {
             let element = activeElement(word)
             switch element {
-            case .Mention(let userHandle):
+            case .Mention(let userHandle) where mentionEnabled:
                 activeElements[.Mention]?.append((textString.rangeOfString("@\(userHandle)"), element))
-            case .Hashtag(let hashtag):
+            case .Hashtag(let hashtag) where hashtagEnabled:
                 activeElements[.Hashtag]?.append((textString.rangeOfString("#\(hashtag)"), element))
-            case .URL(let url):
+            case .URL(let url) where URLEnabled:
                 activeElements[.URL]?.append((textString.rangeOfString(url.absoluteString), element))
-            case .None: ()
+            default: ()
             }
         }
     }
