@@ -33,11 +33,12 @@ label.handleHashtagTap { hashtag in
 ##### `hashtagEnabled: Bool = true`
 ##### `URLEnabled: Bool = true`
 ##### `mentionColor: UIColor = .blueColor()`
-##### `mentionSelectedColor: UIColor = .blueColor()`
+##### `mentionSelectedColor: UIColor?`
 ##### `hashtagColor: UIColor = .blueColor()`
-##### `hashtagSelectedColor: UIColor = .blueColor()`
+##### `hashtagSelectedColor: UIColor?`
 ##### `URLColor: UIColor = .blueColor()`
-##### `URLSelectedColor: UIColor = .blueColor()`
+##### `URLSelectedColor: UIColor?`
+##### `lineSpacing: Float?`
 
 ##### `handleMentionTap: (String) -> ()`
 
