@@ -203,6 +203,15 @@ public class ActiveLabel: UILabel {
             return
         }
         
+        // clean up previous active elements
+        for (type, _) in activeElements {
+            activeElements[type]?.removeAll()
+        }
+        
+        guard attributedText.length > 0 else {
+            return
+        }
+        
         let mutAttrString = addLineBreak(attributedText)
         parseTextAndExtractActiveElements(mutAttrString)
         addLinkAttribute(mutAttrString)
@@ -240,11 +249,6 @@ public class ActiveLabel: UILabel {
     
     /// use regex check all link ranges
     private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
-        // clean up previous active elements
-        for (type, _) in activeElements {
-            activeElements[type]?.removeAll()
-        }
-        
         let textString = attrString.string as NSString
         for word in textString.componentsSeparatedByString(" ") {
             let element = activeElement(word)
