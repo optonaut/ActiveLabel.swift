@@ -1,6 +1,9 @@
 language: objective-c
 
 #xcode_project: Swifternalization.xcodeproj
-#xcode_scheme: SwifternalizationTests
+xcode_scheme: ActiveLabel
 osx_image: xcode7
-#xcode_sdk: iphonesimulator8.3 
+xcode_sdk: iphonesimulator9
+
+script:
+  - xcodebuild clean build test -scheme ActiveLabel
