@@ -23,12 +23,12 @@ label.textColor = .blackColor()
 
 ## API
 
-##### `mentionEnabled: Bool` (Default: `true`)
-##### `hashtagEnabled: Bool` (Default: `true`)
-##### `URLEnabled: Bool` (Default: `true`)
-##### `mentionColor: UIColor` (Default: `UIColor.blueColor()`)
-##### `hashtagColor: UIColor` (Default: `UIColor.blueColor()`)
-##### `URLColor: UIColor` (Default: `UIColor.blueColor()`)
+##### `mentionEnabled: Bool = true`
+##### `hashtagEnabled: Bool = true`
+##### `URLEnabled: Bool = true`
+##### `mentionColor: UIColor = .blueColor()`
+##### `hashtagColor: UIColor = .blueColor()`
+##### `URLColor: UIColor = .blueColor()`
 
 ##### `handleMentionTap: (String) -> ()`
 
