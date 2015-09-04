@@ -19,6 +19,9 @@ let label = ActiveLabel()
 
 label.text = "This is a post with #hashtags and a @userhandle."
 label.textColor = .blackColor()
+label.handleHashtagTap { hashtag in
+  print("Success. You just tapped the \(hashtag) hashtag")
+}
 ```
 
 ## API
