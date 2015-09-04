@@ -10,6 +10,8 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@) and URLs (http
 * Works as `UILabel` drop-in replacement
 * Well tested and documented
 
+![](ActiveLabelDemo/demo.gif)
+
 ## Usage
 
 ```swift
@@ -17,6 +19,7 @@ import ActiveLabel
 
 let label = ActiveLabel()
 
+label.numberOfLines = 0
 label.text = "This is a post with #hashtags and a @userhandle."
 label.textColor = .blackColor()
 label.handleHashtagTap { hashtag in
@@ -30,8 +33,11 @@ label.handleHashtagTap { hashtag in
 ##### `hashtagEnabled: Bool = true`
 ##### `URLEnabled: Bool = true`
 ##### `mentionColor: UIColor = .blueColor()`
+##### `mentionSelectedColor: UIColor = .blueColor()`
 ##### `hashtagColor: UIColor = .blueColor()`
+##### `hashtagSelectedColor: UIColor = .blueColor()`
 ##### `URLColor: UIColor = .blueColor()`
+##### `URLSelectedColor: UIColor = .blueColor()`
 
 ##### `handleMentionTap: (String) -> ()`
 
@@ -51,7 +57,7 @@ label.handleHashtagTap { hashtag in print("\(hashtag) tapped") }
 label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
 ```
 
-## Install
+## Install (iOS 8+) 
 
 ### Carthage
 

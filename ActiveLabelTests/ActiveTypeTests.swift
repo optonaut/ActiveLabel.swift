@@ -9,9 +9,9 @@
 import XCTest
 @testable import ActiveLabel
 
-extension ActiveType: Equatable {}
+extension ActiveElement: Equatable {}
 
-func ==(a: ActiveType, b: ActiveType) -> Bool {
+func ==(a: ActiveElement, b: ActiveElement) -> Bool {
     switch (a, b) {
     case (.Mention(let a), .Mention(let b)) where a == b: return true
     case (.Hashtag(let a), .Hashtag(let b)) where a == b: return true
@@ -34,32 +34,37 @@ class ActiveTypeTests: XCTestCase {
     }
     
     func testInvalid() {
-        XCTAssertEqual(activeType(""), ActiveType.None)
-        XCTAssertEqual(activeType(" "), ActiveType.None)
-        XCTAssertEqual(activeType("x"), ActiveType.None)
-        XCTAssertEqual(activeType("ಠ_ಠ"), ActiveType.None)
-        XCTAssertEqual(activeType("😁"), ActiveType.None)
+        XCTAssertEqual(activeElement(""), ActiveElement.None)
+        XCTAssertEqual(activeElement(" "), ActiveElement.None)
+        XCTAssertEqual(activeElement("x"), ActiveElement.None)
+        XCTAssertEqual(activeElement("ಠ_ಠ"), ActiveElement.None)
+        XCTAssertEqual(activeElement("😁"), ActiveElement.None)
     }
     
     func testMention() {
-        XCTAssertEqual(activeType("@userhandle"), ActiveType.Mention("userhandle"))
-        XCTAssertEqual(activeType("@_with_underscores_"), ActiveType.Mention("_with_underscores_"))
-        XCTAssertEqual(activeType("@u"), ActiveType.Mention("u"))
-        XCTAssertEqual(activeType("@"), ActiveType.None)
+        XCTAssertEqual(activeElement("@userhandle"), ActiveElement.Mention("userhandle"))
+        XCTAssertEqual(activeElement("@userhandle."), ActiveElement.Mention("userhandle"))
+        XCTAssertEqual(activeElement("@_with_underscores_"), ActiveElement.Mention("_with_underscores_"))
+        XCTAssertEqual(activeElement("@u"), ActiveElement.Mention("u"))
+        XCTAssertEqual(activeElement("@."), ActiveElement.None)
+        XCTAssertEqual(activeElement("@"), ActiveElement.None)
     }
     
     func testHashtag() {
-        XCTAssertEqual(activeType("#somehashtag"), ActiveType.Hashtag("somehashtag"))
-        XCTAssertEqual(activeType("#_with_underscores_"), ActiveType.Hashtag("_with_underscores_"))
-        XCTAssertEqual(activeType("#h"), ActiveType.Hashtag("h"))
-        XCTAssertEqual(activeType("#"), ActiveType.None)
+        XCTAssertEqual(activeElement("#somehashtag"), ActiveElement.Hashtag("somehashtag"))
+        XCTAssertEqual(activeElement("#somehashtag."), ActiveElement.Hashtag("somehashtag"))
+        XCTAssertEqual(activeElement("#_with_underscores_"), ActiveElement.Hashtag("_with_underscores_"))
+        XCTAssertEqual(activeElement("#h"), ActiveElement.Hashtag("h"))
+        XCTAssertEqual(activeElement("#."), ActiveElement.None)
+        XCTAssertEqual(activeElement("#"), ActiveElement.None)
     }
     
     func testURL() {
-        XCTAssertEqual(activeType("http://www.google.com"), ActiveType.URL(NSURL(string: "http://www.google.com")!))
-        XCTAssertEqual(activeType("https://www.google.com"), ActiveType.URL(NSURL(string: "https://www.google.com")!))
-        XCTAssertEqual(activeType("www.google.com"), ActiveType.None)
-        XCTAssertEqual(activeType("google.com"), ActiveType.None)
+        XCTAssertEqual(activeElement("http://www.google.com"), ActiveElement.URL(NSURL(string: "http://www.google.com")!))
+        XCTAssertEqual(activeElement("https://www.google.com"), ActiveElement.URL(NSURL(string: "https://www.google.com")!))
+        XCTAssertEqual(activeElement("https://www.google.com."), ActiveElement.URL(NSURL(string: "https://www.google.com")!))
+        XCTAssertEqual(activeElement("www.google.com"), ActiveElement.None)
+        XCTAssertEqual(activeElement("google.com"), ActiveElement.None)
     }
     
 }
