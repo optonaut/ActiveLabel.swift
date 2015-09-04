@@ -18,15 +18,19 @@ import ActiveLabel
 let label = ActiveLabel()
 
 label.text = "This is a post with #hashtags and a @userhandle."
+label.textColor = .blackColor()
 ```
 
 ## API
 
-##### `ActiveLabel.mentionColor: UIColor`
-##### `ActiveLabel.hashtagColor: UIColor`
-##### `ActiveLabel.URLColor: UIColor`
+##### `ActiveLabel.mentionEnabled: Bool` (Default: `true`)
+##### `ActiveLabel.hashtagEnabled: Bool` (Default: `true`)
+##### `ActiveLabel.URLEnabled: Bool` (Default: `true`)
+##### `ActiveLabel.mentionColor: UIColor` (Default: `UIColor.blueColor()`)
+##### `ActiveLabel.hashtagColor: UIColor` (Default: `UIColor.blueColor()`)
+##### `ActiveLabel.URLColor: UIColor` (Default: `UIColor.blueColor()`)
 
-### `ActiveLabel.handleMentionTap: (String) -> ()`
+##### `ActiveLabel.handleMentionTap: (String) -> ()`
 
 ```swift
 label.handleMentionTap { userHandle in print("\(userHandle) tapped") }
