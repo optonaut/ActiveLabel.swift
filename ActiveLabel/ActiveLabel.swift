@@ -114,57 +114,11 @@ public class ActiveLabel: UILabel {
         setupLabel()
     }
     
+    // MARK: - layout functions
     public override func layoutSubviews() {
         super.layoutSubviews()
         
         textContainer.size = bounds.size
-    }
-    
-    // MARK: - override touch events
-    public override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        let location = touches.first!.locationInView(self)
-        
-        selectedElement = elementAtLocation(location)
-        updateAttributesWhenSelected(true)
-    }
-    
-    public override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        guard let selectedElement = selectedElement else {
-            return
-        }
-        
-        switch selectedElement.element {
-        case .Mention(let userHandle): mentionTapHandler?(userHandle)
-        case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
-        case .URL(let url): urlTapHandler?(url)
-        case .None: ()
-        }
-        
-        let when = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
-        dispatch_after(when, dispatch_get_main_queue()) {
-            self.updateAttributesWhenSelected(false)
-            self.selectedElement = nil
-        }
-    }
-    
-    public override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        let location = touches.first!.locationInView(self)
-        
-        if let element = elementAtLocation(location) {
-            if element.range.location != selectedElement?.range.location || element.range.length != selectedElement?.range.length {
-                updateAttributesWhenSelected(false)
-                selectedElement = element
-                updateAttributesWhenSelected(true)
-            }
-        } else {
-            updateAttributesWhenSelected(false)
-            selectedElement = nil
-        }
-    }
-    
-    public override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
-        updateAttributesWhenSelected(false)
-        selectedElement = nil
     }
     
     public override func drawTextInRect(rect: CGRect) {
@@ -172,6 +126,43 @@ public class ActiveLabel: UILabel {
         
         layoutManager.drawBackgroundForGlyphRange(range, atPoint: CGPointZero)
         layoutManager.drawGlyphsForGlyphRange(range, atPoint: CGPointZero)
+    }
+    
+    // MARK: - touch events
+    func onTouch(gesture: UILongPressGestureRecognizer) {
+        let location = gesture.locationInView(self)
+        
+        switch gesture.state {
+        case .Began, .Changed:
+            if let element = elementAtLocation(location) {
+                if element.range.location != selectedElement?.range.location || element.range.length != selectedElement?.range.length {
+                    updateAttributesWhenSelected(false)
+                    selectedElement = element
+                    updateAttributesWhenSelected(true)
+                }
+            } else {
+                updateAttributesWhenSelected(false)
+                selectedElement = nil
+            }
+        case .Cancelled, .Ended:
+            guard let selectedElement = selectedElement else {
+                return
+            }
+            
+            switch selectedElement.element {
+            case .Mention(let userHandle): mentionTapHandler?(userHandle)
+            case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
+            case .URL(let url): urlTapHandler?(url)
+            case .None: ()
+            }
+            
+            let when = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
+            dispatch_after(when, dispatch_get_main_queue()) {
+                self.updateAttributesWhenSelected(false)
+                self.selectedElement = nil
+            }
+        default: ()
+        }
     }
     
     // MARK: - private properties
@@ -194,6 +185,10 @@ public class ActiveLabel: UILabel {
         textStorage.addLayoutManager(layoutManager)
         layoutManager.addTextContainer(textContainer)
         textContainer.lineFragmentPadding = 0
+        
+        let touchRecognizer = UILongPressGestureRecognizer(target: self, action: "onTouch:")
+        touchRecognizer.minimumPressDuration = 0.00001
+        addGestureRecognizer(touchRecognizer)
         
         userInteractionEnabled = true
     }
