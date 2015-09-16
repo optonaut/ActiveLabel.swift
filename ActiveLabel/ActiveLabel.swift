@@ -188,6 +188,8 @@ public class ActiveLabel: UILabel {
         
         let touchRecognizer = UILongPressGestureRecognizer(target: self, action: "onTouch:")
         touchRecognizer.minimumPressDuration = 0.00001
+        touchRecognizer.cancelsTouchesInView = false
+        touchRecognizer.delegate = self
         addGestureRecognizer(touchRecognizer)
         
         userInteractionEnabled = true
@@ -324,6 +326,14 @@ public class ActiveLabel: UILabel {
         }
         
         return nil
+    }
+    
+}
+
+extension ActiveLabel: UIGestureRecognizerDelegate {
+    
+    public func gestureRecognizer(gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
     }
     
 }
