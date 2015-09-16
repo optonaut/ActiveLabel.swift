@@ -4,7 +4,7 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@) and URLs (http
 
 ## Features
 
-* Up-to-date: Swift 2 (Beta 6)
+* Up-to-date: Swift 2 (Xcode 7 GM)
 * Support for **Hashtags, Mentions and Links**
 * Super easy to use and lightweight
 * Works as `UILabel` drop-in replacement
@@ -67,3 +67,12 @@ Add the following to your `Cartfile` and follow [these instructions](https://git
 ```
 github "optonaut/ActiveLabel.swift" >= 0.1.0
 ```
+
+## Alternatives
+
+Before writing `ActiveLabel` we've tried a lot of the following alternatives but weren't quite satisfied with the quality level or ease of usage, so we decided to contribute our own solution.
+
+* [TTTAttributedLabel](https://github.com/TTTAttributedLabel/TTTAttributedLabel) (ObjC) - A drop-in replacement for UILabel that supports attributes, data detectors, links, and more
+* [STTweetLabel](https://github.com/SebastienThiebaud/STTweetLabel) (ObjC) - A UILabel with #hashtag @handle and links tappable
+* [AMAttributedHighlightLabel](https://github.com/rootd/AMAttributedHighlightLabel) (ObjC) - A UILabel subclass with mention/hashtag/link highlighting
+* [KILabel](https://github.com/Krelborn/KILabel) (ObjC) - A simple to use drop in replacement for UILabel for iOS 7 and above that highlights links such as URLs, twitter style usernames and hashtags and makes them touchable
