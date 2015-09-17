@@ -58,14 +58,25 @@ label.handleHashtagTap { hashtag in print("\(hashtag) tapped") }
 label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
 ```
 
-## Install (iOS 8+) 
+## Install (iOS 8+)
 
 ### Carthage
 
 Add the following to your `Cartfile` and follow [these instructions](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)
 
 ```
-github "optonaut/ActiveLabel.swift" >= 0.1.0
+github "optonaut/ActiveLabel.swift"
+```
+
+### CocoaPods
+
+CocoaPods 0.36 adds supports for Swift and embedded frameworks. To integrate ActiveLabel into your project add the following to your `Podfile`:
+
+```ruby
+platform :ios, '8.0'
+use_frameworks!
+
+pod 'ActiveLabel'
 ```
 
 ## Alternatives
