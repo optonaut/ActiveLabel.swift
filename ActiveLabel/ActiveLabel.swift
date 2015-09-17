@@ -114,18 +114,13 @@ public class ActiveLabel: UILabel {
         setupLabel()
     }
     
-    // MARK: - layout functions
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        textContainer.size = bounds.size
-    }
-    
     public override func drawTextInRect(rect: CGRect) {
         let range = NSRange(location: 0, length: textStorage.length)
         
-        layoutManager.drawBackgroundForGlyphRange(range, atPoint: CGPointZero)
-        layoutManager.drawGlyphsForGlyphRange(range, atPoint: CGPointZero)
+        textContainer.size = rect.size
+        
+        layoutManager.drawBackgroundForGlyphRange(range, atPoint: rect.origin)
+        layoutManager.drawGlyphsForGlyphRange(range, atPoint: rect.origin)
     }
     
     // MARK: - touch events
