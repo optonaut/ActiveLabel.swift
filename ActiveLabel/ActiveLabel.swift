@@ -123,6 +123,16 @@ public class ActiveLabel: UILabel {
         layoutManager.drawGlyphsForGlyphRange(range, atPoint: rect.origin)
     }
     
+    public override func sizeThatFits(size: CGSize) -> CGSize {
+        let currentSize = frame.size
+        defer {
+            textContainer.size = currentSize
+        }
+        
+        textContainer.size = size
+        return layoutManager.usedRectForTextContainer(textContainer).size
+    }
+    
     // MARK: - touch events
     func onTouch(gesture: UILongPressGestureRecognizer) {
         let location = gesture.locationInView(self)
