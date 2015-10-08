@@ -124,7 +124,7 @@ public class ActiveLabel: UILabel {
     }
     
     public override func sizeThatFits(size: CGSize) -> CGSize {
-        let currentSize = frame.size
+        let currentSize = textContainer.size
         defer {
             textContainer.size = currentSize
         }
