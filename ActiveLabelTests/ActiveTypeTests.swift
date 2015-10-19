@@ -63,8 +63,8 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElement("http://www.google.com"), ActiveElement.URL(NSURL(string: "http://www.google.com")!))
         XCTAssertEqual(activeElement("https://www.google.com"), ActiveElement.URL(NSURL(string: "https://www.google.com")!))
         XCTAssertEqual(activeElement("https://www.google.com."), ActiveElement.URL(NSURL(string: "https://www.google.com")!))
-        XCTAssertEqual(activeElement("www.google.com"), ActiveElement.None)
-        XCTAssertEqual(activeElement("google.com"), ActiveElement.None)
+        XCTAssertEqual(activeElement("www.google.com"), ActiveElement.URL(NSURL(string: "www.google.com")!))
+        XCTAssertEqual(activeElement("google.com"), ActiveElement.URL(NSURL(string: "google.com")!))
     }
     
 }
