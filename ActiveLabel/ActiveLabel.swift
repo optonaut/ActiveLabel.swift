@@ -9,55 +9,55 @@
 import Foundation
 import UIKit
 
-public class ActiveLabel: UILabel {
+@IBDesignable public class ActiveLabel: UILabel {
     
     // MARK: - public properties
-    public var mentionEnabled: Bool = true {
+    @IBInspectable public var mentionEnabled: Bool = true {
         didSet {
             updateTextStorage()
         }
     }
-    public var hashtagEnabled: Bool = true {
+    @IBInspectable public var hashtagEnabled: Bool = true {
         didSet {
             updateTextStorage()
         }
     }
-    public var URLEnabled: Bool = true {
+    @IBInspectable public var URLEnabled: Bool = true {
         didSet {
             updateTextStorage()
         }
     }
-    public var mentionColor: UIColor = .blueColor() {
+    @IBInspectable public var mentionColor: UIColor = .blueColor() {
         didSet {
             updateTextStorage()
         }
     }
-    public var mentionSelectedColor: UIColor? {
+    @IBInspectable public var mentionSelectedColor: UIColor? {
         didSet {
             updateTextStorage()
         }
     }
-    public var hashtagColor: UIColor = .blueColor() {
+    @IBInspectable public var hashtagColor: UIColor = .blueColor() {
         didSet {
             updateTextStorage()
         }
     }
-    public var hashtagSelectedColor: UIColor? {
+    @IBInspectable public var hashtagSelectedColor: UIColor? {
         didSet {
             updateTextStorage()
         }
     }
-    public var URLColor: UIColor = .blueColor() {
+    @IBInspectable public var URLColor: UIColor = .blueColor() {
         didSet {
             updateTextStorage()
         }
     }
-    public var URLSelectedColor: UIColor? {
+    @IBInspectable public var URLSelectedColor: UIColor? {
         didSet {
             updateTextStorage()
         }
     }
-    public var lineSpacing: Float? {
+    @IBInspectable public var lineSpacing: Float? {
         didSet {
             updateTextStorage()
         }
