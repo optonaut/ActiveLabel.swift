@@ -46,9 +46,9 @@ func activeElement(word: String) -> ActiveElement {
 }
 
 private func reduceRightToURL(str: String) -> NSURL? {
-    if let regex = try? NSRegularExpression(pattern: "(?i)https?://(?:www\\.)?\\S+(?:/|\\b)", options: [.CaseInsensitive]) {
+    if let urlDetector = try? NSDataDetector(types: NSTextCheckingType.Link.rawValue) {
         let nsStr = str as NSString
-        let results = regex.matchesInString(str, options: [], range: NSRange(location: 0, length: nsStr.length))
+        let results = urlDetector.matchesInString(str, options: .ReportCompletion, range: NSRange(location: 0, length: nsStr.length))
         if let result = results.map({ nsStr.substringWithRange($0.range) }).first, url = NSURL(string: result) {
             return url
         }

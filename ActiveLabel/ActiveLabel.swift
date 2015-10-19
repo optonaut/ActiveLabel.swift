@@ -251,15 +251,29 @@ import UIKit
     /// use regex check all link ranges
     private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
         let textString = attrString.string as NSString
-        for word in textString.componentsSeparatedByString(" ") {
+        let textLength = textString.length
+        var searchRange = NSMakeRange(0, textLength)
+        
+        for word in textString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) {
             let element = activeElement(word)
+            
+            if case .None = element {
+                continue
+            }
+            
+            let elementRange = textString.rangeOfString(word, options: .LiteralSearch, range: searchRange)
+            defer {
+                let startIndex = elementRange.location + elementRange.length
+                searchRange = NSMakeRange(startIndex, textLength - startIndex)
+            }
+            
             switch element {
-            case .Mention(let userHandle) where mentionEnabled:
-                activeElements[.Mention]?.append((textString.rangeOfString("@\(userHandle)"), element))
-            case .Hashtag(let hashtag) where hashtagEnabled:
-                activeElements[.Hashtag]?.append((textString.rangeOfString("#\(hashtag)"), element))
-            case .URL(let url) where URLEnabled:
-                activeElements[.URL]?.append((textString.rangeOfString(url.absoluteString), element))
+            case .Mention where mentionEnabled:
+                activeElements[.Mention]?.append((elementRange, element))
+            case .Hashtag where hashtagEnabled:
+                activeElements[.Hashtag]?.append((elementRange, element))
+            case .URL where URLEnabled:
+                activeElements[.URL]?.append((elementRange, element))
             default: ()
             }
         }
