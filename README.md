@@ -4,7 +4,7 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@) and URLs (http
 
 ## Features
 
-* Up-to-date: Swift 2 (Xcode 7 GM)
+* Swift 2+
 * Support for **Hashtags, Mentions and Links**
 * Super easy to use and lightweight
 * Works as `UILabel` drop-in replacement
