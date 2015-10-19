@@ -262,9 +262,10 @@ import UIKit
             }
             
             let elementRange = textString.rangeOfString(word, options: .LiteralSearch, range: searchRange)
-            
-            let startIndex: Int = elementRange.location + elementRange.length
-            searchRange = NSMakeRange(startIndex, textLength - startIndex)
+            defer {
+                let startIndex = elementRange.location + elementRange.length
+                searchRange = NSMakeRange(startIndex, textLength - startIndex)
+            }
             
             switch element {
             case .Mention where mentionEnabled:
