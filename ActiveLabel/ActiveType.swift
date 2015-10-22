@@ -12,7 +12,7 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(NSURL)
-    case Custom(String)
+    case Regex(String)
     case None
 }
 
@@ -20,17 +20,17 @@ enum ActiveType {
     case Mention
     case Hashtag
     case URL
-    case Custom
+    case Regex
     case None
 }
 
-func activeElement(word: String, matchWord: String? = nil) -> ActiveElement {
+func activeElement(word: String, regex: String? = nil) -> ActiveElement {
     if let url = reduceRightToURL(word) {
         return .URL(url)
     }
     
-    if (matchWord != nil && word == matchWord!) {
-        return .Custom(word)
+    if (regex != nil && (word=~regex!)?.count > 0) {
+        return .Regex(word)
     }
     
     if word.characters.count < 2 {
@@ -63,14 +63,43 @@ private func reduceRightToURL(str: String) -> NSURL? {
 }
 
 private func reduceRightToAllowed(str: String) -> String? {
-    if let regex = try? NSRegularExpression(pattern: "^[a-z0-9_]*", options: [.CaseInsensitive]) {
-        let nsStr = str as NSString
-        let results = regex.matchesInString(str, options: [], range: NSRange(location: 0, length: nsStr.length))
-        if let result = results.map({ nsStr.substringWithRange($0.range) }).first {
-            if !result.isEmpty {
-                return result
-            }
+    
+    let pattern = "^[a-z0-9_]*"
+    //if support chinese let pattern = "^[a-z0-9_\\u4e00-\\u9fa5]*" 
+    let nsStr = str as NSString
+    if let result = (str=~pattern)?.map({ nsStr.substringWithRange($0.range)}).first {
+        if !result.isEmpty {
+            return result
         }
     }
     return nil
+}
+
+private struct RegexHelper {
+    let regex: NSRegularExpression
+    
+    init(_ pattern: String) throws {
+        try regex = NSRegularExpression(pattern: pattern,
+            options: .CaseInsensitive)
+    }
+    
+    func match(input: String) -> Array<NSTextCheckingResult> {
+        let matches = regex.matchesInString(input,
+            options: [],
+            range: NSMakeRange(0, input.characters.count))
+        return matches
+    }
+}
+
+infix operator =~ {
+    associativity none
+    precedence 130
+}
+
+private func =~(lhs:String, rhs:String) -> Array<NSTextCheckingResult>? {
+    do {
+        return try RegexHelper(rhs).match(lhs)
+    } catch _ {
+        return nil
+    }
 }

@@ -27,7 +27,7 @@ import UIKit
             updateTextStorage()
         }
     }
-    @IBInspectable public var customEnabled: Bool = true {
+    @IBInspectable public var regexEnabled: Bool = true {
         didSet {
             updateTextStorage()
         }
@@ -52,17 +52,17 @@ import UIKit
             updateTextStorage()
         }
     }
-    @IBInspectable public var customColor: UIColor = .orangeColor() {
+    @IBInspectable public var regexColor: UIColor = .orangeColor() {
         didSet {
             updateTextStorage()
         }
     }
-    @IBInspectable public var customSelectedColor: UIColor? {
+    @IBInspectable public var regexSelectedColor: UIColor? {
         didSet {
             updateTextStorage()
         }
     }
-    @IBInspectable public var customString: String? {
+    @IBInspectable public var regexString: String? {
         didSet {
             updateTextStorage()
         }
@@ -82,7 +82,7 @@ import UIKit
             updateTextStorage()
         }
     }
-    
+        
     // MARK: - public methods
     public func handleMentionTap(handler: (String) -> ()) {
         mentionTapHandler = handler
@@ -96,8 +96,8 @@ import UIKit
         urlTapHandler = handler
     }
     
-    public func handleCustomTap(handler: (String) -> ()) {
-        customTapHandler = handler
+    public func handleRegexTap(handler: (String) -> ()) {
+        regexTapHandler = handler
     }
     
     // MARK: - override UILabel properties
@@ -182,7 +182,7 @@ import UIKit
             case .Mention(let userHandle): mentionTapHandler?(userHandle)
             case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
             case .URL(let url): urlTapHandler?(url)
-            case .Custom(let custom): customTapHandler?(custom)
+            case .Regex(let regex): regexTapHandler?(regex)
                 
             case .None: ()
             }
@@ -200,7 +200,7 @@ import UIKit
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
-    private var customTapHandler: ((String) -> ())?
+    private var regexTapHandler: ((String) -> ())?
     
     private var selectedElement: (range: NSRange, element: ActiveElement)?
     private lazy var textStorage = NSTextStorage()
@@ -210,7 +210,7 @@ import UIKit
         .Mention: [],
         .Hashtag: [],
         .URL: [],
-        .Custom: [],
+        .Regex: [],
     ]
     
     // MARK: - helper functions
@@ -267,7 +267,7 @@ import UIKit
             case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
-            case .Custom: attributes[NSForegroundColorAttributeName] = customColor
+            case .Regex: attributes[NSForegroundColorAttributeName] = regexColor
             case .None: ()
             }
             
@@ -287,8 +287,8 @@ import UIKit
             
             let element:ActiveElement
             
-            if customString != nil {
-                element = activeElement(word, matchWord: customString!)
+            if regexString != nil {
+                element = activeElement(word, regex: regexString!)
             } else {
                 element = activeElement(word)
             }
@@ -310,8 +310,8 @@ import UIKit
                 activeElements[.Hashtag]?.append((elementRange, element))
             case .URL where URLEnabled:
                 activeElements[.URL]?.append((elementRange, element))
-            case .Custom where customEnabled:
-                activeElements[.Custom]?.append((elementRange, element))
+            case .Regex where regexEnabled:
+                activeElements[.Regex]?.append((elementRange, element))
             default: ()
             }
         }
@@ -347,7 +347,7 @@ import UIKit
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
-            case .Custom(_): attributes[NSForegroundColorAttributeName] = customColor
+            case .Regex(_): attributes[NSForegroundColorAttributeName] = regexColor
                 
             case .None: ()
             }
@@ -356,7 +356,7 @@ import UIKit
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
-            case .Custom(_): attributes[NSForegroundColorAttributeName] = customSelectedColor ?? customColor
+            case .Regex(_): attributes[NSForegroundColorAttributeName] = regexSelectedColor ?? regexColor
                 
             case .None: ()
             }
