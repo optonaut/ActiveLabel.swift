@@ -12,6 +12,7 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(NSURL)
+    case CUSTOM(String)
     case None
 }
 
@@ -19,12 +20,17 @@ enum ActiveType {
     case Mention
     case Hashtag
     case URL
+    case CUSTOM
     case None
 }
 
-func activeElement(word: String) -> ActiveElement {
+func activeElement(word: String, matchWord: String = "") -> ActiveElement {
     if let url = reduceRightToURL(word) {
         return .URL(url)
+    }
+    
+    if word == matchWord {
+        return .CUSTOM(word)
     }
     
     if word.characters.count < 2 {

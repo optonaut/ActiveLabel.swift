@@ -27,6 +27,11 @@ import UIKit
             updateTextStorage()
         }
     }
+    @IBInspectable public var customEnabled: Bool = true {
+        didSet {
+            updateTextStorage()
+        }
+    }
     @IBInspectable public var mentionColor: UIColor = .blueColor() {
         didSet {
             updateTextStorage()
@@ -43,6 +48,21 @@ import UIKit
         }
     }
     @IBInspectable public var hashtagSelectedColor: UIColor? {
+        didSet {
+            updateTextStorage()
+        }
+    }
+    @IBInspectable public var customColor: UIColor = .orangeColor() {
+        didSet {
+            updateTextStorage()
+        }
+    }
+    @IBInspectable public var customSelectedColor: UIColor? {
+        didSet {
+            updateTextStorage()
+        }
+    }
+    @IBInspectable public var customString: String? {
         didSet {
             updateTextStorage()
         }
@@ -74,6 +94,10 @@ import UIKit
     
     public func handleURLTap(handler: (NSURL) -> ()) {
         urlTapHandler = handler
+    }
+    
+    public func handleCustomTap(handler: (String) -> ()) {
+        customTapHandler = handler
     }
     
     // MARK: - override UILabel properties
@@ -158,6 +182,8 @@ import UIKit
             case .Mention(let userHandle): mentionTapHandler?(userHandle)
             case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
             case .URL(let url): urlTapHandler?(url)
+            case .CUSTOM(let custom): customTapHandler?(custom)
+                
             case .None: ()
             }
             
@@ -174,6 +200,7 @@ import UIKit
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
+    private var customTapHandler: ((String) -> ())?
     
     private var selectedElement: (range: NSRange, element: ActiveElement)?
     private lazy var textStorage = NSTextStorage()
@@ -183,6 +210,7 @@ import UIKit
         .Mention: [],
         .Hashtag: [],
         .URL: [],
+        .CUSTOM: [],
     ]
     
     // MARK: - helper functions
@@ -239,6 +267,7 @@ import UIKit
             case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
+            case .CUSTOM: attributes[NSForegroundColorAttributeName] = customColor
             case .None: ()
             }
             
@@ -255,7 +284,14 @@ import UIKit
         var searchRange = NSMakeRange(0, textLength)
         
         for word in textString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) {
-            let element = activeElement(word)
+            
+            let element:ActiveElement
+            
+            if customString != nil {
+                element = activeElement(word, matchWord: customString!)
+            } else {
+                element = activeElement(word)
+            }
             
             if case .None = element {
                 continue
@@ -274,6 +310,8 @@ import UIKit
                 activeElements[.Hashtag]?.append((elementRange, element))
             case .URL where URLEnabled:
                 activeElements[.URL]?.append((elementRange, element))
+            case .CUSTOM where customEnabled:
+                activeElements[.CUSTOM]?.append((elementRange, element))
             default: ()
             }
         }
@@ -309,6 +347,8 @@ import UIKit
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
+            case .CUSTOM(_): attributes[NSForegroundColorAttributeName] = customColor
+                
             case .None: ()
             }
         } else {
@@ -316,6 +356,8 @@ import UIKit
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
+            case .CUSTOM(_): attributes[NSForegroundColorAttributeName] = customSelectedColor ?? customColor
+                
             case .None: ()
             }
         }
