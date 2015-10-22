@@ -12,7 +12,7 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(NSURL)
-    case CUSTOM(String)
+    case Custom(String)
     case None
 }
 
@@ -20,7 +20,7 @@ enum ActiveType {
     case Mention
     case Hashtag
     case URL
-    case CUSTOM
+    case Custom
     case None
 }
 
@@ -30,7 +30,7 @@ func activeElement(word: String, matchWord: String? = nil) -> ActiveElement {
     }
     
     if (matchWord != nil && word == matchWord!) {
-        return .CUSTOM(word)
+        return .Custom(word)
     }
     
     if word.characters.count < 2 {

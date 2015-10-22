@@ -182,7 +182,7 @@ import UIKit
             case .Mention(let userHandle): mentionTapHandler?(userHandle)
             case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
             case .URL(let url): urlTapHandler?(url)
-            case .CUSTOM(let custom): customTapHandler?(custom)
+            case .Custom(let custom): customTapHandler?(custom)
                 
             case .None: ()
             }
@@ -210,7 +210,7 @@ import UIKit
         .Mention: [],
         .Hashtag: [],
         .URL: [],
-        .CUSTOM: [],
+        .Custom: [],
     ]
     
     // MARK: - helper functions
@@ -267,7 +267,7 @@ import UIKit
             case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
-            case .CUSTOM: attributes[NSForegroundColorAttributeName] = customColor
+            case .Custom: attributes[NSForegroundColorAttributeName] = customColor
             case .None: ()
             }
             
@@ -310,8 +310,8 @@ import UIKit
                 activeElements[.Hashtag]?.append((elementRange, element))
             case .URL where URLEnabled:
                 activeElements[.URL]?.append((elementRange, element))
-            case .CUSTOM where customEnabled:
-                activeElements[.CUSTOM]?.append((elementRange, element))
+            case .Custom where customEnabled:
+                activeElements[.Custom]?.append((elementRange, element))
             default: ()
             }
         }
@@ -347,7 +347,7 @@ import UIKit
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
-            case .CUSTOM(_): attributes[NSForegroundColorAttributeName] = customColor
+            case .Custom(_): attributes[NSForegroundColorAttributeName] = customColor
                 
             case .None: ()
             }
@@ -356,7 +356,7 @@ import UIKit
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
-            case .CUSTOM(_): attributes[NSForegroundColorAttributeName] = customSelectedColor ?? customColor
+            case .Custom(_): attributes[NSForegroundColorAttributeName] = customSelectedColor ?? customColor
                 
             case .None: ()
             }
