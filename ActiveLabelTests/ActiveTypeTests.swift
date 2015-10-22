@@ -16,6 +16,8 @@ func ==(a: ActiveElement, b: ActiveElement) -> Bool {
     case (.Mention(let a), .Mention(let b)) where a == b: return true
     case (.Hashtag(let a), .Hashtag(let b)) where a == b: return true
     case (.URL(let a), .URL(let b)) where a == b: return true
+    case (.CUSTOM(let a), .CUSTOM(let b)) where a == b: return true
+
     case (.None, .None): return true
     default: return false
     }
@@ -67,4 +69,12 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElement("google.com"), ActiveElement.URL(NSURL(string: "google.com")!))
     }
     
+    func testCustom() {
+        
+        XCTAssertEqual(activeElement("hello",matchWord: "hello"), ActiveElement.CUSTOM("hello"))
+        XCTAssertEqual(activeElement("你好",matchWord: "你好"), ActiveElement.CUSTOM("你好"))
+        XCTAssertEqual(activeElement("ಠ_ಠ",matchWord: "ಠ_ಠ"), ActiveElement.CUSTOM("ಠ_ಠ"))
+        XCTAssertEqual(activeElement("😁",matchWord: "😁"), ActiveElement.CUSTOM("😁"))
+    }
+
 }

@@ -20,6 +20,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0A7A96B31BD8F2BB006996E6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8F0249991B9989B1005D8035 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F0249BF1B998A66005D8035;
+			remoteInfo = ActiveLabelDemo;
+		};
 		8F0249AE1B9989B1005D8035 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8F0249991B9989B1005D8035 /* Project object */;
@@ -170,6 +177,7 @@
 			);
 			dependencies = (
 				8F0249AF1B9989B1005D8035 /* PBXTargetDependency */,
+				0A7A96B41BD8F2BB006996E6 /* PBXTargetDependency */,
 			);
 			name = ActiveLabelTests;
 			productName = ActiveLabelTests;
@@ -291,6 +299,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		0A7A96B41BD8F2BB006996E6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F0249BF1B998A66005D8035 /* ActiveLabelDemo */;
+			targetProxy = 0A7A96B31BD8F2BB006996E6 /* PBXContainerItemProxy */;
+		};
 		8F0249AF1B9989B1005D8035 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8F0249A11B9989B1005D8035 /* ActiveLabel */;

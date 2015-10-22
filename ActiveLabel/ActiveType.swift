@@ -24,12 +24,12 @@ enum ActiveType {
     case None
 }
 
-func activeElement(word: String, matchWord: String = "") -> ActiveElement {
+func activeElement(word: String, matchWord: String? = nil) -> ActiveElement {
     if let url = reduceRightToURL(word) {
         return .URL(url)
     }
     
-    if word == matchWord {
+    if (matchWord != nil && word == matchWord!) {
         return .CUSTOM(word)
     }
     
