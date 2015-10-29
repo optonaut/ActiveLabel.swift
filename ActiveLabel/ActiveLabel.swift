@@ -82,7 +82,13 @@ import UIKit
             updateTextStorage()
         }
     }
-        
+    
+    @IBInspectable public var activeBackgroundColor: UIColor? {
+        didSet {
+            updateTextStorage()
+        }
+    }
+    
     // MARK: - public methods
     public func handleMentionTap(handler: (String) -> ()) {
         mentionTapHandler = handler
@@ -157,6 +163,68 @@ import UIKit
         return layoutManager.usedRectForTextContainer(textContainer).size
     }
     
+    override public func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+
+        let touch = (touches.first)!
+        let location = touch.locationInView(self)
+
+        if let element = elementAtLocation(location) {
+            if element.range.location != selectedElement?.range.location || element.range.length != selectedElement?.range.length {
+                updateAttributesWhenSelected(false)
+                selectedElement = element
+                updateAttributesWhenSelected(true)
+            }
+        } else {
+            updateAttributesWhenSelected(false)
+            selectedElement = nil
+        }
+        addHighlightColor(true)
+        
+        if selectedElement == nil {
+            super.touchesBegan(touches, withEvent: event)
+        }
+    }
+    
+    override public func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        super.touchesEnded(touches, withEvent: event)
+        touchEndHandle()
+        
+    }
+    
+    override public func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
+        super.touchesCancelled(touches, withEvent: event)
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(0.20 * Double(NSEC_PER_SEC)))
+        dispatch_after(time, dispatch_get_main_queue()) {
+            self.addHighlightColor(false)
+        }
+    }
+    
+    private func touchEndHandle() {
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(0.20 * Double(NSEC_PER_SEC)))
+        dispatch_after(time, dispatch_get_main_queue()) {
+            self.addHighlightColor(false)
+        }
+        
+        guard let selectedElement = selectedElement else {
+            return
+        }
+        
+        switch selectedElement.element {
+        case .Mention(let userHandle): mentionTapHandler?(userHandle)
+        case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
+        case .URL(let url): urlTapHandler?(url)
+        case .Regex(let regex): regexTapHandler?(regex)
+            
+        case .None: ()
+        }
+        
+        let when = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
+        dispatch_after(when, dispatch_get_main_queue()) {
+            self.updateAttributesWhenSelected(false)
+            self.selectedElement = nil
+        }
+    }
+    
     // MARK: - touch events
     func onTouch(gesture: UILongPressGestureRecognizer) {
         let location = gesture.locationInView(self)
@@ -173,7 +241,15 @@ import UIKit
                 updateAttributesWhenSelected(false)
                 selectedElement = nil
             }
+            addHighlightColor(true)
+
         case .Cancelled, .Ended:
+            
+            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
+            dispatch_after(time, dispatch_get_main_queue()) {
+                self.addHighlightColor(false)
+            }
+
             guard let selectedElement = selectedElement else {
                 return
             }
@@ -194,6 +270,22 @@ import UIKit
             }
         default: ()
         }
+    }
+    
+    override public func intrinsicContentSize() -> CGSize {
+        var size = super.intrinsicContentSize()
+        
+        let stringSize = NSString(string: self.text!).boundingRectWithSize(CGSizeMake(size.width,CGFloat(DBL_MAX)),
+            options: NSStringDrawingOptions.UsesLineFragmentOrigin,
+            attributes: [NSFontAttributeName: self.font],
+            context: nil).size
+        
+        let lineNum = stringSize.height/self.font.lineHeight
+        
+        if let spacing = self.lineSpacing {
+            size.height = size.height + CGFloat(spacing) * lineNum//CGFloat(spacing * 3)
+        }
+        return size
     }
     
     // MARK: - private properties
@@ -219,10 +311,10 @@ import UIKit
         layoutManager.addTextContainer(textContainer)
         textContainer.lineFragmentPadding = 0
         
-        let touchRecognizer = UILongPressGestureRecognizer(target: self, action: "onTouch:")
-        touchRecognizer.minimumPressDuration = 0.00001
-        touchRecognizer.delegate = self
-        addGestureRecognizer(touchRecognizer)
+//        let touchRecognizer = UILongPressGestureRecognizer(target: self, action: "onTouch:")
+//        touchRecognizer.minimumPressDuration = 0.00001
+//        touchRecognizer.delegate = self
+//        addGestureRecognizer(touchRecognizer)
         
         userInteractionEnabled = true
     }
@@ -285,13 +377,15 @@ import UIKit
         
         for word in textString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) {
             
-            let element:ActiveElement
+//            let element:ActiveElement
             
-            if regexString != nil {
-                element = activeElement(word, regex: regexString!)
-            } else {
-                element = activeElement(word)
-            }
+//            if regexString != nil {
+//                element = activeElement(word, regex: regexString!)
+//            } else {
+//                element = activeElement(word)
+//            }
+            
+            let element:ActiveElement = activeElement(word, regex: regexString)
             
             if case .None = element {
                 continue
@@ -325,7 +419,7 @@ import UIKit
         var attributes = mutAttrString.attributesAtIndex(0, effectiveRange: &range)
         
         let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
-        paragraphStyle.lineBreakMode = NSLineBreakMode.ByWordWrapping
+//        paragraphStyle.lineBreakMode = NSLineBreakMode.ByTruncatingTail//NSLineBreakMode.ByWordWrapping
         if let lineSpacing = lineSpacing {
             paragraphStyle.lineSpacing = CGFloat(lineSpacing)
         }
@@ -334,6 +428,25 @@ import UIKit
         mutAttrString.setAttributes(attributes, range: range)
         
         return mutAttrString
+    }
+    
+    private func addHighlightColor(isHighlight:Bool) {
+        
+        guard let selectedElement = selectedElement else {
+            return
+        }
+        var attributes = textStorage.attributesAtIndex(0, effectiveRange: nil)
+        
+        if isHighlight {
+            attributes[NSBackgroundColorAttributeName] = activeBackgroundColor ?? UIColor.clearColor()// UIColor(red:0.816, green:0.910, blue:0.980, alpha:1)
+
+        } else {
+            attributes[NSBackgroundColorAttributeName] = UIColor.clearColor()
+        }
+        
+        textStorage.addAttributes(attributes, range: selectedElement.range)
+        
+        setNeedsDisplay()
     }
     
     private func updateAttributesWhenSelected(isSelected: Bool) {
@@ -352,6 +465,7 @@ import UIKit
             case .None: ()
             }
         } else {
+
             switch selectedElement.element {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor

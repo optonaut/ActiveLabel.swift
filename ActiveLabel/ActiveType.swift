@@ -29,7 +29,7 @@ func activeElement(word: String, regex: String? = nil) -> ActiveElement {
         return .URL(url)
     }
     
-    if (regex != nil && (word=~regex!)?.count > 0) {
+    if let regex = regex where regexMatches(regex, searchString: word)?.isEmpty == false {
         return .Regex(word)
     }
     
@@ -64,10 +64,12 @@ private func reduceRightToURL(str: String) -> NSURL? {
 
 private func reduceRightToAllowed(str: String) -> String? {
     
-    let pattern = "^[a-z0-9_]*"
+    let pattern = "^[a-z0-9_\\u4e00-\\u9fa5]*"
+    
     //if support chinese let pattern = "^[a-z0-9_\\u4e00-\\u9fa5]*" 
     let nsStr = str as NSString
-    if let result = (str=~pattern)?.map({ nsStr.substringWithRange($0.range)}).first {
+    
+    if let result = regexMatches(pattern, searchString: str)?.map({ nsStr.substringWithRange($0.range)}).first {
         if !result.isEmpty {
             return result
         }
@@ -75,31 +77,8 @@ private func reduceRightToAllowed(str: String) -> String? {
     return nil
 }
 
-private struct RegexHelper {
-    let regex: NSRegularExpression
-    
-    init(_ pattern: String) throws {
-        try regex = NSRegularExpression(pattern: pattern,
-            options: .CaseInsensitive)
-    }
-    
-    func match(input: String) -> Array<NSTextCheckingResult> {
-        let matches = regex.matchesInString(input,
-            options: [],
-            range: NSMakeRange(0, input.characters.count))
-        return matches
-    }
-}
 
-infix operator =~ {
-    associativity none
-    precedence 130
-}
-
-private func =~(lhs:String, rhs:String) -> Array<NSTextCheckingResult>? {
-    do {
-        return try RegexHelper(rhs).match(lhs)
-    } catch _ {
-        return nil
-    }
+private func regexMatches(regexString: String, searchString: String) -> Array<NSTextCheckingResult>? {
+    guard let regex = try? NSRegularExpression(pattern: regexString, options: .CaseInsensitive) else { return nil }
+    return regex.matchesInString(searchString, options: [], range: NSMakeRange(0, searchString.characters.count))
 }
