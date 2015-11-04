@@ -57,7 +57,7 @@ private func reduceRightToURL(str: String) -> NSURL? {
 }
 
 private func reduceRightToAllowed(str: String) -> String? {
-    if let regex = try? NSRegularExpression(pattern: "^[a-z0-9_]*", options: [.CaseInsensitive]) {
+    if let regex = try? NSRegularExpression(pattern: "^[\\p{L}'0-9_]*", options: [.CaseInsensitive]) {
         let nsStr = str as NSString
         let results = regex.matchesInString(str, options: [], range: NSRange(location: 0, length: nsStr.length))
         if let result = results.map({ nsStr.substringWithRange($0.range) }).first {
