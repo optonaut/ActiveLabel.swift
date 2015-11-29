@@ -16,8 +16,19 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co. support regex (^[0-9]{11}$)--> 18664841987 "
-        label.regexString = "^[0-9]{11}$"
+        label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co. support regex ([0-9]{11})--> 18664841987 , suport the chinese --> @支持中文 "
+        
+        var regex = ActiveRegex()
+        regex.key = "this is the key"
+        regex.regex = "[0-9]{11}"
+        regex.textColor = UIColor.orangeColor()
+        regex.tapHandler = { element in
+            self.alert(element.element.key!, message: element.text)
+        }
+        regex.highlightColor = UIColor.blueColor()
+
+        label.extendRegex = [regex]
+        
         label.numberOfLines = 0
         label.lineSpacing = 4
         
@@ -26,16 +37,14 @@ class ViewController: UIViewController {
         label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
         label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
         
-        label.handleMentionTap { self.alert("Mention", message: $0) }
-        label.handleHashtagTap { self.alert("Hashtag", message: $0) }
-        label.handleURLTap { self.alert("URL", message: $0.description) }
-        label.handleRegexTap {self.alert("Regex", message: $0) }
-        
+        label.handleMentionTap { self.alert("Mention", message: $0.text) }
+        label.handleHashtagTap { self.alert("Hashtag", message: $0.text) }
+        label.handleURLTap { self.alert("URL", message: $0.text) }
+        //This setup is very important
+        label.setupRegexArray()
         label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
         view.addSubview(label)
         
-
-
         // Do any additional setup after loading the view, typically from a nib.
     }
 

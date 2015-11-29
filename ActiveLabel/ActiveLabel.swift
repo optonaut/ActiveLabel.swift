@@ -9,8 +9,25 @@
 import Foundation
 import UIKit
 
+public typealias ActiveElement = (range:NSRange, element: ActiveRegex, text: String)
+
+public struct ActiveRegex {
+    
+    public var key:String?
+    public var regex:String?
+    public var textColor:UIColor?
+    public var tapHandler: (ActiveElement -> ())?
+    public var highlightColor:UIColor?
+    
+    public init() {
+    
+    }
+    
+}
+
 @IBDesignable public class ActiveLabel: UILabel {
     
+
     // MARK: - public properties
     @IBInspectable public var mentionEnabled: Bool = true {
         didSet {
@@ -23,11 +40,6 @@ import UIKit
         }
     }
     @IBInspectable public var URLEnabled: Bool = true {
-        didSet {
-            updateTextStorage()
-        }
-    }
-    @IBInspectable public var regexEnabled: Bool = true {
         didSet {
             updateTextStorage()
         }
@@ -52,21 +64,6 @@ import UIKit
             updateTextStorage()
         }
     }
-    @IBInspectable public var regexColor: UIColor = .orangeColor() {
-        didSet {
-            updateTextStorage()
-        }
-    }
-    @IBInspectable public var regexSelectedColor: UIColor? {
-        didSet {
-            updateTextStorage()
-        }
-    }
-    @IBInspectable public var regexString: String? {
-        didSet {
-            updateTextStorage()
-        }
-    }
     @IBInspectable public var URLColor: UIColor = .blueColor() {
         didSet {
             updateTextStorage()
@@ -82,7 +79,6 @@ import UIKit
             updateTextStorage()
         }
     }
-    
     @IBInspectable public var activeBackgroundColor: UIColor? {
         didSet {
             updateTextStorage()
@@ -90,19 +86,19 @@ import UIKit
     }
     
     // MARK: - public methods
-    public func handleMentionTap(handler: (String) -> ()) {
+    public func handleMentionTap(handler: (ActiveElement) -> ()) {
         mentionTapHandler = handler
     }
     
-    public func handleHashtagTap(handler: (String) -> ()) {
+    public func handleHashtagTap(handler: (ActiveElement) -> ()) {
         hashtagTapHandler = handler
     }
     
-    public func handleURLTap(handler: (NSURL) -> ()) {
+    public func handleURLTap(handler: (ActiveElement) -> ()) {
         urlTapHandler = handler
     }
     
-    public func handleRegexTap(handler: (String) -> ()) {
+    public func handleRegexTap(handler: (ActiveElement) -> ()) {
         regexTapHandler = handler
     }
     
@@ -130,6 +126,14 @@ import UIKit
             updateTextStorage()
         }
     }
+    
+    public var extendRegex:Array<ActiveRegex>? {
+        didSet {
+//            self.setupRegexArray()
+        }
+    }
+    
+    private var regexArray:Array<ActiveRegex> = Array()
     
     // MARK: - init functions
     override public init(frame: CGRect) {
@@ -163,158 +167,118 @@ import UIKit
         return layoutManager.usedRectForTextContainer(textContainer).size
     }
     
+    /**
+     use touches replace GestureRecognizer ,it can response scrollview event
+     
+     - parameter touches:
+     - parameter event:
+     */
     override public func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
 
         let touch = (touches.first)!
         let location = touch.locationInView(self)
 
         if let element = elementAtLocation(location) {
-            if element.range.location != selectedElement?.range.location || element.range.length != selectedElement?.range.length {
-                updateAttributesWhenSelected(false)
-                selectedElement = element
-                updateAttributesWhenSelected(true)
-            }
+            selectedElement = element
+            addHighlightColor(true,active: element)
         } else {
-            updateAttributesWhenSelected(false)
-            selectedElement = nil
-        }
-        addHighlightColor(true)
-        
-        if selectedElement == nil {
             super.touchesBegan(touches, withEvent: event)
         }
     }
     
     override public func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
         super.touchesEnded(touches, withEvent: event)
-        touchEndHandle()
+        guard let selectedElement = selectedElement else {
+            return
+        }
         
+        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(0.20 * Double(NSEC_PER_SEC)))
+        dispatch_after(time, dispatch_get_main_queue()) {
+            if let selectedElement = self.selectedElement {
+                self.addHighlightColor(false,active: selectedElement)
+                self.selectedElement = nil
+            }
+        }
+        
+        selectedElement.element.tapHandler?(selectedElement)
     }
     
     override public func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
         super.touchesCancelled(touches, withEvent: event)
         let time = dispatch_time(DISPATCH_TIME_NOW, Int64(0.20 * Double(NSEC_PER_SEC)))
         dispatch_after(time, dispatch_get_main_queue()) {
-            self.addHighlightColor(false)
-        }
-    }
-    
-    private func touchEndHandle() {
-        let time = dispatch_time(DISPATCH_TIME_NOW, Int64(0.20 * Double(NSEC_PER_SEC)))
-        dispatch_after(time, dispatch_get_main_queue()) {
-            self.addHighlightColor(false)
-        }
-        
-        guard let selectedElement = selectedElement else {
-            return
-        }
-        
-        switch selectedElement.element {
-        case .Mention(let userHandle): mentionTapHandler?(userHandle)
-        case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
-        case .URL(let url): urlTapHandler?(url)
-        case .Regex(let regex): regexTapHandler?(regex)
-            
-        case .None: ()
-        }
-        
-        let when = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
-        dispatch_after(when, dispatch_get_main_queue()) {
-            self.updateAttributesWhenSelected(false)
-            self.selectedElement = nil
-        }
-    }
-    
-    // MARK: - touch events
-    func onTouch(gesture: UILongPressGestureRecognizer) {
-        let location = gesture.locationInView(self)
-        
-        switch gesture.state {
-        case .Began, .Changed:
-            if let element = elementAtLocation(location) {
-                if element.range.location != selectedElement?.range.location || element.range.length != selectedElement?.range.length {
-                    updateAttributesWhenSelected(false)
-                    selectedElement = element
-                    updateAttributesWhenSelected(true)
-                }
-            } else {
-                updateAttributesWhenSelected(false)
-                selectedElement = nil
-            }
-            addHighlightColor(true)
-
-        case .Cancelled, .Ended:
-            
-            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
-            dispatch_after(time, dispatch_get_main_queue()) {
-                self.addHighlightColor(false)
-            }
-
-            guard let selectedElement = selectedElement else {
-                return
-            }
-            
-            switch selectedElement.element {
-            case .Mention(let userHandle): mentionTapHandler?(userHandle)
-            case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
-            case .URL(let url): urlTapHandler?(url)
-            case .Regex(let regex): regexTapHandler?(regex)
-                
-            case .None: ()
-            }
-            
-            let when = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
-            dispatch_after(when, dispatch_get_main_queue()) {
-                self.updateAttributesWhenSelected(false)
+            if let selectedElement = self.selectedElement {
+                self.addHighlightColor(false,active: selectedElement)
                 self.selectedElement = nil
             }
-        default: ()
         }
-    }
-    
-    override public func intrinsicContentSize() -> CGSize {
-        var size = super.intrinsicContentSize()
-        
-        let stringSize = NSString(string: self.text!).boundingRectWithSize(CGSizeMake(size.width,CGFloat(DBL_MAX)),
-            options: NSStringDrawingOptions.UsesLineFragmentOrigin,
-            attributes: [NSFontAttributeName: self.font],
-            context: nil).size
-        
-        let lineNum = stringSize.height/self.font.lineHeight
-        
-        if let spacing = self.lineSpacing {
-            size.height = size.height + CGFloat(spacing) * lineNum//CGFloat(spacing * 3)
-        }
-        return size
     }
     
     // MARK: - private properties
-    private var mentionTapHandler: ((String) -> ())?
-    private var hashtagTapHandler: ((String) -> ())?
-    private var urlTapHandler: ((NSURL) -> ())?
-    private var regexTapHandler: ((String) -> ())?
+    private var mentionTapHandler: ((range:NSRange, element: ActiveRegex, text: String) -> ())?
+    private var hashtagTapHandler: ((range:NSRange, element: ActiveRegex, text: String) -> ())?
+    private var urlTapHandler: ((range:NSRange, element: ActiveRegex, text: String) -> ())?
+    private var regexTapHandler: ((range:NSRange, element: ActiveRegex, text: String) -> ())?
     
-    private var selectedElement: (range: NSRange, element: ActiveElement)?
+    private var selectedElement: (range:NSRange, element: ActiveRegex, text: String)?
     private lazy var textStorage = NSTextStorage()
     private lazy var layoutManager = NSLayoutManager()
     private lazy var textContainer = NSTextContainer()
-    private lazy var activeElements: [ActiveType: [(range: NSRange, element: ActiveElement)]] = [
-        .Mention: [],
-        .Hashtag: [],
-        .URL: [],
-        .Regex: [],
-    ]
     
+    private lazy var activeElements: [(range:NSRange, element: ActiveRegex, text: String)] = []
+    
+    
+    public func setupRegexArray() {
+        
+        self.regexArray.removeAll()
+        
+        var regexType = [
+            ["key":"mention","regex":mentionPattern()],
+            ["key":"hashTag","regex":hashTagsPattern()],
+            ["key":"URL","regex":URLPattern()]
+        ]
+        
+        if !self.mentionEnabled { regexType.removeAtIndex(0) }
+        if !self.hashtagEnabled { regexType.removeAtIndex(1) }
+        if !self.URLEnabled { regexType.removeAtIndex(2) }
+
+        for type in regexType {
+            var regex = ActiveRegex()
+            regex.key = type["key"]
+            regex.regex = type["regex"]
+            switch regex.key! {
+            case "mention":
+                regex.textColor = self.mentionColor
+                regex.tapHandler = self.mentionTapHandler
+                regex.highlightColor = self.activeBackgroundColor
+            case "hashTag":
+                regex.textColor = self.hashtagColor
+                regex.tapHandler = self.hashtagTapHandler
+                regex.highlightColor = self.activeBackgroundColor
+            case "URL":
+                regex.textColor = self.URLColor
+                regex.tapHandler = self.urlTapHandler
+                regex.highlightColor = self.activeBackgroundColor
+            default:
+                break;
+            }
+            
+            self.regexArray.append(regex)
+        }
+
+        if let extend = self.extendRegex {
+            self.regexArray += extend
+        }
+        
+        updateTextStorage()
+    }
     // MARK: - helper functions
     private func setupLabel() {
+        
         textStorage.addLayoutManager(layoutManager)
         layoutManager.addTextContainer(textContainer)
         textContainer.lineFragmentPadding = 0
-        
-//        let touchRecognizer = UILongPressGestureRecognizer(target: self, action: "onTouch:")
-//        touchRecognizer.minimumPressDuration = 0.00001
-//        touchRecognizer.delegate = self
-//        addGestureRecognizer(touchRecognizer)
+        setupRegexArray()
         
         userInteractionEnabled = true
     }
@@ -323,11 +287,8 @@ import UIKit
         guard let attributedText = attributedText else {
             return
         }
-        
         // clean up previous active elements
-        for (type, _) in activeElements {
-            activeElements[type]?.removeAll()
-        }
+        activeElements.removeAll()
         
         guard attributedText.length > 0 else {
             return
@@ -351,64 +312,28 @@ import UIKit
         attributes[NSForegroundColorAttributeName] = textColor
         mutAttrString.addAttributes(attributes, range: range)
         
-        attributes[NSForegroundColorAttributeName] = mentionColor
-        
-        for (type, elements) in activeElements {
-            
-            switch type {
-            case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
-            case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
-            case .URL: attributes[NSForegroundColorAttributeName] = URLColor
-            case .Regex: attributes[NSForegroundColorAttributeName] = regexColor
-            case .None: ()
-            }
-            
-            for element in elements {
-                mutAttrString.setAttributes(attributes, range: element.range)
-            }
+        for (range, elements, _) in activeElements {
+            attributes[NSForegroundColorAttributeName] = elements.textColor
+            mutAttrString.setAttributes(attributes,range: range)
         }
+        
     }
     
     /// use regex check all link ranges
     private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
-        let textString = attrString.string as NSString
-        let textLength = textString.length
-        var searchRange = NSMakeRange(0, textLength)
         
-        for word in textString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) {
+        for activeRegex in regexArray {
             
-//            let element:ActiveElement
-            
-//            if regexString != nil {
-//                element = activeElement(word, regex: regexString!)
-//            } else {
-//                element = activeElement(word)
-//            }
-            
-            let element:ActiveElement = activeElement(word, regex: regexString)
-            
-            if case .None = element {
-                continue
-            }
-            
-            let elementRange = textString.rangeOfString(word, options: .LiteralSearch, range: searchRange)
-            defer {
-                let startIndex = elementRange.location + elementRange.length
-                searchRange = NSMakeRange(startIndex, textLength - startIndex)
-            }
-            
-            switch element {
-            case .Mention where mentionEnabled:
-                activeElements[.Mention]?.append((elementRange, element))
-            case .Hashtag where hashtagEnabled:
-                activeElements[.Hashtag]?.append((elementRange, element))
-            case .URL where URLEnabled:
-                activeElements[.URL]?.append((elementRange, element))
-            case .Regex where regexEnabled:
-                activeElements[.Regex]?.append((elementRange, element))
-            default: ()
+            if let matchResult = regexMatches(activeRegex.regex!, searchString: attrString.string) {
+                
+                for match in matchResult {
+                    let matchNSString = attrString.string as NSString
+                    let text = matchNSString.substringWithRange(match.range)
+                    activeElements.append((range: match.range, element: activeRegex,text: text))
+                }
             }
         }
+
     }
     
     /// add line break mode
@@ -419,7 +344,6 @@ import UIKit
         var attributes = mutAttrString.attributesAtIndex(0, effectiveRange: &range)
         
         let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
-//        paragraphStyle.lineBreakMode = NSLineBreakMode.ByTruncatingTail//NSLineBreakMode.ByWordWrapping
         if let lineSpacing = lineSpacing {
             paragraphStyle.lineSpacing = CGFloat(lineSpacing)
         }
@@ -430,58 +354,26 @@ import UIKit
         return mutAttrString
     }
     
-    private func addHighlightColor(isHighlight:Bool) {
+    private func addHighlightColor(isHighlight:Bool,active:ActiveElement) {
         
-        guard let selectedElement = selectedElement else {
-            return
-        }
         var attributes = textStorage.attributesAtIndex(0, effectiveRange: nil)
         
+        attributes[NSForegroundColorAttributeName] = active.element.textColor
+        
         if isHighlight {
-            attributes[NSBackgroundColorAttributeName] = activeBackgroundColor ?? UIColor.clearColor()// UIColor(red:0.816, green:0.910, blue:0.980, alpha:1)
+            attributes[NSBackgroundColorAttributeName] = active.element.highlightColor ?? UIColor.clearColor()
 
         } else {
             attributes[NSBackgroundColorAttributeName] = UIColor.clearColor()
         }
         
-        textStorage.addAttributes(attributes, range: selectedElement.range)
+        textStorage.addAttributes(attributes, range: active.range)
         
         setNeedsDisplay()
     }
     
-    private func updateAttributesWhenSelected(isSelected: Bool) {
-        guard let selectedElement = selectedElement else {
-            return
-        }
-        
-        var attributes = textStorage.attributesAtIndex(0, effectiveRange: nil)
-        if isSelected {
-            switch selectedElement.element {
-            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
-            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
-            case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
-            case .Regex(_): attributes[NSForegroundColorAttributeName] = regexColor
-                
-            case .None: ()
-            }
-        } else {
-
-            switch selectedElement.element {
-            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
-            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
-            case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
-            case .Regex(_): attributes[NSForegroundColorAttributeName] = regexSelectedColor ?? regexColor
-                
-            case .None: ()
-            }
-        }
-        
-        textStorage.addAttributes(attributes, range: selectedElement.range)
-        
-        setNeedsDisplay()
-    }
     
-    private func elementAtLocation(location: CGPoint) -> (range: NSRange, element: ActiveElement)? {
+    private func elementAtLocation(location: CGPoint) -> ActiveElement? {
         guard textStorage.length > 0 else {
             return nil
         }
@@ -493,13 +385,31 @@ import UIKit
         
         let index = layoutManager.glyphIndexForPoint(location, inTextContainer: textContainer)
         
-        for element in activeElements.map({ $0.1 }).flatten() {
-            if index >= element.range.location && index <= element.range.location + element.range.length {
+        for element in activeElements {
+            if index >= element.0.location && index <= element.0.location + element.0.length {
                 return element
             }
         }
         
         return nil
+    }
+    
+    
+    private func hashTagsPattern() -> String {
+        return "(#[a-zA-Z0-9_\\u4E00-\\u9FA5]+)"
+    }
+    
+    private func mentionPattern() -> String {
+        return "(@[a-zA-Z0-9_\\u4E00-\\u9FA5]+)"
+    }
+    
+    private func URLPattern() -> String {
+        return "[a-zA-z]+://[^\\s]*"
+    }
+    
+    private func regexMatches(regexString: String, searchString: String) -> Array<NSTextCheckingResult>? {
+        guard let regex = try? NSRegularExpression(pattern: regexString, options: .CaseInsensitive) else { return nil }
+        return regex.matchesInString(searchString, options: [], range: NSMakeRange(0, searchString.characters.count))
     }
     
 }
