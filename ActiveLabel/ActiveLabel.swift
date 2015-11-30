@@ -134,25 +134,25 @@ import UIKit
     }
     
     // MARK: - touch events
-    func onTouch(gesture: UILongPressGestureRecognizer) {
-        let location = gesture.locationInView(self)
+    func onTouch(touch: UITouch) -> Bool {
+        let location = touch.locationInView(self)
+        var avoidSuperCall = false
         
-        switch gesture.state {
-        case .Began, .Changed:
+        switch touch.phase {
+        case .Began, .Moved:
             if let element = elementAtLocation(location) {
                 if element.range.location != selectedElement?.range.location || element.range.length != selectedElement?.range.length {
                     updateAttributesWhenSelected(false)
                     selectedElement = element
                     updateAttributesWhenSelected(true)
                 }
+                avoidSuperCall = true
             } else {
                 updateAttributesWhenSelected(false)
                 selectedElement = nil
             }
         case .Cancelled, .Ended:
-            guard let selectedElement = selectedElement else {
-                return
-            }
+            guard let selectedElement = selectedElement else { return avoidSuperCall }
             
             switch selectedElement.element {
             case .Mention(let userHandle): mentionTapHandler?(userHandle)
@@ -166,8 +166,11 @@ import UIKit
                 self.updateAttributesWhenSelected(false)
                 self.selectedElement = nil
             }
+            avoidSuperCall = true
         default: ()
         }
+        
+        return avoidSuperCall
     }
     
     // MARK: - private properties
@@ -190,12 +193,6 @@ import UIKit
         textStorage.addLayoutManager(layoutManager)
         layoutManager.addTextContainer(textContainer)
         textContainer.lineFragmentPadding = 0
-        
-        let touchRecognizer = UILongPressGestureRecognizer(target: self, action: "onTouch:")
-        touchRecognizer.minimumPressDuration = 0.00001
-        touchRecognizer.delegate = self
-        addGestureRecognizer(touchRecognizer)
-        
         userInteractionEnabled = true
     }
     
@@ -344,6 +341,26 @@ import UIKit
         }
         
         return nil
+    }
+    
+    
+    //MARK: - Handle UI Responder touches
+    public override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        if onTouch(touch) { return }
+        super.touchesBegan(touches, withEvent: event)
+    }
+    
+    public override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
+        guard let touch = touches?.first else { return }
+        onTouch(touch)
+        super.touchesCancelled(touches, withEvent: event)
+    }
+    
+    public override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        if onTouch(touch) { return }
+        super.touchesEnded(touches, withEvent: event)
     }
     
 }
