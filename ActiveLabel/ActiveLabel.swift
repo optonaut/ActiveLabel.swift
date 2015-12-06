@@ -9,9 +9,15 @@
 import Foundation
 import UIKit
 
+public protocol ActiveLabelDelegate: class {
+    func didSelectText(text: String, type: ActiveType)
+}
+
 @IBDesignable public class ActiveLabel: UILabel {
     
     // MARK: - public properties
+    weak var delegate: ActiveLabelDelegate?
+    
     @IBInspectable public var mentionEnabled: Bool = true {
         didSet {
             updateTextStorage()
@@ -155,9 +161,9 @@ import UIKit
             guard let selectedElement = selectedElement else { return avoidSuperCall }
             
             switch selectedElement.element {
-            case .Mention(let userHandle): mentionTapHandler?(userHandle)
-            case .Hashtag(let hashtag): hashtagTapHandler?(hashtag)
-            case .URL(let url): urlTapHandler?(url)
+            case .Mention(let userHandle): didTapMention(userHandle)
+            case .Hashtag(let hashtag): didTapHashtag(hashtag)
+            case .URL(let url): didTapStringURL(url)
             case .None: ()
             }
             
@@ -363,6 +369,31 @@ import UIKit
         super.touchesEnded(touches, withEvent: event)
     }
     
+    //MARK: ActiveLabel handler
+    
+    private func didTapMention(username: String) {
+        guard let mentionHandler = mentionTapHandler else {
+            delegate?.didSelectText(username, type: .Mention)
+            return
+        }
+        mentionHandler(username)
+    }
+    
+    private func didTapHashtag(hashtag: String) {
+        guard let hashtagHandler = hashtagTapHandler else {
+            delegate?.didSelectText(hashtag, type: .Hashtag)
+            return
+        }
+        hashtagHandler(hashtag)
+    }
+    
+    private func didTapStringURL(stringURL: String) {
+        guard let urlHandler = urlTapHandler, let url = NSURL(string: stringURL) else {
+            delegate?.didSelectText(stringURL, type: .URL)
+            return
+        }
+        urlHandler(url)
+    }
 }
 
 extension ActiveLabel: UIGestureRecognizerDelegate {
