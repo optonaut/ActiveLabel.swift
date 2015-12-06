@@ -16,7 +16,7 @@ public protocol ActiveLabelDelegate: class {
 @IBDesignable public class ActiveLabel: UILabel {
     
     // MARK: - public properties
-    weak var delegate: ActiveLabelDelegate?
+    public weak var delegate: ActiveLabelDelegate?
     
     @IBInspectable public var mentionEnabled: Bool = true {
         didSet {
@@ -369,8 +369,7 @@ public protocol ActiveLabelDelegate: class {
         super.touchesEnded(touches, withEvent: event)
     }
     
-    //MARK: ActiveLabel handler
-    
+    //MARK: - ActiveLabel handler
     private func didTapMention(username: String) {
         guard let mentionHandler = mentionTapHandler else {
             delegate?.didSelectText(username, type: .Mention)
