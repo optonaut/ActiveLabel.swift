@@ -60,11 +60,11 @@ class ActiveTypeTests: XCTestCase {
     }
     
     func testURL() {
-        XCTAssertEqual(activeElement("http://www.google.com"), ActiveElement.URL(NSURL(string: "http://www.google.com")!))
-        XCTAssertEqual(activeElement("https://www.google.com"), ActiveElement.URL(NSURL(string: "https://www.google.com")!))
-        XCTAssertEqual(activeElement("https://www.google.com."), ActiveElement.URL(NSURL(string: "https://www.google.com")!))
-        XCTAssertEqual(activeElement("www.google.com"), ActiveElement.URL(NSURL(string: "www.google.com")!))
-        XCTAssertEqual(activeElement("google.com"), ActiveElement.URL(NSURL(string: "google.com")!))
+        XCTAssertEqual(activeElement("http://www.google.com"), ActiveElement.URL("http://www.google.com"))
+        XCTAssertEqual(activeElement("https://www.google.com"), ActiveElement.URL("https://www.google.com"))
+        XCTAssertEqual(activeElement("https://www.google.com."), ActiveElement.URL("https://www.google.com"))
+        XCTAssertEqual(activeElement("www.google.com"), ActiveElement.URL("www.google.com"))
+        XCTAssertEqual(activeElement("google.com"), ActiveElement.URL("google.com"))
     }
     
 }

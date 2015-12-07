@@ -11,11 +11,11 @@ import Foundation
 enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
-    case URL(NSURL)
+    case URL(String)
     case None
 }
 
-enum ActiveType {
+public enum ActiveType {
     case Mention
     case Hashtag
     case URL
@@ -45,12 +45,12 @@ func activeElement(word: String) -> ActiveElement {
     }
 }
 
-private func reduceRightToURL(str: String) -> NSURL? {
+private func reduceRightToURL(str: String) -> String? {
     if let urlDetector = try? NSDataDetector(types: NSTextCheckingType.Link.rawValue) {
         let nsStr = str as NSString
         let results = urlDetector.matchesInString(str, options: .ReportCompletion, range: NSRange(location: 0, length: nsStr.length))
-        if let result = results.map({ nsStr.substringWithRange($0.range) }).first, url = NSURL(string: result) {
-            return url
+        if let result = results.map({ nsStr.substringWithRange($0.range) }).first {
+            return result
         }
     }
     return nil
