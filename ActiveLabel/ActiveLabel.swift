@@ -257,9 +257,9 @@ public protocol ActiveLabelDelegate: class {
         let textLength = textString.length
         var searchRange = NSMakeRange(0, textLength)
         
-        for word in textString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) {
+        for word in textString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet()) {
             let element = activeElement(word)
-            
+    
             if case .None = element {
                 continue
             }
