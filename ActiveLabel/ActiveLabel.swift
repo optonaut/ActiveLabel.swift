@@ -258,8 +258,10 @@ public protocol ActiveLabelDelegate: class {
         var searchRange = NSMakeRange(0, textLength)
         
         for word in textString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) {
-            let element = activeElement(word)
-            
+            let trimmedWord = word.stringByReplacingOccurrencesOfString("^\\s*",
+                withString: "", options: .RegularExpressionSearch)
+            let element = activeElement(trimmedWord)
+    
             if case .None = element {
                 continue
             }
