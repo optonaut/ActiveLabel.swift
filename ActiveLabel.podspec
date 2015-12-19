@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 	s.name    = 'ActiveLabel'
-	s.version = '0.3.5'
+	s.version = '0.3.6'
 
 	s.author      = { 'Optonaut' => 'hello@optonaut.co' }
 	s.homepage    = 'https://github.com/optonaut/ActiveLabel.swift'
