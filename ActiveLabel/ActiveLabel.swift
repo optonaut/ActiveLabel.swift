@@ -107,6 +107,12 @@ public protocol ActiveLabelDelegate: class {
         }
     }
     
+    override public var textAlignment: NSTextAlignment {
+        didSet {
+            updateTextStorage()
+        }
+    }
+    
     // MARK: - init functions
     override public init(frame: CGRect) {
         super.init(frame: frame)
@@ -291,6 +297,7 @@ public protocol ActiveLabelDelegate: class {
         
         let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.ByWordWrapping
+        paragraphStyle.alignment = textAlignment
         if let lineSpacing = lineSpacing {
             paragraphStyle.lineSpacing = CGFloat(lineSpacing)
         }
