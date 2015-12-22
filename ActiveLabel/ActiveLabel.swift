@@ -33,6 +33,11 @@ public protocol ActiveLabelDelegate: class {
             updateTextStorage()
         }
     }
+    @IBInspectable public var verticalTextAlignmentCenter: Bool = false {
+        didSet {
+            updateTextStorage()
+        }
+    }
     @IBInspectable public var mentionColor: UIColor = .blueColor() {
         didSet {
             updateTextStorage()
@@ -130,9 +135,17 @@ public protocol ActiveLabelDelegate: class {
         let range = NSRange(location: 0, length: textStorage.length)
         
         textContainer.size = rect.size
+        var glyphOrigin = rect.origin
         
-        layoutManager.drawBackgroundForGlyphRange(range, atPoint: rect.origin)
-        layoutManager.drawGlyphsForGlyphRange(range, atPoint: rect.origin)
+        if verticalTextAlignmentCenter {
+            let usedRect = layoutManager.usedRectForTextContainer(textContainer)
+            
+            let glyphOriginY = (rect.height > usedRect.height) ? rect.origin.y + (rect.height - usedRect.height) / 2 : rect.origin.y
+            glyphOrigin = CGPointMake(rect.origin.x, glyphOriginY)
+        }
+        
+        layoutManager.drawBackgroundForGlyphRange(range, atPoint: glyphOrigin)
+        layoutManager.drawGlyphsForGlyphRange(range, atPoint: glyphOrigin)
     }
     
     public override func sizeThatFits(size: CGSize) -> CGSize {

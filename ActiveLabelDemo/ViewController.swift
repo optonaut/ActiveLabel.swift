@@ -19,6 +19,7 @@ class ViewController: UIViewController {
         label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co."
         label.numberOfLines = 0
         label.lineSpacing = 4
+        label.verticalTextAlignmentCenter = true
         
         label.textColor = UIColor(red: 102.0/255, green: 117.0/255, blue: 127.0/255, alpha: 1)
         label.hashtagColor = UIColor(red: 85.0/255, green: 172.0/255, blue: 238.0/255, alpha: 1)
