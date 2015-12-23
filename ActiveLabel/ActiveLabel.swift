@@ -33,6 +33,11 @@ public protocol ActiveLabelDelegate: class {
             updateTextStorage()
         }
     }
+    @IBInspectable public var verticalTextAlignmentCenter: Bool = false {
+        didSet {
+            updateTextStorage()
+        }
+    }
     @IBInspectable public var mentionColor: UIColor = .blueColor() {
         didSet {
             updateTextStorage()
@@ -64,6 +69,12 @@ public protocol ActiveLabelDelegate: class {
         }
     }
     @IBInspectable public var lineSpacing: Float? {
+        didSet {
+            updateTextStorage()
+        }
+    }
+    
+    public var minFontSize: Int? {
         didSet {
             updateTextStorage()
         }
@@ -127,12 +138,14 @@ public protocol ActiveLabelDelegate: class {
     }
     
     public override func drawTextInRect(rect: CGRect) {
+        
+        setFontIfNeeded(rect)
+        
         let range = NSRange(location: 0, length: textStorage.length)
+        let glyphOrigin = textOrigin(rect)
         
-        textContainer.size = rect.size
-        
-        layoutManager.drawBackgroundForGlyphRange(range, atPoint: rect.origin)
-        layoutManager.drawGlyphsForGlyphRange(range, atPoint: rect.origin)
+        layoutManager.drawBackgroundForGlyphRange(range, atPoint: glyphOrigin)
+        layoutManager.drawGlyphsForGlyphRange(range, atPoint: glyphOrigin)
     }
     
     public override func sizeThatFits(size: CGSize) -> CGSize {
@@ -356,6 +369,33 @@ public protocol ActiveLabelDelegate: class {
         return nil
     }
     
+    private func setFontIfNeeded(rect: CGRect) {
+        let currentFontSize = font.pointSize
+        
+        let maximumLabelSize = CGSizeMake(rect.width, CGFloat.max);
+        
+        var expectSize = sizeThatFits(maximumLabelSize)
+        
+        if let minFontSize = minFontSize where minFontSize > 0 {
+            for var fontSize = currentFontSize - 1; rect.height < expectSize.height && fontSize > CGFloat(minFontSize); fontSize-- {
+                font = font.fontWithSize(fontSize)
+                expectSize = sizeThatFits(maximumLabelSize)
+            }
+        }
+    }
+    
+    private func textOrigin(rect: CGRect) -> CGPoint {
+        textContainer.size = rect.size
+        var glyphOrigin = rect.origin
+        
+        if verticalTextAlignmentCenter {
+            let usedRect = layoutManager.usedRectForTextContainer(textContainer)
+            let glyphOriginY = (rect.height > usedRect.height) ? rect.origin.y + (rect.height - usedRect.height) / 2 : rect.origin.y
+            glyphOrigin = CGPointMake(rect.origin.x, glyphOriginY)
+        }
+        
+        return glyphOrigin
+    }
     
     //MARK: - Handle UI Responder touches
     public override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
