@@ -130,9 +130,10 @@ public protocol ActiveLabelDelegate: class {
         let range = NSRange(location: 0, length: textStorage.length)
         
         textContainer.size = rect.size
+        let newOrigin = textOrigin(inRect: rect)
         
-        layoutManager.drawBackgroundForGlyphRange(range, atPoint: rect.origin)
-        layoutManager.drawGlyphsForGlyphRange(range, atPoint: rect.origin)
+        layoutManager.drawBackgroundForGlyphRange(range, atPoint: newOrigin)
+        layoutManager.drawGlyphsForGlyphRange(range, atPoint: newOrigin)
     }
     
     public override func sizeThatFits(size: CGSize) -> CGSize {
@@ -229,6 +230,13 @@ public protocol ActiveLabelDelegate: class {
         textStorage.setAttributedString(mutAttrString)
         
         setNeedsDisplay()
+    }
+    
+    private func textOrigin(inRect rect: CGRect) -> CGPoint {
+        let usedRect = layoutManager.usedRectForTextContainer(textContainer)
+        let heightDiff = rect.height - usedRect.height
+        let glyphOriginY = heightDiff > 0 ? rect.origin.y + heightDiff/2 : rect.origin.y
+        return CGPoint(x: rect.origin.x, y: glyphOriginY)
     }
     
     /// add link attribute
