@@ -9,37 +9,68 @@
 import UIKit
 import ActiveLabel
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, ActiveLabelDelegate {
     
     let label = ActiveLabel()
+    let tableView = UITableView()
+    let reuseID = "reuseID"
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co."
-        label.numberOfLines = 0
-        label.lineSpacing = 4
-        
-        label.textColor = UIColor(red: 102.0/255, green: 117.0/255, blue: 127.0/255, alpha: 1)
-        label.hashtagColor = UIColor(red: 85.0/255, green: 172.0/255, blue: 238.0/255, alpha: 1)
-        label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
-        label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
-        
-        label.handleMentionTap { self.alert("Mention", message: $0) }
-        label.handleHashtagTap { self.alert("Hashtag", message: $0) }
-        label.handleURLTap { self.alert("URL", message: $0.description) }
-        
-        label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
-        view.addSubview(label)
-        
-        
-        // Do any additional setup after loading the view, typically from a nib.
+        title = "ActiveLabel.swift"
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.frame = self.view.bounds
+        tableView.registerClass(ActiveLabelCell.self, forCellReuseIdentifier: reuseID)
+        view.addSubview(tableView)
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    
+    
+    //MARK: ActiveLabelDelegate
+    
+    func didSelectText(text: String, type: ActiveType) {
+        switch type {
+        case .Mention:
+            alert("Mention", message: text)
+        case .Hashtag:
+            alert("Hashtag", message: text)
+        case .URL:
+            alert("URL", message: text)
+        case .None:
+            break
+        }
     }
+    
+    
+    //MARK: UITableViewDataSource
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 30
+    }
+    
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCellWithIdentifier(reuseID) as? ActiveLabelCell else {
+            return UITableViewCell()
+        }
+        cell.customizeCell(withText: "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co.")
+        cell.activeLabel.delegate = self
+        return cell
+    }
+    
+    
+    //MARK: UITableViewDelegate
+    
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return 80
+    }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        let cell = tableView.cellForRowAtIndexPath(indexPath) as? ActiveLabelCell
+        cell?.backgroundColor = .grayColor()
+        UIView.animateWithDuration(0.5) { cell?.backgroundColor = .clearColor()}
+    }
+    
     
     func alert(title: String, message: String) {
         let vc = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)

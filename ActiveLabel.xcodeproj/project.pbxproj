@@ -8,15 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		8F0249A61B9989B1005D8035 /* ActiveLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 8F0249A51B9989B1005D8035 /* ActiveLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		8F0249AD1B9989B1005D8035 /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; settings = {ASSET_TAGS = (); }; };
+		8F0249AD1B9989B1005D8035 /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
 		8F0249B21B9989B1005D8035 /* ActiveTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249B11B9989B1005D8035 /* ActiveTypeTests.swift */; };
 		8F0249C31B998A66005D8035 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249C21B998A66005D8035 /* AppDelegate.swift */; };
 		8F0249C51B998A66005D8035 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249C41B998A66005D8035 /* ViewController.swift */; };
 		8F0249C81B998A66005D8035 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8F0249C61B998A66005D8035 /* Main.storyboard */; };
 		8F0249CA1B998A66005D8035 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8F0249C91B998A66005D8035 /* Assets.xcassets */; };
 		8F0249CD1B998A66005D8035 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8F0249CB1B998A66005D8035 /* LaunchScreen.storyboard */; };
-		8F0249D31B998C00005D8035 /* ActiveLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249D21B998C00005D8035 /* ActiveLabel.swift */; settings = {ASSET_TAGS = (); }; };
-		8F0249D51B998D21005D8035 /* ActiveType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249D41B998D21005D8035 /* ActiveType.swift */; settings = {ASSET_TAGS = (); }; };
+		8F0249D31B998C00005D8035 /* ActiveLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249D21B998C00005D8035 /* ActiveLabel.swift */; };
+		8F0249D51B998D21005D8035 /* ActiveType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249D41B998D21005D8035 /* ActiveType.swift */; };
+		C161B6E41C38999900894A3A /* ActiveLabelCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C161B6E31C38999900894A3A /* ActiveLabelCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +46,7 @@
 		8F0249CE1B998A66005D8035 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8F0249D21B998C00005D8035 /* ActiveLabel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveLabel.swift; sourceTree = "<group>"; };
 		8F0249D41B998D21005D8035 /* ActiveType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveType.swift; sourceTree = "<group>"; };
+		C161B6E31C38999900894A3A /* ActiveLabelCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveLabelCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 			children = (
 				8F0249C21B998A66005D8035 /* AppDelegate.swift */,
 				8F0249C41B998A66005D8035 /* ViewController.swift */,
+				C161B6E31C38999900894A3A /* ActiveLabelCell.swift */,
 				8F0249C61B998A66005D8035 /* Main.storyboard */,
 				8F0249C91B998A66005D8035 /* Assets.xcassets */,
 				8F0249CB1B998A66005D8035 /* LaunchScreen.storyboard */,
@@ -284,6 +287,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8F0249C51B998A66005D8035 /* ViewController.swift in Sources */,
+				C161B6E41C38999900894A3A /* ActiveLabelCell.swift in Sources */,
 				8F0249C31B998A66005D8035 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
