@@ -192,6 +192,7 @@ public protocol ActiveLabelDelegate: class {
     private var urlTapHandler: ((NSURL) -> ())?
     
     private var selectedElement: (range: NSRange, element: ActiveElement)?
+    private var heightCorrection: CGFloat = 0
     private lazy var textStorage = NSTextStorage()
     private lazy var layoutManager = NSLayoutManager()
     private lazy var textContainer = NSTextContainer()
@@ -234,8 +235,8 @@ public protocol ActiveLabelDelegate: class {
     
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
         let usedRect = layoutManager.usedRectForTextContainer(textContainer)
-        let heightDiff = rect.height - usedRect.height
-        let glyphOriginY = heightDiff > 0 ? rect.origin.y + heightDiff/2 : rect.origin.y
+        heightCorrection = (rect.height - usedRect.height)/2
+        let glyphOriginY = heightCorrection > 0 ? rect.origin.y + heightCorrection : rect.origin.y
         return CGPoint(x: rect.origin.x, y: glyphOriginY)
     }
     
@@ -347,13 +348,15 @@ public protocol ActiveLabelDelegate: class {
         guard textStorage.length > 0 else {
             return nil
         }
-        
+
+        var correctLocation = location
+        correctLocation.y -= heightCorrection
         let boundingRect = layoutManager.boundingRectForGlyphRange(NSRange(location: 0, length: textStorage.length), inTextContainer: textContainer)
-        guard boundingRect.contains(location) else {
+        guard boundingRect.contains(correctLocation) else {
             return nil
         }
         
-        let index = layoutManager.glyphIndexForPoint(location, inTextContainer: textContainer)
+        let index = layoutManager.glyphIndexForPoint(correctLocation, inTextContainer: textContainer)
         
         for element in activeElements.map({ $0.1 }).flatten() {
             if index >= element.range.location && index <= element.range.location + element.range.length {
