@@ -235,9 +235,8 @@ public protocol ActiveLabelDelegate: class {
     
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
         let usedRect = layoutManager.usedRectForTextContainer(textContainer)
-        let heightDiff = rect.height - usedRect.height
-        heightCorrection = heightDiff/2
-        let glyphOriginY = heightDiff > 0 ? rect.origin.y + heightCorrection : rect.origin.y
+        heightCorrection = (rect.height - usedRect.height)/2
+        let glyphOriginY = heightCorrection > 0 ? rect.origin.y + heightCorrection : rect.origin.y
         return CGPoint(x: rect.origin.x, y: glyphOriginY)
     }
     
