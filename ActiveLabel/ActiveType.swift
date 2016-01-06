@@ -30,7 +30,8 @@ struct ActiveBuilder {
         var elements: [(range: NSRange, element: ActiveElement)] = []
         
         for mention in mentions where mention.range.length > 2 {
-            let word = nsstring.substringWithRange(mention.range)
+            let range = NSRange(location: mention.range.location + 1, length: mention.range.length - 1)
+            let word = nsstring.substringWithRange(range)
             let element = ActiveElement.Mention(word)
             elements.append((mention.range, element))
         }
@@ -43,7 +44,8 @@ struct ActiveBuilder {
         var elements: [(range: NSRange, element: ActiveElement)] = []
         
         for hashtag in hashtags where hashtag.range.length > 2 {
-            let word = nsstring.substringWithRange(hashtag.range)
+            let range = NSRange(location: hashtag.range.location + 1, length: hashtag.range.length - 1)
+            let word = nsstring.substringWithRange(range)
             let element = ActiveElement.Hashtag(word)
             elements.append((hashtag.range, element))
         }
