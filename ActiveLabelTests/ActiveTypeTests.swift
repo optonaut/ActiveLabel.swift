@@ -43,6 +43,20 @@ class ActiveTypeTests: XCTestCase {
         }
     }
     
+    var currentElementType: ActiveType {
+        let currentElement = activeElements.first!
+        switch currentElement {
+        case .Mention:
+            return .Mention
+        case .Hashtag:
+            return .Hashtag
+        case .URL:
+            return .URL
+        case .None:
+            return .None
+        }
+    }
+    
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -70,15 +84,18 @@ class ActiveTypeTests: XCTestCase {
         label.text = "@userhandle"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
         
         label.text = "@userhandle."
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
-        
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+
         label.text = "@_with_underscores_"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "_with_underscores_")
-        
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+
         label.text = "@u"
         XCTAssertEqual(activeElements.count, 0)
         label.text = "@."
@@ -91,14 +108,17 @@ class ActiveTypeTests: XCTestCase {
         label.text = "#somehashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "somehashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
 
         label.text = "#somehashtag."
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "somehashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
 
         label.text = "#_with_underscores_"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "_with_underscores_")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
 
         label.text = "#h"
         XCTAssertEqual(activeElements.count, 0)
@@ -112,22 +132,27 @@ class ActiveTypeTests: XCTestCase {
         label.text = "http://www.google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "http://www.google.com")
-        
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+
         label.text = "https://www.google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "https://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
 
         label.text = "http://www.google.com."
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "http://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
 
         label.text = "www.google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
 
         label.text = "google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
     }
     
 }
