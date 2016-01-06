@@ -196,7 +196,7 @@ public protocol ActiveLabelDelegate: class {
     private lazy var textStorage = NSTextStorage()
     private lazy var layoutManager = NSLayoutManager()
     private lazy var textContainer = NSTextContainer()
-    private lazy var activeElements: [ActiveType: [(range: NSRange, element: ActiveElement)]] = [
+    internal lazy var activeElements: [ActiveType: [(range: NSRange, element: ActiveElement)]] = [
         .Mention: [],
         .Hashtag: [],
         .URL: [],
