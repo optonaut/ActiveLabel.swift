@@ -49,11 +49,14 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        let startDate = NSDate()
         guard let cell = tableView.dequeueReusableCellWithIdentifier(reuseID) as? ActiveLabelCell else {
             return UITableViewCell()
         }
-        cell.customizeCell(withText: "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co.")
+        cell.customizeCell(withText: "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co." +
+        " This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co.")
         cell.activeLabel.delegate = self
+        print("Reuse time = \(NSDate().timeIntervalSinceDate(startDate))")
         return cell
     }
     
@@ -61,7 +64,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     //MARK: UITableViewDelegate
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return 80
+        return 150
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
