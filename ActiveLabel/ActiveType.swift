@@ -22,49 +22,44 @@ public enum ActiveType {
     case None
 }
 
-//func activeElement(word: String) -> ActiveElement {
-//    if let url = reduceRightToURL(word) {
-//        return .URL(url)
-//    }
-//    
-//    if word.characters.count < 2 {
-//        return .None
-//    }
-//    
-//    // remove # or @ sign and reduce to alpha numeric string (also allowed: _)
-//    guard let allowedWord = reduceRightToAllowed(word.substringFromIndex(word.startIndex.advancedBy(1))) else {
-//        return .None
-//    }
-//    
-//    if word.hasPrefix("@") {
-//        return .Mention(allowedWord)
-//    } else if word.hasPrefix("#") {
-//        return .Hashtag(allowedWord)
-//    } else {
-//        return .None
-//    }
-//}
-//
-//private func reduceRightToURL(str: String) -> String? {
-//    if let urlDetector = try? NSDataDetector(types: NSTextCheckingType.Link.rawValue) {
-//        let nsStr = str as NSString
-//        let results = urlDetector.matchesInString(str, options: .ReportCompletion, range: NSRange(location: 0, length: nsStr.length))
-//        if let result = results.map({ nsStr.substringWithRange($0.range) }).first {
-//            return result
-//        }
-//    }
-//    return nil
-//}
-//
-//private func reduceRightToAllowed(str: String) -> String? {
-//    if let regex = try? NSRegularExpression(pattern: "^[a-z0-9_]*", options: [.CaseInsensitive]) {
-//        let nsStr = str as NSString
-//        let results = regex.matchesInString(str, options: [], range: NSRange(location: 0, length: nsStr.length))
-//        if let result = results.map({ nsStr.substringWithRange($0.range) }).first {
-//            if !result.isEmpty {
-//                return result
-//            }
-//        }
-//    }
-//    return nil
-//}
+struct ActiveBuilder {
+    
+    static func createMentionElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
+        let mentions = RegexParser.getMentions(fromText: text, range: range)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for mention in mentions where mention.range.length > 2 {
+            let word = nsstring.substringWithRange(mention.range)
+            let element = ActiveElement.Mention(word)
+            elements.append((mention.range, element))
+        }
+        return elements
+    }
+    
+    static func createHashtagElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
+        let hashtags = RegexParser.getHashtags(fromText: text, range: range)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for hashtag in hashtags where hashtag.range.length > 2 {
+            let word = nsstring.substringWithRange(hashtag.range)
+            let element = ActiveElement.Hashtag(word)
+            elements.append((hashtag.range, element))
+        }
+        return elements
+    }
+    
+    static func createURLElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
+        let urls = RegexParser.getURLs(fromText: text, range: range)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for url in urls where url.range.length > 2 {
+            let word = nsstring.substringWithRange(url.range)
+            let element = ActiveElement.URL(word)
+            elements.append((url.range, element))
+        }
+        return elements
+    }
+}

@@ -269,54 +269,20 @@ public protocol ActiveLabelDelegate: class {
     /// use regex check all link ranges
     private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
         let textString = attrString.string
-        let textNSString = attrString.string as NSString
         let textLength = textString.characters.count
-        
-        var hashtags: [NSTextCheckingResult] = []
-        var mentions: [NSTextCheckingResult] = []
-        var urls: [NSTextCheckingResult] = []
+        let textRange = NSRange(location: 0, length: textLength)
         
         //URLS
-        if let urlDetector = try? NSDataDetector(types: NSTextCheckingType.Link.rawValue) {
-            let results = urlDetector.matchesInString(textString,
-                options: .ReportCompletion,
-                range: NSRange(location: 0, length: textLength))
-            urls.appendContentsOf(results)
-        }
+        let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
+        activeElements[.URL]?.appendContentsOf(urlElements)
         
-        for url in urls where url.range.length > 2 {
-            let word = textNSString.substringWithRange(url.range)
-            let element = ActiveElement.URL(word)
-            activeElements[.URL]?.append((url.range, element))
-        }
-        
-        //HASHTAGS
-        if let regex = try? NSRegularExpression(pattern: "#[a-z0-9_]*", options: [.CaseInsensitive]) {
-            let results = regex.matchesInString(textString,
-                options: [],
-                range: NSRange(location: 0, length: textLength))
-            hashtags.appendContentsOf(results)
-        }
-        
-        for hashtag in hashtags where hashtag.range.length > 2 {
-            let word = textNSString.substringWithRange(hashtag.range)
-            let element = ActiveElement.Hashtag(word)
-            activeElements[.Hashtag]?.append((hashtag.range, element))
-        }
+        //HASHTAGS        
+        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange)
+        activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
         
         //MENTIONS
-        if let regex = try? NSRegularExpression(pattern: "@[a-z0-9_]*", options: [.CaseInsensitive]) {
-            let results = regex.matchesInString(textString,
-                options: [],
-                range: NSRange(location: 0, length: textLength))
-            mentions.appendContentsOf(results)
-        }
-        
-        for mention in mentions where mention.range.length > 2 {
-            let word = textNSString.substringWithRange(mention.range)
-            let element = ActiveElement.Mention(word)
-            activeElements[.Mention]?.append((mention.range, element))
-        }
+        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange)
+        activeElements[.Mention]?.appendContentsOf(mentionElements)
     }
 
     
