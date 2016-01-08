@@ -31,7 +31,10 @@ struct ActiveBuilder {
         
         for mention in mentions where mention.range.length > 2 {
             let range = NSRange(location: mention.range.location + 1, length: mention.range.length - 1)
-            let word = nsstring.substringWithRange(range)
+            var word = nsstring.substringWithRange(range)
+            if word.hasPrefix("@") {
+                word.removeAtIndex(word.startIndex)
+            }
             let element = ActiveElement.Mention(word)
             elements.append((mention.range, element))
         }
@@ -45,7 +48,10 @@ struct ActiveBuilder {
         
         for hashtag in hashtags where hashtag.range.length > 2 {
             let range = NSRange(location: hashtag.range.location + 1, length: hashtag.range.length - 1)
-            let word = nsstring.substringWithRange(range)
+            var word = nsstring.substringWithRange(range)
+            if word.hasPrefix("#") {
+                word.removeAtIndex(word.startIndex)
+            }
             let element = ActiveElement.Hashtag(word)
             elements.append((hashtag.range, element))
         }
