@@ -18,55 +18,26 @@ public protocol ActiveLabelDelegate: class {
     // MARK: - public properties
     public weak var delegate: ActiveLabelDelegate?
     
-    @IBInspectable public var mentionEnabled: Bool = true {
-        didSet {
-            updateTextStorage()
-        }
-    }
-    @IBInspectable public var hashtagEnabled: Bool = true {
-        didSet {
-            updateTextStorage()
-        }
-    }
-    @IBInspectable public var URLEnabled: Bool = true {
-        didSet {
-            updateTextStorage()
-        }
-    }
     @IBInspectable public var mentionColor: UIColor = .blueColor() {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var mentionSelectedColor: UIColor? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var hashtagColor: UIColor = .blueColor() {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var hashtagSelectedColor: UIColor? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var URLColor: UIColor = .blueColor() {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var URLSelectedColor: UIColor? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var lineSpacing: Float? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     
     // MARK: - public methods
@@ -84,33 +55,23 @@ public protocol ActiveLabelDelegate: class {
     
     // MARK: - override UILabel properties
     override public var text: String? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage() }
     }
     
     override public var attributedText: NSAttributedString? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage() }
     }
     
     override public var font: UIFont! {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     
     override public var textColor: UIColor! {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     
     override public var textAlignment: NSTextAlignment {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false)}
     }
     
     // MARK: - init functions
@@ -210,24 +171,21 @@ public protocol ActiveLabelDelegate: class {
         userInteractionEnabled = true
     }
     
-    private func updateTextStorage() {
-        guard let attributedText = attributedText else {
-            return
-        }
-        
+    private func updateTextStorage(parseText parseText: Bool = true) {
         // clean up previous active elements
-        for (type, _) in activeElements {
-            activeElements[type]?.removeAll()
-        }
-        
-        guard attributedText.length > 0 else {
+        guard let attributedText = attributedText
+            where attributedText.length > 0 else {
             return
         }
         
         let mutAttrString = addLineBreak(attributedText)
-        parseTextAndExtractActiveElements(mutAttrString)
+        if parseText {
+            for (type, _) in activeElements {
+                activeElements[type]?.removeAll()
+            }
+            parseTextAndExtractActiveElements(mutAttrString)
+        }
         addLinkAttribute(mutAttrString)
-        
         textStorage.setAttributedString(mutAttrString)
         
         setNeedsDisplay()
