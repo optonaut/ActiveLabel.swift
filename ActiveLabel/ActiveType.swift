@@ -65,6 +65,7 @@ struct ActiveBuilder {
         
         for url in urls where url.range.length > 2 {
             let word = nsstring.substringWithRange(url.range)
+                .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             let element = ActiveElement.URL(word)
             elements.append((url.range, element))
         }

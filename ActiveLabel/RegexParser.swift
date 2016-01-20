@@ -9,9 +9,14 @@
 import Foundation
 
 struct RegexParser {
+    
+    static let urlPattern = "(^|[\\s.:;?\\-\\]<\\(])" +
+    "(https?://[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
+    "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"
+    
     static let hashtagRegex = try? NSRegularExpression(pattern: "(?:^|\\s|$)#[a-z0-9_]*", options: [.CaseInsensitive])
     static let mentionRegex = try? NSRegularExpression(pattern: "(?:^|\\s|$|[.])@[a-z0-9_]*", options: [.CaseInsensitive])
-    static let urlDetector = try? NSDataDetector(types: NSTextCheckingType.Link.rawValue)
+    static let urlDetector = try? NSRegularExpression(pattern: urlPattern, options: [.CaseInsensitive])
     
     static func getMentions(fromText text: String, range: NSRange) -> [NSTextCheckingResult] {
         guard let mentionRegex = mentionRegex else { return [] }
