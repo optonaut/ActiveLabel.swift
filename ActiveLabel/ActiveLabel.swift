@@ -179,16 +179,19 @@ public protocol ActiveLabelDelegate: class {
         }
         
         let mutAttrString = addLineBreak(attributedText)
+
         if parseText {
             for (type, _) in activeElements {
                 activeElements[type]?.removeAll()
             }
             parseTextAndExtractActiveElements(mutAttrString)
         }
-        addLinkAttribute(mutAttrString)
-        textStorage.setAttributedString(mutAttrString)
         
-        setNeedsDisplay()
+        dispatch_async(dispatch_get_main_queue()) {
+            self.addLinkAttribute(mutAttrString)
+            self.textStorage.setAttributedString(mutAttrString)
+            self.setNeedsDisplay()
+        }
     }
     
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
