@@ -230,7 +230,7 @@ public protocol ActiveLabelDelegate: class {
     /// use regex check all link ranges
     private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
         let textString = attrString.string
-        let textLength = textString.characters.count
+        let textLength = textString.utf16.count
         let textRange = NSRange(location: 0, length: textLength)
         
         //URLS
