@@ -388,7 +388,7 @@ public class ActiveLabel: UILabel {
         setNeedsDisplay()
     }
 
-    private func elementAtLocation(location: CGPoint) -> (range: NSRange, element: ActiveElement)? {
+    func elementAtLocation(location: CGPoint) -> (range: NSRange, element: ActiveElement)? {
         guard textStorage.length > 0 else {
             return nil
         }
