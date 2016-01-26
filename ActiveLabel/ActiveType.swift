@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum ActiveElement {
+public enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(String)
@@ -23,19 +23,20 @@ public enum ActiveType {
 }
 
 func activeElement(word: String) -> ActiveElement {
+
     if let url = reduceRightToURL(word) {
         return .URL(url)
     }
-    
+
     if word.characters.count < 2 {
         return .None
     }
-    
+
     // remove # or @ sign and reduce to alpha numeric string (also allowed: _)
     guard let allowedWord = reduceRightToAllowed(word.substringFromIndex(word.startIndex.advancedBy(1))) else {
         return .None
     }
-    
+
     if word.hasPrefix("@") {
         return .Mention(allowedWord)
     } else if word.hasPrefix("#") {
