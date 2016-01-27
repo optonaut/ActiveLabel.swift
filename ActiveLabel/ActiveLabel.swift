@@ -186,7 +186,7 @@ public class ActiveLabel: UILabel {
                 updateAttributesWhenSelected(false)
                 selectedElement = nil
             }
-        case .Cancelled, .Ended:
+        case .Ended:
             guard let selectedElement = selectedElement else { return avoidSuperCall }
 
             if elementAtLocation(location) != nil {
