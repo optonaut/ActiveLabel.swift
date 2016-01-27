@@ -207,6 +207,9 @@ public class ActiveLabel: UILabel {
                 self.selectedElement = nil
             }
             avoidSuperCall = true
+        case .Cancelled:
+          self.updateAttributesWhenSelected(false)
+          self.selectedElement = nil
         default: ()
         }
 
