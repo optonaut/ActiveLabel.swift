@@ -23,6 +23,40 @@ func ==(a: ActiveElement, b: ActiveElement) -> Bool {
 
 class ActiveTypeTests: XCTestCase {
     
+    let label = ActiveLabel()
+    
+    var activeElements: [ActiveElement] {
+        return label.activeElements.flatMap({$0.1.flatMap({$0.element})})
+    }
+    
+    var currentElementString: String {
+        let currentElement = activeElements.first!
+        switch currentElement {
+        case .Mention(let mention):
+            return mention
+        case .Hashtag(let hashtag):
+            return hashtag
+        case .URL(let url):
+            return url
+        case .None:
+            return ""
+        }
+    }
+    
+    var currentElementType: ActiveType {
+        let currentElement = activeElements.first!
+        switch currentElement {
+        case .Mention:
+            return .Mention
+        case .Hashtag:
+            return .Hashtag
+        case .URL:
+            return .URL
+        case .None:
+            return .None
+        }
+    }
+    
     override func setUp() {
         super.setUp()
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -34,37 +68,142 @@ class ActiveTypeTests: XCTestCase {
     }
     
     func testInvalid() {
-        XCTAssertEqual(activeElement(""), ActiveElement.None)
-        XCTAssertEqual(activeElement(" "), ActiveElement.None)
-        XCTAssertEqual(activeElement("x"), ActiveElement.None)
-        XCTAssertEqual(activeElement("ಠ_ಠ"), ActiveElement.None)
-        XCTAssertEqual(activeElement("😁"), ActiveElement.None)
+        label.text = ""
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = " "
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "x"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "ಠ_ಠ"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "😁"
+        XCTAssertEqual(activeElements.count, 0)
     }
     
     func testMention() {
-        XCTAssertEqual(activeElement("@userhandle"), ActiveElement.Mention("userhandle"))
-        XCTAssertEqual(activeElement("@userhandle."), ActiveElement.Mention("userhandle"))
-        XCTAssertEqual(activeElement("@_with_underscores_"), ActiveElement.Mention("_with_underscores_"))
-        XCTAssertEqual(activeElement("@u"), ActiveElement.Mention("u"))
-        XCTAssertEqual(activeElement("@."), ActiveElement.None)
-        XCTAssertEqual(activeElement("@"), ActiveElement.None)
+        label.text = "@userhandle"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = "@userhandle."
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+
+        label.text = "@_with_underscores_"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "_with_underscores_")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = " . @userhandle"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = "@user#hashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "user")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = "@user@mention"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "user")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = ".@userhandle"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = " .@userhandle"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+
+        label.text = "word@mention"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "@u"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "@."
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "@"
+        XCTAssertEqual(activeElements.count, 0)
     }
     
     func testHashtag() {
-        XCTAssertEqual(activeElement("#somehashtag"), ActiveElement.Hashtag("somehashtag"))
-        XCTAssertEqual(activeElement("#somehashtag."), ActiveElement.Hashtag("somehashtag"))
-        XCTAssertEqual(activeElement("#_with_underscores_"), ActiveElement.Hashtag("_with_underscores_"))
-        XCTAssertEqual(activeElement("#h"), ActiveElement.Hashtag("h"))
-        XCTAssertEqual(activeElement("#."), ActiveElement.None)
-        XCTAssertEqual(activeElement("#"), ActiveElement.None)
+        label.text = "#somehashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "somehashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+
+        label.text = "#somehashtag."
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "somehashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+
+        label.text = "#_with_underscores_"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "_with_underscores_")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = " . #somehashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "somehashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = "#some#hashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "some")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = "#some@mention"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "some")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = ".#somehashtag"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = " .#somehashtag"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "word#hashtag"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "#h"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "#."
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "#"
+        XCTAssertEqual(activeElements.count, 0)
     }
     
     func testURL() {
-        XCTAssertEqual(activeElement("http://www.google.com"), ActiveElement.URL("http://www.google.com"))
-        XCTAssertEqual(activeElement("https://www.google.com"), ActiveElement.URL("https://www.google.com"))
-        XCTAssertEqual(activeElement("https://www.google.com."), ActiveElement.URL("https://www.google.com"))
-        XCTAssertEqual(activeElement("www.google.com"), ActiveElement.URL("www.google.com"))
-        XCTAssertEqual(activeElement("google.com"), ActiveElement.URL("google.com"))
+        label.text = "http://www.google.com"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "http://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+
+        label.text = "https://www.google.com"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "https://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+
+        label.text = "http://www.google.com."
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "http://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+
+        label.text = "www.google.com"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+        
+        label.text = "pic.twitter.com/YUGdEbUx"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "pic.twitter.com/YUGdEbUx")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+
+        label.text = "google.com"
+        XCTAssertEqual(activeElements.count, 0)
     }
     
 }

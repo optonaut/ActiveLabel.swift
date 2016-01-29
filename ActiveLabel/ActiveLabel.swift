@@ -18,55 +18,26 @@ public protocol ActiveLabelDelegate: class {
     // MARK: - public properties
     public weak var delegate: ActiveLabelDelegate?
     
-    @IBInspectable public var mentionEnabled: Bool = true {
-        didSet {
-            updateTextStorage()
-        }
-    }
-    @IBInspectable public var hashtagEnabled: Bool = true {
-        didSet {
-            updateTextStorage()
-        }
-    }
-    @IBInspectable public var URLEnabled: Bool = true {
-        didSet {
-            updateTextStorage()
-        }
-    }
     @IBInspectable public var mentionColor: UIColor = .blueColor() {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var mentionSelectedColor: UIColor? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var hashtagColor: UIColor = .blueColor() {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var hashtagSelectedColor: UIColor? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var URLColor: UIColor = .blueColor() {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var URLSelectedColor: UIColor? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var lineSpacing: Float? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     
     // MARK: - public methods
@@ -84,33 +55,23 @@ public protocol ActiveLabelDelegate: class {
     
     // MARK: - override UILabel properties
     override public var text: String? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage() }
     }
     
     override public var attributedText: NSAttributedString? {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage() }
     }
     
     override public var font: UIFont! {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     
     override public var textColor: UIColor! {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false) }
     }
     
     override public var textAlignment: NSTextAlignment {
-        didSet {
-            updateTextStorage()
-        }
+        didSet { updateTextStorage(parseText: false)}
     }
     
     // MARK: - init functions
@@ -196,7 +157,7 @@ public protocol ActiveLabelDelegate: class {
     private lazy var textStorage = NSTextStorage()
     private lazy var layoutManager = NSLayoutManager()
     private lazy var textContainer = NSTextContainer()
-    private lazy var activeElements: [ActiveType: [(range: NSRange, element: ActiveElement)]] = [
+    internal lazy var activeElements: [ActiveType: [(range: NSRange, element: ActiveElement)]] = [
         .Mention: [],
         .Hashtag: [],
         .URL: [],
@@ -210,27 +171,27 @@ public protocol ActiveLabelDelegate: class {
         userInteractionEnabled = true
     }
     
-    private func updateTextStorage() {
-        guard let attributedText = attributedText else {
-            return
-        }
-        
+    private func updateTextStorage(parseText parseText: Bool = true) {
         // clean up previous active elements
-        for (type, _) in activeElements {
-            activeElements[type]?.removeAll()
-        }
-        
-        guard attributedText.length > 0 else {
+        guard let attributedText = attributedText
+            where attributedText.length > 0 else {
             return
         }
         
         let mutAttrString = addLineBreak(attributedText)
-        parseTextAndExtractActiveElements(mutAttrString)
-        addLinkAttribute(mutAttrString)
+
+        if parseText {
+            for (type, _) in activeElements {
+                activeElements[type]?.removeAll()
+            }
+            parseTextAndExtractActiveElements(mutAttrString)
+        }
         
-        textStorage.setAttributedString(mutAttrString)
-        
-        setNeedsDisplay()
+        dispatch_async(dispatch_get_main_queue()) {
+            self.addLinkAttribute(mutAttrString)
+            self.textStorage.setAttributedString(mutAttrString)
+            self.setNeedsDisplay()
+        }
     }
     
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
@@ -268,34 +229,23 @@ public protocol ActiveLabelDelegate: class {
     
     /// use regex check all link ranges
     private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
-        let textString = attrString.string as NSString
-        let textLength = textString.length
-        var searchRange = NSMakeRange(0, textLength)
+        let textString = attrString.string
+        let textLength = textString.utf16.count
+        let textRange = NSRange(location: 0, length: textLength)
         
-        for word in textString.componentsSeparatedByCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet()) {
-            let element = activeElement(word)
-    
-            if case .None = element {
-                continue
-            }
-            
-            let elementRange = textString.rangeOfString(word, options: .LiteralSearch, range: searchRange)
-            defer {
-                let startIndex = elementRange.location + elementRange.length
-                searchRange = NSMakeRange(startIndex, textLength - startIndex)
-            }
-            
-            switch element {
-            case .Mention where mentionEnabled:
-                activeElements[.Mention]?.append((elementRange, element))
-            case .Hashtag where hashtagEnabled:
-                activeElements[.Hashtag]?.append((elementRange, element))
-            case .URL where URLEnabled:
-                activeElements[.URL]?.append((elementRange, element))
-            default: ()
-            }
-        }
+        //URLS
+        let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
+        activeElements[.URL]?.appendContentsOf(urlElements)
+        
+        //HASHTAGS        
+        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange)
+        activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
+        
+        //MENTIONS
+        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange)
+        activeElements[.Mention]?.appendContentsOf(mentionElements)
     }
+
     
     /// add line break mode
     private func addLineBreak(attrString: NSAttributedString) -> NSMutableAttributedString {
