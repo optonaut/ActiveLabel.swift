@@ -187,11 +187,9 @@ public protocol ActiveLabelDelegate: class {
             parseTextAndExtractActiveElements(mutAttrString)
         }
         
-        dispatch_async(dispatch_get_main_queue()) {
-            self.addLinkAttribute(mutAttrString)
-            self.textStorage.setAttributedString(mutAttrString)
-            self.setNeedsDisplay()
-        }
+        self.addLinkAttribute(mutAttrString)
+        self.textStorage.setAttributedString(mutAttrString)
+        self.setNeedsDisplay()
     }
     
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
