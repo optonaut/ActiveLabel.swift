@@ -29,9 +29,6 @@ label.handleHashtagTap { hashtag in
 
 ## API
 
-##### `mentionEnabled: Bool = true`
-##### `hashtagEnabled: Bool = true`
-##### `URLEnabled: Bool = true`
 ##### `mentionColor: UIColor = .blueColor()`
 ##### `mentionSelectedColor: UIColor?`
 ##### `hashtagColor: UIColor = .blueColor()`
