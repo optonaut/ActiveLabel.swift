@@ -96,17 +96,7 @@ public protocol ActiveLabelDelegate: class {
         layoutManager.drawBackgroundForGlyphRange(range, atPoint: newOrigin)
         layoutManager.drawGlyphsForGlyphRange(range, atPoint: newOrigin)
     }
-    
-    public override func sizeThatFits(size: CGSize) -> CGSize {
-        let currentSize = textContainer.size
-        defer {
-            textContainer.size = currentSize
-        }
-        
-        textContainer.size = size
-        return layoutManager.usedRectForTextContainer(textContainer).size
-    }
-    
+
     // MARK: - touch events
     func onTouch(touch: UITouch) -> Bool {
         let location = touch.locationInView(self)
