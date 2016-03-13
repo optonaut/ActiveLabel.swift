@@ -115,7 +115,7 @@ public protocol ActiveLabelDelegate: class {
                 updateAttributesWhenSelected(false)
                 selectedElement = nil
             }
-        case .Cancelled, .Ended:
+        case .Ended:
             guard let selectedElement = selectedElement else { return avoidSuperCall }
             
             switch selectedElement.element {
@@ -131,7 +131,10 @@ public protocol ActiveLabelDelegate: class {
                 self.selectedElement = nil
             }
             avoidSuperCall = true
-        default: ()
+        case .Cancelled:
+            selectedElement = nil
+        case .Stationary:
+            break
         }
         
         return avoidSuperCall
