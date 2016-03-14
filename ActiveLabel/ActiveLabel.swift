@@ -77,13 +77,13 @@ public protocol ActiveLabelDelegate: class {
     // MARK: - init functions
     override public init(frame: CGRect) {
         super.init(frame: frame)
-        
+        _customizing = false
         setupLabel()
     }
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        
+        _customizing = false
         setupLabel()
     }
     
@@ -95,6 +95,16 @@ public protocol ActiveLabelDelegate: class {
         
         layoutManager.drawBackgroundForGlyphRange(range, atPoint: newOrigin)
         layoutManager.drawGlyphsForGlyphRange(range, atPoint: newOrigin)
+    }
+    
+    
+    // MARK: - customzation
+    public func customize(block: (label: ActiveLabel) -> ()) -> ActiveLabel{
+        _customizing = true
+        block(label: self)
+        _customizing = false
+        updateTextStorage()
+        return self
     }
 
     // MARK: - touch events
@@ -141,6 +151,8 @@ public protocol ActiveLabelDelegate: class {
     }
     
     // MARK: - private properties
+    private var _customizing: Bool = true
+    
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
@@ -165,6 +177,7 @@ public protocol ActiveLabelDelegate: class {
     }
     
     private func updateTextStorage(parseText parseText: Bool = true) {
+        if _customizing { return }
         // clean up previous active elements
         guard let attributedText = attributedText
             where attributedText.length > 0 else {
