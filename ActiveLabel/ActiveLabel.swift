@@ -174,6 +174,7 @@ public protocol ActiveLabelDelegate: class {
         let mutAttrString = addLineBreak(attributedText)
 
         if parseText {
+            selectedElement = nil
             for (type, _) in activeElements {
                 activeElements[type]?.removeAll()
             }
