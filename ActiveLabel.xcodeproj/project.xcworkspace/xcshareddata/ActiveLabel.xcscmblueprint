@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "6CF162AE2BFAE92203B38689E33E1A681E37BE42",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "6CF162AE2BFAE92203B38689E33E1A681E37BE42" : 0,
+    "0B1AF10398ECE7F5F3CBFCF9AA305B09063FE214" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D6110C3B-2988-4FE8-82BE-0AD6A7A6369C",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "6CF162AE2BFAE92203B38689E33E1A681E37BE42" : "ActiveLabel.swift\/",
+    "0B1AF10398ECE7F5F3CBFCF9AA305B09063FE214" : ".."
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "ActiveLabel",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "ActiveLabel.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:poolqf\/Twicket",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "0B1AF10398ECE7F5F3CBFCF9AA305B09063FE214"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:optonaut\/ActiveLabel.swift.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "6CF162AE2BFAE92203B38689E33E1A681E37BE42"
+    }
+  ]
+}

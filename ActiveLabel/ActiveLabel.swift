@@ -314,7 +314,9 @@ public protocol ActiveLabelDelegate: class {
         let index = layoutManager.glyphIndexForPoint(correctLocation, inTextContainer: textContainer)
         
         for element in activeElements.map({ $0.1 }).flatten() {
-            if index >= element.range.location && index <= element.range.location + element.range.length {
+            if index < textStorage.length - 1 &&
+                index >= element.range.location &&
+                index < element.range.location + element.range.length {
                 return element
             }
         }
