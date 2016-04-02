@@ -39,7 +39,7 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var lineSpacing: Float? {
         didSet { updateTextStorage(parseText: false) }
     }
-    
+
     // MARK: - public methods
     public func handleMentionTap(handler: (String) -> ()) {
         mentionTapHandler = handler
@@ -52,7 +52,17 @@ public protocol ActiveLabelDelegate: class {
     public func handleURLTap(handler: (NSURL) -> ()) {
         urlTapHandler = handler
     }
-    
+
+    public func filterMention(predicate: (String) -> Bool) {
+        mentionFilterPredicate = predicate
+        updateTextStorage()
+    }
+
+    public func filterHashtag(predicate: (String) -> Bool) {
+        hashtagFilterPredicate = predicate
+        updateTextStorage()
+    }
+
     // MARK: - override UILabel properties
     override public var text: String? {
         didSet { updateTextStorage() }
@@ -156,6 +166,9 @@ public protocol ActiveLabelDelegate: class {
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
+
+    private var mentionFilterPredicate: ((String) -> Bool) = { _ in return false }
+    private var hashtagFilterPredicate: ((String) -> Bool) = { _ in return false }
     
     private var selectedElement: (range: NSRange, element: ActiveElement)?
     private var heightCorrection: CGFloat = 0
@@ -243,11 +256,23 @@ public protocol ActiveLabelDelegate: class {
         activeElements[.URL]?.appendContentsOf(urlElements)
         
         //HASHTAGS        
-        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange)
+        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange).filter { (_, element: ActiveElement) in
+
+            switch element {
+                case .Hashtag(let tag): return hashtagFilterPredicate(tag)
+                default: return true
+            }
+        }
         activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
         
         //MENTIONS
-        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange)
+        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange).filter { (_, element: ActiveElement) in
+
+            switch element {
+                case .Mention(let mention): return mentionFilterPredicate(mention)
+                default: return true
+            }
+        }
         activeElements[.Mention]?.appendContentsOf(mentionElements)
     }
 
