@@ -205,5 +205,16 @@ class ActiveTypeTests: XCTestCase {
         label.text = "google.com"
         XCTAssertEqual(activeElements.count, 0)
     }
+
+    func testFiltering() {
+        label.text = "@user #tag"
+        XCTAssertEqual(activeElements.count, 2)
+
+        label.filterMention { $0 != "user" }
+        XCTAssertEqual(activeElements.count, 1)
+
+        label.filterHashtag { $0 != "tag" }
+        XCTAssertEqual(activeElements.count, 0)
+    }
     
 }

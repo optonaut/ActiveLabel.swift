@@ -22,9 +22,11 @@ public enum ActiveType {
     case None
 }
 
+typealias ActiveFilterPredicate = (String -> Bool)
+
 struct ActiveBuilder {
     
-    static func createMentionElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
+    static func createMentionElements(fromText text: String, range: NSRange, filterPredicate: ActiveFilterPredicate?) -> [(range: NSRange, element: ActiveElement)] {
         let mentions = RegexParser.getMentions(fromText: text, range: range)
         let nsstring = text as NSString
         var elements: [(range: NSRange, element: ActiveElement)] = []
@@ -35,13 +37,16 @@ struct ActiveBuilder {
             if word.hasPrefix("@") {
                 word.removeAtIndex(word.startIndex)
             }
-            let element = ActiveElement.Mention(word)
-            elements.append((mention.range, element))
+
+            if filterPredicate?(word) ?? true {
+                let element = ActiveElement.Mention(word)
+                elements.append((mention.range, element))
+            }
         }
         return elements
     }
     
-    static func createHashtagElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
+    static func createHashtagElements(fromText text: String, range: NSRange, filterPredicate: ActiveFilterPredicate?) -> [(range: NSRange, element: ActiveElement)] {
         let hashtags = RegexParser.getHashtags(fromText: text, range: range)
         let nsstring = text as NSString
         var elements: [(range: NSRange, element: ActiveElement)] = []
@@ -52,8 +57,11 @@ struct ActiveBuilder {
             if word.hasPrefix("#") {
                 word.removeAtIndex(word.startIndex)
             }
-            let element = ActiveElement.Hashtag(word)
-            elements.append((hashtag.range, element))
+
+            if filterPredicate?(word) ?? true {
+                let element = ActiveElement.Hashtag(word)
+                elements.append((hashtag.range, element))
+            }
         }
         return elements
     }

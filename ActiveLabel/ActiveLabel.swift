@@ -167,9 +167,9 @@ public protocol ActiveLabelDelegate: class {
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
 
-    private var mentionFilterPredicate: ((String) -> Bool) = { _ in return false }
-    private var hashtagFilterPredicate: ((String) -> Bool) = { _ in return false }
-    
+    private var mentionFilterPredicate: ((String) -> Bool)?
+    private var hashtagFilterPredicate: ((String) -> Bool)?
+
     private var selectedElement: (range: NSRange, element: ActiveElement)?
     private var heightCorrection: CGFloat = 0
     private lazy var textStorage = NSTextStorage()
@@ -254,25 +254,13 @@ public protocol ActiveLabelDelegate: class {
         //URLS
         let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
         activeElements[.URL]?.appendContentsOf(urlElements)
-        
-        //HASHTAGS        
-        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange).filter { (_, element: ActiveElement) in
 
-            switch element {
-                case .Hashtag(let tag): return hashtagFilterPredicate(tag)
-                default: return true
-            }
-        }
+        //HASHTAGS
+        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
         activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
-        
-        //MENTIONS
-        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange).filter { (_, element: ActiveElement) in
 
-            switch element {
-                case .Mention(let mention): return mentionFilterPredicate(mention)
-                default: return true
-            }
-        }
+        //MENTIONS
+        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
         activeElements[.Mention]?.appendContentsOf(mentionElements)
     }
 
