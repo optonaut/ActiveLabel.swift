@@ -80,6 +80,18 @@ label.handleHashtagTap { hashtag in print("\(hashtag) tapped") }
 label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
 ```
 
+##### `filterHashtag: (String) -> Bool`
+
+```swift
+label.filterHashtag { hashtag in validHashtags.contains(hashtag) }
+```
+
+##### `filterMention: (String) -> Bool`
+
+```swift
+label.filterMention { mention in validMentions.contains(mention) }
+```
+
 ## Install (iOS 8+)
 
 ### Carthage
