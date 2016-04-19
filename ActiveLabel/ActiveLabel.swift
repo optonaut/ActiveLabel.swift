@@ -106,7 +106,11 @@ public protocol ActiveLabelDelegate: class {
         layoutManager.drawBackgroundForGlyphRange(range, atPoint: newOrigin)
         layoutManager.drawGlyphsForGlyphRange(range, atPoint: newOrigin)
     }
-    
+	
+	public override func intrinsicContentSize() -> CGSize {
+		let labelHeight = self.sizeThatFits(CGSize(width: CGRectGetWidth(self.frame), height: CGFloat.max)).height
+		return CGSize(width: self.frame.size.width, height: labelHeight + self.layoutMargins.top + self.layoutMargins.bottom)
+	}
     
     // MARK: - customzation
     public func customize(block: (label: ActiveLabel) -> ()) -> ActiveLabel{
