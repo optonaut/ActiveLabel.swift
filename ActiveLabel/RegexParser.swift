@@ -17,6 +17,7 @@ struct RegexParser {
     static let hashtagRegex = try? NSRegularExpression(pattern: "(?:^|\\s|$)#[\\p{L}0-9_]*", options: [.CaseInsensitive])
     static let mentionRegex = try? NSRegularExpression(pattern: "(?:^|\\s|$|[.])@[\\p{L}0-9_]*", options: [.CaseInsensitive]);
     static let urlDetector = try? NSRegularExpression(pattern: urlPattern, options: [.CaseInsensitive])
+    static let phoneNumberRegex = try? NSRegularExpression(pattern: "(\\+?\\d{1,3})?\\s?-?\\(?\\d{2,4}\\)?\\s?-?\\d{3,4}-?\\d{4}", options: [.CaseInsensitive]);
     
     static func getMentions(fromText text: String, range: NSRange) -> [NSTextCheckingResult] {
         guard let mentionRegex = mentionRegex else { return [] }
@@ -31,6 +32,11 @@ struct RegexParser {
     static func getURLs(fromText text: String, range: NSRange) -> [NSTextCheckingResult] {
         guard let urlDetector = urlDetector else { return [] }
         return urlDetector.matchesInString(text, options: [], range: range)
+    }
+    
+    static func getPhoneNumbers(fromText text: String, range: NSRange) -> [NSTextCheckingResult] {
+        guard let phoneNumberRegex = phoneNumberRegex else { return [] }
+        return phoneNumberRegex.matchesInString(text, options: [], range: range)
     }
     
 }
