@@ -217,4 +217,15 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 0)
     }
     
+    // test for issue https://github.com/optonaut/ActiveLabel.swift/issues/64
+    func testIssue64pic() {
+        label.text = "picfoo"
+        XCTAssertEqual(activeElements.count, 0)
+    }
+    
+    // test for issue https://github.com/optonaut/ActiveLabel.swift/issues/64
+    func testIssue64www() {
+        label.text = "wwwbar"
+        XCTAssertEqual(activeElements.count, 0)
+    }
 }
