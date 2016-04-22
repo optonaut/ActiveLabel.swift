@@ -18,7 +18,9 @@ class ViewController: UIViewController {
         
         label.customize { label in
             
-            label.text = "This is a post with #multiple and a @userhandle.Links are also supported like this one: http://optonaut.co. patern link 'Optional'"
+            label.text = "This is a post with #multiple and a @userhandle. change pattern @+userhandle.Links are also supported like this one: http://optonaut.co. patern link 'Optional'"
+            
+            ActiveLabel.setupMentionRegex(try! NSRegularExpression(pattern: "(?:^|\\s|$|[.])@[\\p{L}\\+0-9_]*", options: [.CaseInsensitive]))
             
             label.numberOfLines = 0
             label.lineSpacing = 4
