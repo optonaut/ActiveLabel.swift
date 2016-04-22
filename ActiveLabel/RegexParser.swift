@@ -33,4 +33,11 @@ struct RegexParser {
         return urlDetector.matchesInString(text, options: [], range: range)
     }
     
+    static func getOptionals(fromText text: String, pattern:String, range: NSRange) -> [NSTextCheckingResult] {
+        if let match = try? NSRegularExpression(pattern: pattern, options: [.CaseInsensitive]).matchesInString(text, options: [], range: range) {
+            return match
+        }
+        return []
+    }
+    
 }

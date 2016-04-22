@@ -12,6 +12,7 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(String)
+    case Optional(String, String)
     case None
 }
 
@@ -19,6 +20,7 @@ public enum ActiveType {
     case Mention
     case Hashtag
     case URL
+    case Optional
     case None
 }
 
@@ -76,6 +78,20 @@ struct ActiveBuilder {
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             let element = ActiveElement.URL(word)
             elements.append((url.range, element))
+        }
+        return elements
+    }
+    
+    static func createOptionalElements(fromText text: String, range: NSRange, pattern:String) -> [(range: NSRange, element: ActiveElement)] {
+        let optionals = RegexParser.getOptionals(fromText: text, pattern: pattern, range: range)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for optional in optionals where optional.range.length > 2 {
+            let word = nsstring.substringWithRange(optional.range)
+                .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+            let element = ActiveElement.Optional(pattern, word)
+            elements.append((optional.range, element))
         }
         return elements
     }
