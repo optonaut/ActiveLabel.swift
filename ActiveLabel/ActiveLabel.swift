@@ -15,15 +15,15 @@ public protocol ActiveLabelDelegate: class {
 
 @IBDesignable public class ActiveLabel: UILabel {
     
-    static func setupMentionRegex(regex:NSRegularExpression) {
+    public static func setupMentionRegex(regex:NSRegularExpression) {
         RegexParser.mentionRegex = regex
     }
     
-    static func setupHashtagRegex(regex:NSRegularExpression) {
+    public static func setupHashtagRegex(regex:NSRegularExpression) {
         RegexParser.hashtagRegex = regex
     }
     
-    static func setupURLRegex(regex:NSRegularExpression) {
+    public static func setupURLRegex(regex:NSRegularExpression) {
         RegexParser.urlDetector = regex
     }
     
