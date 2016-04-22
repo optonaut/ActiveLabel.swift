@@ -15,6 +15,13 @@ public protocol ActiveLabelDelegate: class {
 
 @IBDesignable public class ActiveLabel: UILabel {
     
+    public var on:[ActiveType:Bool] = [
+        .Mention : true,
+        .Hashtag: true,
+        .URL: true,
+        .Optional: true,
+    ]
+    
     // MARK: - public properties
     public weak var delegate: ActiveLabelDelegate?
     
@@ -268,22 +275,30 @@ public protocol ActiveLabelDelegate: class {
         let textRange = NSRange(location: 0, length: textLength)
         
         //OPTIIONAL
-        for (_, pattern) in optionalPatterns {
-            let optionalElements = ActiveBuilder.createOptionalElements(fromText: textString, range: textRange, pattern: pattern)
-            activeElements[.Optional]?.appendContentsOf(optionalElements)
+        if (on[.Optional] != nil && on[.Optional]!) {
+            for (_, pattern) in optionalPatterns {
+                let optionalElements = ActiveBuilder.createOptionalElements(fromText: textString, range: textRange, pattern: pattern)
+                activeElements[.Optional]?.appendContentsOf(optionalElements)
+            }
         }
         
         //URLS
-        let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
-        activeElements[.URL]?.appendContentsOf(urlElements)
-
+        if (on[.URL] != nil && on[.URL]!) {
+            let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
+            activeElements[.URL]?.appendContentsOf(urlElements)
+        }
+        
         //HASHTAGS
-        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
-        activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
+        if (on[.Hashtag] != nil && on[.Hashtag]!) {
+            let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
+            activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
+        }
         
         //MENTIONS
-        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
-        activeElements[.Mention]?.appendContentsOf(mentionElements)
+        if (on[.Mention] != nil && on[.Mention]!) {
+            let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
+            activeElements[.Mention]?.appendContentsOf(mentionElements)
+        }
     }
 
     
