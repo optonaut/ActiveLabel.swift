@@ -104,6 +104,11 @@ public protocol ActiveLabelDelegate: class {
         _customizing = false
         setupLabel()
     }
+
+    public override func awakeFromNib() {
+        super.awakeFromNib()
+        updateTextStorage()
+    }
     
     public override func drawTextInRect(rect: CGRect) {
         let range = NSRange(location: 0, length: textStorage.length)
