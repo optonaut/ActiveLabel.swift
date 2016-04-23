@@ -17,7 +17,11 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         label.customize { label in
-            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co."
+            
+            label.text = "This is a post with #multiple and a @userhandle. change pattern @+userhandle.Links are also supported like this one: http://optonaut.co. patern link 'Optional'"
+            
+            ActiveLabel.setupMentionRegex(try! NSRegularExpression(pattern: "(?:^|\\s|$|[.])@[\\p{L}\\+0-9_]*", options: [.CaseInsensitive]))
+            
             label.numberOfLines = 0
             label.lineSpacing = 4
             
@@ -25,10 +29,12 @@ class ViewController: UIViewController {
             label.hashtagColor = UIColor(red: 85.0/255, green: 172.0/255, blue: 238.0/255, alpha: 1)
             label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
             label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
+            label.optionalColor = UIColor(red: 85.0/255, green: 85.0/255, blue: 238.0/255, alpha: 1)
             
             label.handleMentionTap { self.alert("Mention", message: $0) }
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
             label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
+            label.handleOptionalTab("'(.*?)'", handler: { self.alert("Optional", message: $0)})
         }
         
         label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)

@@ -17,6 +17,9 @@
 		8F0249CD1B998A66005D8035 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8F0249CB1B998A66005D8035 /* LaunchScreen.storyboard */; };
 		8F0249D31B998C00005D8035 /* ActiveLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249D21B998C00005D8035 /* ActiveLabel.swift */; };
 		8F0249D51B998D21005D8035 /* ActiveType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249D41B998D21005D8035 /* ActiveType.swift */; };
+		BC6FFC1E1CCABF1C001C195F /* RegexParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E867D51C3D7AEA00FD687A /* RegexParser.swift */; };
+		BC6FFC1F1CCABF2E001C195F /* ActiveLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249D21B998C00005D8035 /* ActiveLabel.swift */; };
+		BC6FFC201CCABF31001C195F /* ActiveType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249D41B998D21005D8035 /* ActiveType.swift */; };
 		C1E867D61C3D7AEA00FD687A /* RegexParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E867D51C3D7AEA00FD687A /* RegexParser.swift */; };
 /* End PBXBuildFile section */
 
@@ -287,8 +290,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC6FFC1F1CCABF2E001C195F /* ActiveLabel.swift in Sources */,
 				8F0249C51B998A66005D8035 /* ViewController.swift in Sources */,
 				8F0249C31B998A66005D8035 /* AppDelegate.swift in Sources */,
+				BC6FFC1E1CCABF1C001C195F /* RegexParser.swift in Sources */,
+				BC6FFC201CCABF31001C195F /* ActiveType.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
