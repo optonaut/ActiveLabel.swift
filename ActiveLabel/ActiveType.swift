@@ -12,6 +12,7 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(String)
+    case PhoneNumber(String)
     case None
 }
 
@@ -19,6 +20,7 @@ public enum ActiveType {
     case Mention
     case Hashtag
     case URL
+    case PhoneNumber
     case None
 }
 
@@ -76,6 +78,19 @@ struct ActiveBuilder {
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             let element = ActiveElement.URL(word)
             elements.append((url.range, element))
+        }
+        return elements
+    }
+    
+    static func createPhoneNumberElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
+        let phoneNumbers = RegexParser.getPhoneNumbers(fromText: text, range: range)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for phoneNumber in phoneNumbers where phoneNumber.range.length > 2 {
+            let word = nsstring.substringWithRange(phoneNumber.range)
+            let element = ActiveElement.PhoneNumber(word)
+            elements.append((phoneNumber.range, element))
         }
         return elements
     }

@@ -36,6 +36,12 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var URLSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
+    @IBInspectable public var phoneNumberColor: UIColor = .blueColor() {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var phoneNumberSelectedColor: UIColor? {
+        didSet { updateTextStorage(parseText: false) }
+    }
     @IBInspectable public var lineSpacing: Float? {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -51,6 +57,10 @@ public protocol ActiveLabelDelegate: class {
     
     public func handleURLTap(handler: (NSURL) -> ()) {
         urlTapHandler = handler
+    }
+    
+    public func handlePhoneNumberTap(handler: (String) -> ()) {
+        phoneNumberTapHandler = handler
     }
 
     public func filterMention(predicate: (String) -> Bool) {
@@ -142,6 +152,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(let userHandle): didTapMention(userHandle)
             case .Hashtag(let hashtag): didTapHashtag(hashtag)
             case .URL(let url): didTapStringURL(url)
+            case .PhoneNumber(let phoneNumber): didTapPhoneNumber(phoneNumber)
             case .None: ()
             }
             
@@ -166,6 +177,7 @@ public protocol ActiveLabelDelegate: class {
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
+    private var phoneNumberTapHandler: ((String) -> ())?
 
     private var mentionFilterPredicate: ((String) -> Bool)?
     private var hashtagFilterPredicate: ((String) -> Bool)?
@@ -179,6 +191,7 @@ public protocol ActiveLabelDelegate: class {
         .Mention: [],
         .Hashtag: [],
         .URL: [],
+        .PhoneNumber: []
     ]
     
     // MARK: - helper functions
@@ -236,6 +249,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
+            case .PhoneNumber: attributes[NSForegroundColorAttributeName] = phoneNumberColor
             case .None: ()
             }
             
@@ -262,6 +276,10 @@ public protocol ActiveLabelDelegate: class {
         //MENTIONS
         let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
         activeElements[.Mention]?.appendContentsOf(mentionElements)
+        
+        //PHONE NUMBERS
+        let phoneNumberElements = ActiveBuilder.createPhoneNumberElements(fromText: textString, range: textRange)
+        activeElements[.PhoneNumber]?.appendContentsOf(phoneNumberElements)
     }
 
     
@@ -296,6 +314,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
+            case .PhoneNumber(_): attributes[NSForegroundColorAttributeName] = phoneNumberColor
             case .None: ()
             }
         } else {
@@ -303,6 +322,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
+            case .PhoneNumber(_): attributes[NSForegroundColorAttributeName] = phoneNumberSelectedColor ?? phoneNumberColor
             case .None: ()
             }
         }
@@ -378,6 +398,14 @@ public protocol ActiveLabelDelegate: class {
             return
         }
         urlHandler(url)
+    }
+    
+    private func didTapPhoneNumber(phoneNumber: String) {
+        guard let phoneNumberHandler = phoneNumberTapHandler else {
+            delegate?.didSelectText(phoneNumber, type: .PhoneNumber)
+            return
+        }
+        phoneNumberHandler(phoneNumber)
     }
 }
 

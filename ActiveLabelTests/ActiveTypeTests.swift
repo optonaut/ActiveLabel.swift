@@ -16,6 +16,7 @@ func ==(a: ActiveElement, b: ActiveElement) -> Bool {
     case (.Mention(let a), .Mention(let b)) where a == b: return true
     case (.Hashtag(let a), .Hashtag(let b)) where a == b: return true
     case (.URL(let a), .URL(let b)) where a == b: return true
+    case (.PhoneNumber(let a), .PhoneNumber(let b)) where a == b: return true
     case (.None, .None): return true
     default: return false
     }
@@ -38,6 +39,8 @@ class ActiveTypeTests: XCTestCase {
             return hashtag
         case .URL(let url):
             return url
+        case .PhoneNumber(let phoneNumber):
+            return phoneNumber
         case .None:
             return ""
         }
@@ -52,6 +55,8 @@ class ActiveTypeTests: XCTestCase {
             return .Hashtag
         case .URL:
             return .URL
+        case .PhoneNumber:
+            return .PhoneNumber
         case .None:
             return .None
         }
@@ -203,6 +208,41 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(currentElementType, ActiveType.URL)
 
         label.text = "google.com"
+        XCTAssertEqual(activeElements.count, 0)
+    }
+    
+    func testPhoneNumber() {
+        label.text = "111-111-1111"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "111-111-1111")
+        XCTAssertEqual(currentElementType, ActiveType.PhoneNumber)
+        
+        label.text = "02-111-1111"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "02-111-1111")
+        XCTAssertEqual(currentElementType, ActiveType.PhoneNumber)
+        
+        label.text = "1111111111"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "1111111111")
+        XCTAssertEqual(currentElementType, ActiveType.PhoneNumber)
+
+        label.text = "+821111111111"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "+821111111111")
+        XCTAssertEqual(currentElementType, ActiveType.PhoneNumber)
+        
+        label.text = "+1-111-1111-1111"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "+1-111-1111-1111")
+        XCTAssertEqual(currentElementType, ActiveType.PhoneNumber)
+        
+        label.text = "(111) 111-1111"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "(111) 111-1111")
+        XCTAssertEqual(currentElementType, ActiveType.PhoneNumber)
+        
+        label.text = "12345678"
         XCTAssertEqual(activeElements.count, 0)
     }
 
