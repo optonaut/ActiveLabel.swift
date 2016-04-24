@@ -83,6 +83,14 @@ public protocol ActiveLabelDelegate: class {
     override public var textAlignment: NSTextAlignment {
         didSet { updateTextStorage(parseText: false)}
     }
+
+    public override var numberOfLines: Int {
+        didSet { textContainer.maximumNumberOfLines = numberOfLines }
+    }
+    
+    public override var lineBreakMode: NSLineBreakMode {
+        didSet { textContainer.lineBreakMode = lineBreakMode }
+    }
     
     // MARK: - init functions
     override public init(frame: CGRect) {
@@ -186,6 +194,8 @@ public protocol ActiveLabelDelegate: class {
         textStorage.addLayoutManager(layoutManager)
         layoutManager.addTextContainer(textContainer)
         textContainer.lineFragmentPadding = 0
+        textContainer.lineBreakMode = lineBreakMode
+        textContainer.maximumNumberOfLines = numberOfLines
         userInteractionEnabled = true
     }
     
