@@ -152,6 +152,7 @@ public protocol ActiveLabelDelegate: class {
             }
             avoidSuperCall = true
         case .Cancelled:
+            updateAttributesWhenSelected(false)
             selectedElement = nil
         case .Stationary:
             break
