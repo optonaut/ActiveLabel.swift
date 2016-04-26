@@ -36,7 +36,7 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var URLSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable public var lineSpacing: Float? {
+    @IBInspectable public var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
 
@@ -276,9 +276,7 @@ public protocol ActiveLabelDelegate: class {
         let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.ByWordWrapping
         paragraphStyle.alignment = textAlignment
-        if let lineSpacing = lineSpacing {
-            paragraphStyle.lineSpacing = CGFloat(lineSpacing)
-        }
+        paragraphStyle.lineSpacing = CGFloat(lineSpacing)
         
         attributes[NSParagraphStyleAttributeName] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
