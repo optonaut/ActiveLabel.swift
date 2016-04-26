@@ -302,16 +302,16 @@ public protocol ActiveLabelDelegate: class {
         var attributes = textStorage.attributesAtIndex(0, effectiveRange: nil)
         if isSelected {
             switch selectedElement.element {
-            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
-            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
-            case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
+            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
+            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
+            case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
             case .None: ()
             }
         } else {
             switch selectedElement.element {
-            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
-            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
-            case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
+            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
+            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
+            case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
             case .None: ()
             }
         }
