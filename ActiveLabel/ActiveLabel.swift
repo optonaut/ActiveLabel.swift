@@ -351,6 +351,12 @@ public protocol ActiveLabelDelegate: class {
         if onTouch(touch) { return }
         super.touchesBegan(touches, withEvent: event)
     }
+
+    public override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        if onTouch(touch) { return }
+        super.touchesMoved(touches, withEvent: event)
+    }
     
     public override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
         guard let touch = touches?.first else { return }
