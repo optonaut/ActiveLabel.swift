@@ -39,6 +39,9 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
+    public var hashtagRegex: NSRegularExpression? = nil
+    public var mentionRegex: NSRegularExpression? = nil
+    public var urlRegex: NSRegularExpression? = nil
 
     // MARK: - public methods
     public func handleMentionTap(handler: (String) -> ()) {
@@ -263,15 +266,15 @@ public protocol ActiveLabelDelegate: class {
         let textRange = NSRange(location: 0, length: textLength)
         
         //URLS
-        let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
+        let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange, regex: urlRegex)
         activeElements[.URL]?.appendContentsOf(urlElements)
 
         //HASHTAGS
-        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
+        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, regex: hashtagRegex,filterPredicate: hashtagFilterPredicate)
         activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
 
         //MENTIONS
-        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
+        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, regex: mentionRegex ,filterPredicate: mentionFilterPredicate)
         activeElements[.Mention]?.appendContentsOf(mentionElements)
     }
 

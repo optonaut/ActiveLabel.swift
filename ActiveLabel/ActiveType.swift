@@ -26,12 +26,12 @@ typealias ActiveFilterPredicate = (String -> Bool)
 
 struct ActiveBuilder {
     
-    static func createMentionElements(fromText text: String, range: NSRange, filterPredicate: ActiveFilterPredicate?) -> [(range: NSRange, element: ActiveElement)] {
-        let mentions = RegexParser.getMentions(fromText: text, range: range)
+    static func createMentionElements(fromText text: String, range: NSRange, regex: NSRegularExpression?, filterPredicate: ActiveFilterPredicate?) -> [(range: NSRange, element: ActiveElement)] {
+        let mentions = RegexParser.getMentions(fromText: text, range: range, regex: regex)
         let nsstring = text as NSString
         var elements: [(range: NSRange, element: ActiveElement)] = []
         
-        for mention in mentions where mention.range.length > 2 {
+        for mention in mentions where mention.range.length > 1 {
             let range = NSRange(location: mention.range.location + 1, length: mention.range.length - 1)
             var word = nsstring.substringWithRange(range)
             if word.hasPrefix("@") {
@@ -46,12 +46,12 @@ struct ActiveBuilder {
         return elements
     }
     
-    static func createHashtagElements(fromText text: String, range: NSRange, filterPredicate: ActiveFilterPredicate?) -> [(range: NSRange, element: ActiveElement)] {
-        let hashtags = RegexParser.getHashtags(fromText: text, range: range)
+    static func createHashtagElements(fromText text: String, range: NSRange, regex: NSRegularExpression?, filterPredicate: ActiveFilterPredicate?) -> [(range: NSRange, element: ActiveElement)] {
+        let hashtags = RegexParser.getHashtags(fromText: text, range: range, regex: regex)
         let nsstring = text as NSString
         var elements: [(range: NSRange, element: ActiveElement)] = []
         
-        for hashtag in hashtags where hashtag.range.length > 2 {
+        for hashtag in hashtags where hashtag.range.length > 1 {
             let range = NSRange(location: hashtag.range.location + 1, length: hashtag.range.length - 1)
             var word = nsstring.substringWithRange(range)
             if word.hasPrefix("#") {
@@ -66,12 +66,12 @@ struct ActiveBuilder {
         return elements
     }
     
-    static func createURLElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
-        let urls = RegexParser.getURLs(fromText: text, range: range)
+    static func createURLElements(fromText text: String, range: NSRange, regex: NSRegularExpression?) -> [(range: NSRange, element: ActiveElement)] {
+        let urls = RegexParser.getURLs(fromText: text, range: range, regex: regex)
         let nsstring = text as NSString
         var elements: [(range: NSRange, element: ActiveElement)] = []
         
-        for url in urls where url.range.length > 2 {
+        for url in urls where url.range.length > 1 {
             let word = nsstring.substringWithRange(url.range)
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             let element = ActiveElement.URL(word)
