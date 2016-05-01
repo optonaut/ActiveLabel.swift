@@ -38,6 +38,8 @@ class ActiveTypeTests: XCTestCase {
             return hashtag
         case .URL(let url):
             return url
+        case .Phone(let phone):
+            return phone
         case .None:
             return ""
         }
@@ -52,6 +54,8 @@ class ActiveTypeTests: XCTestCase {
             return .Hashtag
         case .URL:
             return .URL
+        case .Phone:
+            return .Phone
         case .None:
             return .None
         }
@@ -179,6 +183,26 @@ class ActiveTypeTests: XCTestCase {
         label.text = "#тест #тег #россия"
         XCTAssertEqual(activeElements.count, 3)
         label.text = "#測試 #兩"
+        XCTAssertEqual(activeElements.count, 2)
+    }
+    
+    func testPhone() {
+        label.text = "+1(111)1111111"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementType, ActiveType.Phone)
+        XCTAssertEqual(currentElementString, "+1(111)1111111")
+        
+        label.text = "+79990001100"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementType, ActiveType.Phone)
+        XCTAssertEqual(currentElementString, "+79990001100")
+        
+        label.text = "7777777"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementType, ActiveType.Phone)
+        XCTAssertEqual(currentElementString, "7777777")
+        
+        label.text = "+1(333)999-55-44 +380(33)9-33-55"
         XCTAssertEqual(activeElements.count, 2)
     }
     
