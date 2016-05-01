@@ -33,6 +33,7 @@ class ViewController: UIViewController {
         }
         
         label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
+        label.addActiveElement(NSMakeRange(10, 4), type: .Mention)
         view.addSubview(label)
         
         

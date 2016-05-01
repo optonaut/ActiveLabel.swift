@@ -65,6 +65,27 @@ public protocol ActiveLabelDelegate: class {
         hashtagFilterPredicate = predicate
         updateTextStorage()
     }
+    
+    public func addActiveElement(range: NSRange, type: ActiveType) {
+        guard let attributedText = attributedText
+            where attributedText.length > 0 else {
+                return
+        }
+        let word = attributedText.attributedSubstringFromRange(range).string
+        var element: ActiveElement
+        switch type {
+        case .Mention:
+            element = ActiveElement.Mention(word)
+        case .Hashtag:
+            element = ActiveElement.Hashtag(word)
+        case .URL:
+            element = ActiveElement.URL(word)
+        case .None:
+            return
+        }
+        activeElements[type]?.append((range, element))
+        updateTextStorage(parseText: false)
+    }
 
     // MARK: - override UILabel properties
     override public var text: String? {
@@ -270,11 +291,11 @@ public protocol ActiveLabelDelegate: class {
         activeElements[.URL]?.appendContentsOf(urlElements)
 
         //HASHTAGS
-        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, regex: hashtagRegex,filterPredicate: hashtagFilterPredicate)
+        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, regex: hashtagRegex, filterPredicate: hashtagFilterPredicate)
         activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
 
         //MENTIONS
-        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, regex: mentionRegex ,filterPredicate: mentionFilterPredicate)
+        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, regex: mentionRegex, filterPredicate: mentionFilterPredicate)
         activeElements[.Mention]?.appendContentsOf(mentionElements)
     }
 

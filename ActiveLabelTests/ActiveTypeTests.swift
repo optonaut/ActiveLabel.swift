@@ -388,4 +388,12 @@ class ActiveTypeTests: XCTestCase {
         label.text = "testmail@gmail.com"
         XCTAssertEqual(activeElements.count, 0)
     }
+    
+    func testAddActiveElement() {
+        label.text = "Hello world"
+        label.addActiveElement(NSMakeRange(6, 5), type: .Mention)
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "world")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+    }
 }
