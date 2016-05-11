@@ -208,18 +208,17 @@ public protocol ActiveLabelDelegate: class {
     private func updateTextStorage(parseText parseText: Bool = true) {
         if _customizing { return }
         // clean up previous active elements
-        guard let attributedText = attributedText
-            where attributedText.length > 0 else {
+        guard let attributedText = attributedText where attributedText.length > 0 else {
+            clearActiveElements()
+            textStorage.setAttributedString(NSAttributedString())
+            setNeedsDisplay()
             return
         }
         
         let mutAttrString = addLineBreak(attributedText)
 
         if parseText {
-            selectedElement = nil
-            for (type, _) in activeElements {
-                activeElements[type]?.removeAll()
-            }
+            clearActiveElements()
             parseTextAndExtractActiveElements(mutAttrString)
         }
         
@@ -227,7 +226,14 @@ public protocol ActiveLabelDelegate: class {
         self.textStorage.setAttributedString(mutAttrString)
         self.setNeedsDisplay()
     }
-    
+
+    private func clearActiveElements() {
+        selectedElement = nil
+        for (type, _) in activeElements {
+            activeElements[type]?.removeAll()
+        }
+    }
+
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
         let usedRect = layoutManager.usedRectForTextContainer(textContainer)
         heightCorrection = (rect.height - usedRect.height)/2
