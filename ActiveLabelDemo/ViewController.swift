@@ -16,7 +16,7 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    label.text = "This is a post with #multiple #hashtags, and a @userhandle, #COOL. Links are also supported like this one: http://optonaut.co. some test: alex@jogabo.com"
+    label.text = "This is a post with #multiple #hashtags, and a @userhandle, #COOL. Links are also supported like this one: http://optonaut.co. some test: alex@jogabo.com, hey (@alex)"
     label.numberOfLines = 0
     label.lineSpacing = 4
 
@@ -34,7 +34,7 @@ class ViewController: UIViewController {
     label.handleHashtagTap { self.alert("Hashtag", message: $0) }
     label.handleURLTap { self.alert("URL", message: $0.description) }
 
-    label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
+    label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 600)
     view.addSubview(label)
     // Do any additional setup after loading the view, typically from a nib.
   }
