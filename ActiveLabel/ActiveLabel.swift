@@ -23,7 +23,11 @@ public protocol ActiveLabelDelegate: class {
 public class ActiveLabel: UILabel {
 
   // MARK: - public properties
-  public weak var delegate: ActiveLabelDelegate?
+  public weak var delegate: ActiveLabelDelegate? {
+    didSet {
+      updateTextStorage()
+    }
+  }
 
   @IBInspectable public var mentionEnabled: Bool = true {
     didSet {
@@ -313,27 +317,31 @@ public class ActiveLabel: UILabel {
     let textLength = (textString as NSString).length
     let searchRange = NSMakeRange(0, textLength)
 
-    let expressions: [(type: ActiveType, regex: NSRegularExpression?, enabled: Bool, group: Int)] = [
-      (.Mention, try? NSRegularExpression(pattern: "(\\W+|^)(@[a-zA-Z0-9]+)", options: []), mentionEnabled, 2),
-      (.Hashtag, try? NSRegularExpression(pattern: "(\\W+|^)(#[a-zA-Z0-9]+)", options: []), hashtagEnabled, 2),
-      (.URL, try? NSDataDetector(types: NSTextCheckingType.Link.rawValue), URLEnabled, 0)
+    let expressions: [(type: ActiveType, regex: NSRegularExpression?, enabled: Bool, group: Int, preferredGroup: Int)] = [
+      (.Mention, try? NSRegularExpression(pattern: "(\\W+|^)(@([a-zA-Z0-9]+))", options: []), mentionEnabled, 2, 3),
+      (.Hashtag, try? NSRegularExpression(pattern: "(\\W+|^)(#([a-zA-Z0-9]+))", options: []), hashtagEnabled, 2, 3),
+      (.URL, try? NSDataDetector(types: NSTextCheckingType.Link.rawValue), URLEnabled, 0, 0)
     ]
 
     expressions
-      .flatMap { expression -> (ActiveType, NSRegularExpression, Int)? in
+      .flatMap { expression -> (ActiveType, NSRegularExpression, Int, Int)? in
         guard let regex = expression.regex where expression.enabled else { return nil }
-        return (expression.type, regex, expression.group)
+        return (expression.type, regex, expression.group, expression.preferredGroup)
       }
       .forEach { expression in
         let elements = expression.1.matchesInString(textString, options: [], range: searchRange).flatMap { (result:NSTextCheckingResult) -> (NSRange, ActiveElement)? in
-          guard let range = result.rangeAtIndex(expression.2).toRange() else {
+          guard let
+            range = result.rangeAtIndex(expression.3).toRange() else {
             return nil
           }
           let word = textString[range].stringByReplacingOccurrencesOfString(" ", withString: "")
-          return (result.rangeAtIndex(expression.2), expression.0.createElement(word))
+          let element = expression.0.createElement(word)
+          return (result.rangeAtIndex(expression.2), element)
         }
         elements.forEach {
-          self.activeElements[expression.0]?.append(($0.0, $0.1))
+          if self.delegate == nil || self.delegate?.label(self, shouldIgnoreElement: $0.1) == false {
+            self.activeElements[expression.0]?.append(($0.0, $0.1))
+          }
         }
       }
   }

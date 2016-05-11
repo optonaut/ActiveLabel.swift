@@ -28,7 +28,7 @@ class ViewController: UIViewController {
     label.mentionHighlightedColor = label.mentionColor.colorWithAlphaComponent(0.5)
     label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
     label.URLHighlightedColor = label.URLColor.colorWithAlphaComponent(0.5)
-    label.delegate = self
+//    label.delegate = self
 
     label.handleMentionTap { self.alert("Mention", message: $0) }
     label.handleHashtagTap { self.alert("Hashtag", message: $0) }
