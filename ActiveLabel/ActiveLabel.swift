@@ -321,8 +321,8 @@ public class ActiveLabel: UILabel {
     ]
 
     let expressions: [(type: ActiveType, regex: NSRegularExpression?, group: Int, preferredGroup: Int)] = [
-      (.Mention, try? NSRegularExpression(pattern: "(\\W+|^)(@([a-zA-Z0-9]+))", options: []), 2, 3),
-      (.Hashtag, try? NSRegularExpression(pattern: "(\\W+|^)(#([a-zA-Z0-9]+))", options: []), 2, 3),
+      (.Mention, try? NSRegularExpression(pattern: "(\\W+|^)(@([a-zA-Z0-9\\_]+))", options: []), 2, 3),
+      (.Hashtag, try? NSRegularExpression(pattern: "(\\W+|^)(#([a-zA-Z0-9\\_]+))", options: []), 2, 3),
       (.URL, try? NSDataDetector(types: NSTextCheckingType.Link.rawValue), 0, 0)
     ]
 

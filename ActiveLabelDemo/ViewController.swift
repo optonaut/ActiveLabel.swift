@@ -16,7 +16,7 @@ class ViewController: UIViewController {
   override func viewDidLoad() {
     super.viewDidLoad()
 
-    label.text = "This is a post with #multiple #hashtags, and a @userhandle, #COOL. Links are also supported like this one: http://optonaut.co. some test: alex@jogabo.com, hey (@alex)"
+    label.text = "This is a post with #multiple #hashtags, and a @user_handle44, #COOL. Links are also supported like this one: http://optonaut.co. some test: alex@jogabo.com, hey (@alex)"
     label.numberOfLines = 0
     label.lineSpacing = 4
 
@@ -57,7 +57,7 @@ extension ViewController: ActiveLabelDelegate {
   func label(label: ActiveLabel, shouldIgnoreElement element: ActiveElement) -> Bool {
     switch element {
     case .Mention(let username):
-      return username == "alex"
+      return username == "toto"
     default:
       return false
     }
