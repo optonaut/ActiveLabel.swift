@@ -311,7 +311,7 @@ public class ActiveLabel: UILabel {
     }
   }
 
-  static func extractAttributesFromString(textString: String) -> [ActiveType: [(range:NSRange, element:ActiveElement)]] {
+  public static func extractAttributesFromString(textString: String) -> [ActiveType: [(range:NSRange, element:ActiveElement)]] {
     let textLength = (textString as NSString).length
     let searchRange = NSMakeRange(0, textLength)
     var elementsDictionary: [ActiveType: [(range:NSRange, element:ActiveElement)]] = [
