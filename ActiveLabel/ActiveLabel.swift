@@ -311,39 +311,67 @@ public class ActiveLabel: UILabel {
     }
   }
 
-  /// use regex check all link ranges
-  private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
-    let textString = attrString.string
+  static func extractAttributesFromString(textString: String) -> [ActiveType: [(range:NSRange, element:ActiveElement)]] {
     let textLength = (textString as NSString).length
     let searchRange = NSMakeRange(0, textLength)
+    var elementsDictionary: [ActiveType: [(range:NSRange, element:ActiveElement)]] = [
+      .Mention: [],
+      .URL: [],
+      .Hashtag: []
+    ]
 
-    let expressions: [(type: ActiveType, regex: NSRegularExpression?, enabled: Bool, group: Int, preferredGroup: Int)] = [
-      (.Mention, try? NSRegularExpression(pattern: "(\\W+|^)(@([a-zA-Z0-9]+))", options: []), mentionEnabled, 2, 3),
-      (.Hashtag, try? NSRegularExpression(pattern: "(\\W+|^)(#([a-zA-Z0-9]+))", options: []), hashtagEnabled, 2, 3),
-      (.URL, try? NSDataDetector(types: NSTextCheckingType.Link.rawValue), URLEnabled, 0, 0)
+    let expressions: [(type: ActiveType, regex: NSRegularExpression?, group: Int, preferredGroup: Int)] = [
+      (.Mention, try? NSRegularExpression(pattern: "(\\W+|^)(@([a-zA-Z0-9]+))", options: []), 2, 3),
+      (.Hashtag, try? NSRegularExpression(pattern: "(\\W+|^)(#([a-zA-Z0-9]+))", options: []), 2, 3),
+      (.URL, try? NSDataDetector(types: NSTextCheckingType.Link.rawValue), 0, 0)
     ]
 
     expressions
       .flatMap { expression -> (ActiveType, NSRegularExpression, Int, Int)? in
-        guard let regex = expression.regex where expression.enabled else { return nil }
+        guard let regex = expression.regex else { return nil }
         return (expression.type, regex, expression.group, expression.preferredGroup)
       }
       .forEach { expression in
         let elements = expression.1.matchesInString(textString, options: [], range: searchRange).flatMap { (result:NSTextCheckingResult) -> (NSRange, ActiveElement)? in
           guard let
             range = result.rangeAtIndex(expression.3).toRange() else {
-            return nil
+              return nil
           }
           let word = textString[range].stringByReplacingOccurrencesOfString(" ", withString: "")
           let element = expression.0.createElement(word)
           return (result.rangeAtIndex(expression.2), element)
         }
         elements.forEach {
-          if self.delegate == nil || self.delegate?.label(self, shouldIgnoreElement: $0.1) == false {
-            self.activeElements[expression.0]?.append(($0.0, $0.1))
-          }
+          elementsDictionary[expression.0]?.append(($0.0, $0.1))
         }
+    }
+    return elementsDictionary
+  }
+
+  /// use regex check all link ranges
+  private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
+    let elements = ActiveLabel.extractAttributesFromString(attrString.string)
+
+    let mapElements = { (element: (range:NSRange, element:ActiveElement)) -> (range:NSRange, element:ActiveElement)? in
+      if self.delegate == nil || self.delegate?.label(self, shouldIgnoreElement: element.1) == false {
+        return element
+      } else {
+        return nil
       }
+    }
+
+    elements.flatMap { (value:(ActiveType, [(range: NSRange, element: ActiveElement)])) -> (ActiveType, [(range: NSRange, element: ActiveElement)])? in
+      switch value.0 {
+        case .Hashtag where self.hashtagEnabled,
+              .Mention where self.mentionEnabled,
+        .URL where self.URLEnabled:
+        return (value.0, value.1.flatMap(mapElements))
+      default: return nil
+      }
+      }.forEach { (value:(ActiveType, [(range: NSRange, element: ActiveElement)])) in
+        self.activeElements[value.0] = value.1
+    }
+
   }
 
   /// add line break mode
