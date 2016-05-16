@@ -9,20 +9,49 @@
 import Foundation
 import UIKit
 
-extension String {
-  subscript (r: Range<Int>) -> String {
-    return substringWithRange(startIndex.advancedBy(r.startIndex)..<startIndex.advancedBy(r.endIndex))
+public extension String {
+  
+  public subscript (r: NSRange) -> String {
+    return (self as NSString).substringWithRange(r)
+  }
+  
+  public var fullRange: NSRange {
+    return NSMakeRange(0, length)
+  }
+  
+  public var length: Int {
+    return (self as NSString).length
   }
 }
 
 public protocol ActiveLabelDelegate: class {
-  func didSelectText(text: String, type: ActiveType)
   func label(label: ActiveLabel, shouldIgnoreElement element: ActiveElement) -> Bool
+}
+
+public class CustomExpression {
+  private let regex: NSRegularExpression?
+  private let mapFn: (NSTextCheckingResult) -> NSRange
+  private var identifier: String = ""
+
+  public init(regex: String, mapFn: ((NSTextCheckingResult) -> NSRange)? = nil, identifier: String = "", options: NSRegularExpressionOptions = []) {
+    self.regex = try? NSRegularExpression(pattern: regex, options: options)
+    if let mapFn = mapFn {
+      self.mapFn = mapFn
+    } else {
+      self.mapFn = { return $0.range }
+    }
+  }
+
+  public func identifier(identifier: String) -> CustomExpression {
+    self.identifier = identifier
+    return self
+  }
 }
 
 public class ActiveLabel: UILabel {
 
   // MARK: - public properties
+
   public weak var delegate: ActiveLabelDelegate? {
     didSet {
       updateTextStorage()
@@ -46,16 +75,25 @@ public class ActiveLabel: UILabel {
       updateTextStorage()
     }
   }
+
+  @IBInspectable public var customElementsEnabled: Bool = true {
+    didSet {
+      updateTextStorage()
+    }
+  }
+
   @IBInspectable public var mentionColor: UIColor = .blueColor() {
     didSet {
       updateTextStorage()
     }
   }
+
   @IBInspectable public var mentionSelectedColor: UIColor? {
     didSet {
       updateTextStorage()
     }
   }
+
   @IBInspectable public var hashtagColor: UIColor = .blueColor() {
     didSet {
       updateTextStorage()
@@ -73,7 +111,20 @@ public class ActiveLabel: UILabel {
       updateTextStorage()
     }
   }
+
   @IBInspectable public var URLSelectedColor: UIColor? {
+    didSet {
+      updateTextStorage()
+    }
+  }
+
+  @IBInspectable public var customColor: UIColor? {
+    didSet {
+      updateTextStorage()
+    }
+  }
+
+  @IBInspectable public var customSelectedColor: UIColor? {
     didSet {
       updateTextStorage()
     }
@@ -97,6 +148,12 @@ public class ActiveLabel: UILabel {
     }
   }
 
+  @IBInspectable public var customHighlightedColor: UIColor? {
+    didSet {
+      updateTextStorage()
+    }
+  }
+
   @IBInspectable public var lineSpacing: Float? {
     didSet {
       updateTextStorage()
@@ -104,20 +161,14 @@ public class ActiveLabel: UILabel {
   }
 
   // MARK: - public methods
-  public func handleMentionTap(handler: (String) -> ()) {
-    mentionTapHandler = handler
-  }
 
-  public func handleHashtagTap(handler: (String) -> ()) {
-    hashtagTapHandler = handler
-  }
 
-  public func handleURLTap(handler: (NSURL) -> ()) {
-    urlTapHandler = handler
+  public func handleElementTap(handler: (ActiveElement) -> Void) {
+    elementTapHandler = handler
   }
 
   // MARK: - override UILabel properties
-  override public var text: String? {
+  override public var text: String! {
     didSet {
       updateTextStorage()
     }
@@ -200,15 +251,7 @@ public class ActiveLabel: UILabel {
       guard let selectedElement = selectedElement else { return avoidSuperCall }
 
       if elementAtLocation(location) != nil {
-        switch selectedElement.element {
-        case .Mention(let userHandle):
-          didTapMention(userHandle)
-        case .Hashtag(let hashtag):
-          didTapHashtag(hashtag)
-        case .URL(let url):
-          didTapStringURL(url)
-        case .None: ()
-        }
+        self.didTapElement(selectedElement.element)
       }
 
       let when = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
@@ -227,10 +270,7 @@ public class ActiveLabel: UILabel {
   }
 
   // MARK: - private properties
-  private var mentionTapHandler: ((String) -> ())?
-  private var hashtagTapHandler: ((String) -> ())?
-  private var urlTapHandler: ((NSURL) -> ())?
-
+  private var elementTapHandler: ((ActiveElement) -> Void)?
   private var selectedElement: (range: NSRange, element: ActiveElement)?
   private var heightCorrection: CGFloat = 0
   private lazy var textStorage = NSTextStorage()
@@ -240,7 +280,20 @@ public class ActiveLabel: UILabel {
     .Mention: [],
     .Hashtag: [],
     .URL: [],
+    .CustomExpression: []
     ]
+
+  public var customExpressions: [CustomExpression] = [] {
+    didSet {
+      updateTextStorage()
+    }
+  }
+
+  private static let expressions: [(type: ActiveType, regex: NSRegularExpression?, group: Int, preferredGroup: Int)] = [
+    (.Mention, try? NSRegularExpression(pattern: "(\\W+|^)(@([a-zA-Z0-9\\_-]+))", options: []), 2, 3),
+    (.Hashtag, try? NSRegularExpression(pattern: "(\\W+|^)(#([a-zA-Z0-9\\_-]+))", options: []), 2, 3),
+    (.URL, try? NSDataDetector(types: NSTextCheckingType.Link.rawValue), 0, 0)
+  ]
 
   // MARK: - helper functions
   private func setupLabel() {
@@ -251,7 +304,7 @@ public class ActiveLabel: UILabel {
   }
 
   private func updateTextStorage() {
-    guard let attributedText = attributedText else {
+    guard let attributedText = attributedText where superview != nil else {
       return
     }
 
@@ -305,25 +358,22 @@ public class ActiveLabel: UILabel {
       case .URL:
         attributes[NSForegroundColorAttributeName] = URLColor
         attributes[NSBackgroundColorAttributeName] = UIColor.clearColor()
+      case .CustomExpression:
+        attributes[NSForegroundColorAttributeName] = customColor
+        attributes[NSBackgroundColorAttributeName] = UIColor.clearColor()
       case .None: ()
       }
       elements.forEach { mutAttrString.setAttributes(attributes, range: $0.range) }
     }
   }
 
-  public static func extractAttributesFromString(textString: String) -> [ActiveType: [(range:NSRange, element:ActiveElement)]] {
-    let textLength = (textString as NSString).length
-    let searchRange = NSMakeRange(0, textLength)
+  public static func extractAttributesFromString(textString: String, customExpressions: [CustomExpression] = []) -> [ActiveType: [(range:NSRange, element:ActiveElement)]] {
+    let searchRange = textString.fullRange
     var elementsDictionary: [ActiveType: [(range:NSRange, element:ActiveElement)]] = [
       .Mention: [],
       .URL: [],
-      .Hashtag: []
-    ]
-
-    let expressions: [(type: ActiveType, regex: NSRegularExpression?, group: Int, preferredGroup: Int)] = [
-      (.Mention, try? NSRegularExpression(pattern: "(\\W+|^)(@([a-zA-Z0-9\\_]+))", options: []), 2, 3),
-      (.Hashtag, try? NSRegularExpression(pattern: "(\\W+|^)(#([a-zA-Z0-9\\_]+))", options: []), 2, 3),
-      (.URL, try? NSDataDetector(types: NSTextCheckingType.Link.rawValue), 0, 0)
+      .Hashtag: [],
+      .CustomExpression: []
     ]
 
     expressions
@@ -333,11 +383,7 @@ public class ActiveLabel: UILabel {
       }
       .forEach { expression in
         let elements = expression.1.matchesInString(textString, options: [], range: searchRange).flatMap { (result:NSTextCheckingResult) -> (NSRange, ActiveElement)? in
-          guard let
-            range = result.rangeAtIndex(expression.3).toRange() else {
-              return nil
-          }
-          let word = textString[range].stringByReplacingOccurrencesOfString(" ", withString: "")
+          let word: String = textString[result.rangeAtIndex(expression.3)].stringByReplacingOccurrencesOfString(" ", withString: "")
           let element = expression.0.createElement(word)
           return (result.rangeAtIndex(expression.2), element)
         }
@@ -345,12 +391,22 @@ public class ActiveLabel: UILabel {
           elementsDictionary[expression.0]?.append(($0.0, $0.1))
         }
     }
+
+    customExpressions
+      .forEach { expression in
+        expression.regex?.matchesInString(textString, options: [], range: searchRange)
+          .forEach { result in
+            let range = expression.mapFn(result)
+            elementsDictionary[.CustomExpression]?.append((range, ActiveType.CustomExpression.createElement(textString[range], identifier: expression.identifier)))
+          }
+      }
+
     return elementsDictionary
   }
 
   /// use regex check all link ranges
   private func parseTextAndExtractActiveElements(attrString: NSAttributedString) {
-    let elements = ActiveLabel.extractAttributesFromString(attrString.string)
+    let elements = ActiveLabel.extractAttributesFromString(attrString.string, customExpressions: customExpressions)
 
     let mapElements = { (element: (range:NSRange, element:ActiveElement)) -> (range:NSRange, element:ActiveElement)? in
       if self.delegate == nil || self.delegate?.label(self, shouldIgnoreElement: element.1) == false {
@@ -364,14 +420,14 @@ public class ActiveLabel: UILabel {
       switch value.0 {
         case .Hashtag where self.hashtagEnabled,
               .Mention where self.mentionEnabled,
-        .URL where self.URLEnabled:
+              .URL where self.URLEnabled,
+              .CustomExpression where self.customElementsEnabled:
         return (value.0, value.1.flatMap(mapElements))
       default: return nil
       }
       }.forEach { (value:(ActiveType, [(range: NSRange, element: ActiveElement)])) in
         self.activeElements[value.0] = value.1
     }
-
   }
 
   /// add line break mode
@@ -411,6 +467,9 @@ public class ActiveLabel: UILabel {
       case .URL(_):
         attributes[NSForegroundColorAttributeName] = URLColor
         attributes[NSBackgroundColorAttributeName] = URLHighlightedColor
+      case .CustomExpression(_, _):
+        attributes[NSForegroundColorAttributeName] = customColor
+        attributes[NSBackgroundColorAttributeName] = customHighlightedColor
       case .None: ()
       }
     } else {
@@ -423,6 +482,9 @@ public class ActiveLabel: UILabel {
         attributes[NSBackgroundColorAttributeName] = UIColor.clearColor()
       case .URL(_):
         attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
+        attributes[NSBackgroundColorAttributeName] = UIColor.clearColor()
+      case .CustomExpression(_, _):
+        attributes[NSForegroundColorAttributeName] = customSelectedColor ?? customColor
         attributes[NSBackgroundColorAttributeName] = UIColor.clearColor()
       case .None: ()
       }
@@ -477,28 +539,14 @@ public class ActiveLabel: UILabel {
   }
 
   //MARK: - ActiveLabel handler
-  private func didTapMention(username: String) {
-    guard let mentionHandler = mentionTapHandler else {
-      delegate?.didSelectText(username, type: .Mention)
-      return
-    }
-    mentionHandler(username)
+
+  private func didTapElement(element: ActiveElement) {
+    elementTapHandler?(element)
   }
 
-  private func didTapHashtag(hashtag: String) {
-    guard let hashtagHandler = hashtagTapHandler else {
-      delegate?.didSelectText(hashtag, type: .Hashtag)
-      return
-    }
-    hashtagHandler(hashtag)
-  }
-
-  private func didTapStringURL(stringURL: String) {
-    guard let urlHandler = urlTapHandler, let url = NSURL(string: stringURL) else {
-      delegate?.didSelectText(stringURL, type: .URL)
-      return
-    }
-    urlHandler(url)
+  public override func didMoveToSuperview() {
+    super.didMoveToSuperview()
+    updateTextStorage()
   }
 }
 
