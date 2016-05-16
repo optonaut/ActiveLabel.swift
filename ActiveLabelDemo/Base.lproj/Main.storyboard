@@ -20,7 +20,7 @@
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="MwW-QC-oxp" customClass="ActiveLabel" customModule="ActiveLabel">
                                 <rect key="frame" x="20" y="28" width="560" height="564"/>
-                                <string key="text">This is a sample text with #some #hashtags and some @mentions. Emojis are fully supported ⚽️, as well as text color and font. URLs are supported as well (https://google.com), and you can even setup custom expressions. ;)</string>
+                                <mutableString key="text">This is a sample text with #some #hashtags and some @mentions. Emojis are fully supported ⚽️, as well as text color and font. URLs are supported as well (https://google.com), and you can even setup custom expressions. ;) It's also possible to ignore certain elements if needed. Example: Ignoring @thishandle, but not @thisone.</mutableString>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                 <nil key="highlightedColor"/>

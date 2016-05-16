@@ -24,10 +24,6 @@ public extension String {
   }
 }
 
-public protocol ActiveLabelDelegate: class {
-  func label(label: ActiveLabel, shouldIgnoreElement element: ActiveElement) -> Bool
-}
-
 public class CustomExpression {
   private let regex: NSRegularExpression?
   private let mapFn: (NSTextCheckingResult) -> NSRange
@@ -51,12 +47,6 @@ public class CustomExpression {
 public class ActiveLabel: UILabel {
 
   // MARK: - public properties
-
-  public weak var delegate: ActiveLabelDelegate? {
-    didSet {
-      updateTextStorage()
-    }
-  }
 
   @IBInspectable public var mentionEnabled: Bool = true {
     didSet {
@@ -166,6 +156,10 @@ public class ActiveLabel: UILabel {
   public func handleElementTap(handler: (ActiveElement) -> Void) {
     elementTapHandler = handler
   }
+  
+  public func shouldIgnoreElement(handler: (ActiveElement) -> Bool) {
+    ignoreHandler = handler
+  }
 
   // MARK: - override UILabel properties
   override public var text: String! {
@@ -271,6 +265,11 @@ public class ActiveLabel: UILabel {
 
   // MARK: - private properties
   private var elementTapHandler: ((ActiveElement) -> Void)?
+  private var ignoreHandler: ((ActiveElement) -> Bool)? {
+    didSet {
+      updateTextStorage()
+    }
+  }
   private var selectedElement: (range: NSRange, element: ActiveElement)?
   private var heightCorrection: CGFloat = 0
   private lazy var textStorage = NSTextStorage()
@@ -409,7 +408,7 @@ public class ActiveLabel: UILabel {
     let elements = ActiveLabel.extractAttributesFromString(attrString.string, customExpressions: customExpressions)
 
     let mapElements = { (element: (range:NSRange, element:ActiveElement)) -> (range:NSRange, element:ActiveElement)? in
-      if self.delegate == nil || self.delegate?.label(self, shouldIgnoreElement: element.1) == false {
+      if self.ignoreHandler == nil || self.ignoreHandler?(element.1) == false {
         return element
       } else {
         return nil

@@ -26,6 +26,11 @@ class ViewController: UIViewController {
         options: [NSRegularExpressionOptions.CaseInsensitive]) // some optional options for the regular expression
         .identifier("word beginning by 's'") // optional handy identifier
     ]
+    
+    label.shouldIgnoreElement {
+      if case .Mention(let username) = $0 where username == "thishandle" { return true }
+      return false
+    }
 
     // Active label also provides a function to get mentions, URLs, ... from a string without using a ActiveLabel object.
     ActiveLabel.extractAttributesFromString("This is some string with #hashtags, @mentions, @alex, @some-cool-user and an email: alex@jogabo.com.").forEach {
