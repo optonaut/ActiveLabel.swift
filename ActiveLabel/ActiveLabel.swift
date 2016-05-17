@@ -130,6 +130,14 @@ public protocol ActiveLabelDelegate: class {
         return self
     }
 
+    // MARK: - Auto layout
+    public override func intrinsicContentSize() -> CGSize {
+        let superSize = super.intrinsicContentSize()
+        textContainer.size = CGSize(width: superSize.width, height: CGFloat.max)
+        let size = layoutManager.usedRectForTextContainer(textContainer)
+        return CGSize(width: size.width, height: ceil(size.height))
+    }
+    
     // MARK: - touch events
     func onTouch(touch: UITouch) -> Bool {
         let location = touch.locationInView(self)
