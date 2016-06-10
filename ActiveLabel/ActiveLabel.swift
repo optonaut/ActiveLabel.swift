@@ -135,7 +135,7 @@ public protocol ActiveLabelDelegate: class {
         let superSize = super.intrinsicContentSize()
         textContainer.size = CGSize(width: superSize.width, height: CGFloat.max)
         let size = layoutManager.usedRectForTextContainer(textContainer)
-        return CGSize(width: size.width, height: ceil(size.height))
+        return CGSize(width: ceil(size.width), height: ceil(size.height))
     }
     
     // MARK: - touch events
