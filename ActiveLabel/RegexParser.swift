@@ -10,27 +10,53 @@ import Foundation
 
 struct RegexParser {
     
-    static let urlPattern = "(^|[\\s.:;?\\-\\]<\\(])" +
-    "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
-    "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"
-    
     static let hashtagRegex = try? NSRegularExpression(pattern: "(?:^|\\s|$)#[\\p{L}0-9_]*", options: [.CaseInsensitive])
     static let mentionRegex = try? NSRegularExpression(pattern: "(?:^|\\s|$|[.])@[\\p{L}0-9_]*", options: [.CaseInsensitive]);
-    static let urlDetector = try? NSRegularExpression(pattern: urlPattern, options: [.CaseInsensitive])
+    static let urlDetector = try? NSDataDetector(types: NSTextCheckingType.Link.rawValue)
+    static let phoneDetector = try? NSDataDetector(types: NSTextCheckingType.PhoneNumber.rawValue)
     
-    static func getMentions(fromText text: String, range: NSRange) -> [NSTextCheckingResult] {
-        guard let mentionRegex = mentionRegex else { return [] }
-        return mentionRegex.matchesInString(text, options: [], range: range)
+    static func getMentions(fromText text: String, range: NSRange, regex: NSRegularExpression? = mentionRegex) -> [NSTextCheckingResult] {
+        var localRegex: NSRegularExpression
+        if let regex = regex {
+            localRegex = regex
+        } else {
+            guard let mentionRegex = mentionRegex else { return [] }
+            localRegex = mentionRegex
+        }
+        return localRegex.matchesInString(text, options: [], range: range)
     }
     
-    static func getHashtags(fromText text: String, range: NSRange) -> [NSTextCheckingResult] {
-        guard let hashtagRegex = hashtagRegex else { return [] }
-        return hashtagRegex.matchesInString(text, options: [], range: range)
+    static func getHashtags(fromText text: String, range: NSRange, regex: NSRegularExpression? = hashtagRegex) -> [NSTextCheckingResult] {
+        var localRegex: NSRegularExpression
+        if let regex = regex {
+            localRegex = regex
+        } else {
+            guard let hashtagRegex = hashtagRegex else { return [] }
+            localRegex = hashtagRegex
+        }
+        return localRegex.matchesInString(text, options: [], range: range)
     }
     
-    static func getURLs(fromText text: String, range: NSRange) -> [NSTextCheckingResult] {
-        guard let urlDetector = urlDetector else { return [] }
-        return urlDetector.matchesInString(text, options: [], range: range)
+    static func getURLs(fromText text: String, range: NSRange, regex: NSRegularExpression? = urlDetector) -> [NSTextCheckingResult] {
+        var localRegex: NSRegularExpression
+        if let regex = regex {
+            localRegex = regex
+        } else {
+            guard let urlDetector = urlDetector else { return [] }
+            localRegex = urlDetector
+        }
+        return localRegex.matchesInString(text, options: [], range: range)
+    }
+    
+    static func getPhoneNumbers(fromText text: String, range: NSRange, regex: NSRegularExpression? = phoneDetector) -> [NSTextCheckingResult] {
+        var localRegex: NSRegularExpression
+        if let regex = regex {
+            localRegex = regex
+        } else {
+            guard let phoneDetector = phoneDetector else { return [] }
+            localRegex = phoneDetector
+        }
+        return localRegex.matchesInString(text, options: [], range: range)
     }
     
 }

@@ -38,6 +38,8 @@ class ActiveTypeTests: XCTestCase {
             return hashtag
         case .URL(let url):
             return url
+        case .Phone(let phone):
+            return phone
         case .None:
             return ""
         }
@@ -52,6 +54,8 @@ class ActiveTypeTests: XCTestCase {
             return .Hashtag
         case .URL:
             return .URL
+        case .Phone:
+            return .Phone
         case .None:
             return .None
         }
@@ -124,7 +128,7 @@ class ActiveTypeTests: XCTestCase {
         label.text = "word@mention"
         XCTAssertEqual(activeElements.count, 0)
         label.text = "@u"
-        XCTAssertEqual(activeElements.count, 0)
+        XCTAssertEqual(activeElements.count, 1)
         label.text = "@."
         XCTAssertEqual(activeElements.count, 0)
         label.text = "@"
@@ -169,11 +173,37 @@ class ActiveTypeTests: XCTestCase {
         label.text = "word#hashtag"
         XCTAssertEqual(activeElements.count, 0)
         label.text = "#h"
-        XCTAssertEqual(activeElements.count, 0)
+        XCTAssertEqual(activeElements.count, 1)
         label.text = "#."
         XCTAssertEqual(activeElements.count, 0)
         label.text = "#"
         XCTAssertEqual(activeElements.count, 0)
+        
+        // other languages tests
+        label.text = "#тест #тег #россия"
+        XCTAssertEqual(activeElements.count, 3)
+        label.text = "#測試 #兩"
+        XCTAssertEqual(activeElements.count, 2)
+    }
+    
+    func testPhone() {
+        label.text = "+1(111)1111111"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementType, ActiveType.Phone)
+        XCTAssertEqual(currentElementString, "+1(111)1111111")
+        
+        label.text = "+79990001100"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementType, ActiveType.Phone)
+        XCTAssertEqual(currentElementString, "+79990001100")
+        
+        label.text = "7777777"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementType, ActiveType.Phone)
+        XCTAssertEqual(currentElementString, "7777777")
+        
+        label.text = "+1(333)999-55-44 +380(33)9-33-55"
+        XCTAssertEqual(activeElements.count, 2)
     }
     
     func testURL() {
@@ -203,7 +233,10 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(currentElementType, ActiveType.URL)
 
         label.text = "google.com"
-        XCTAssertEqual(activeElements.count, 0)
+        XCTAssertEqual(activeElements.count, 1)
+        
+        label.text = "testmail@gmail.com"
+        XCTAssertEqual(activeElements.count, 1)
     }
 
     func testFiltering() {
@@ -227,5 +260,164 @@ class ActiveTypeTests: XCTestCase {
     func testIssue64www() {
         label.text = "wwwbar"
         XCTAssertEqual(activeElements.count, 0)
+    }
+    
+    func testMentionRegexOverriding() {
+        label.mentionRegex = try? NSRegularExpression(pattern: "(?<=^|\\s|\\.)@(?!\\.)(?=.*[A-Za-z_\\.])[A-Za-z_\\d]?[A-Za-z_\\.\\d]+(?<!\\.)", options: [.CaseInsensitive])
+        label.text = "@userhandle"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = "@userhandle."
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = "@_with_underscores_"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "_with_underscores_")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = " . @userhandle"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = "@user#hashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "user")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = "@user@mention"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "user")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = ".@userhandle"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = " .@userhandle"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "userhandle")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        
+        label.text = "word@mention"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "@u"
+        XCTAssertEqual(activeElements.count, 1)
+        label.text = "@."
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "@"
+        XCTAssertEqual(activeElements.count, 0)
+        
+        label.text = "@abc-def"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "abc")
+        label.text = "@.abcdef @12345 @мама @г @測試"
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "@abc.def"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "abc.def")
+        label.text = "@123.456"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "123.456")
+    }
+    
+    func testHashtagRegexOverriding() {
+        label.hashtagRegex = try? NSRegularExpression(pattern: "#[\\p{L}\\d_]+", options: [.CaseInsensitive])
+        label.text = "#somehashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "somehashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = "#somehashtag."
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "somehashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = "#_with_underscores_"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "_with_underscores_")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = " . #somehashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "somehashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = "#some#hashtag"
+        XCTAssertEqual(activeElements.count, 2)
+        XCTAssertEqual(currentElementString, "some")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = "#some@mention"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "some")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        
+        label.text = ".#somehashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        label.text = " .#somehashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        label.text = "word#hashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        label.text = "#h"
+        XCTAssertEqual(activeElements.count, 1)
+        label.text = "#."
+        XCTAssertEqual(activeElements.count, 0)
+        label.text = "#"
+        XCTAssertEqual(activeElements.count, 0)
+        
+        label.text = "#тест#тег#россия"
+        XCTAssertEqual(activeElements.count, 3)
+        label.text = "#測試#兩"
+        XCTAssertEqual(activeElements.count, 2)
+    }
+    
+    func testURLRegexOverriding() {
+        label.urlRegex = try? NSRegularExpression(pattern: "(^|[\\s.:;?\\-\\]<\\(])" +
+            "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
+            "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])", options: [.CaseInsensitive])
+        label.text = "http://www.google.com"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "http://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+        
+        label.text = "https://www.google.com"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "https://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+        
+        label.text = "http://www.google.com."
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "http://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+        
+        label.text = "www.google.com"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+        
+        label.text = "pic.twitter.com/YUGdEbUx"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "pic.twitter.com/YUGdEbUx")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+        
+        label.text = "google.com"
+        XCTAssertEqual(activeElements.count, 0)
+        
+        label.text = "testmail@gmail.com"
+        XCTAssertEqual(activeElements.count, 0)
+    }
+    
+    func testAddActiveElement() {
+        label.text = "Hello world"
+        label.addActiveElement(NSMakeRange(6, 5), type: .Mention)
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "world")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
     }
 }
