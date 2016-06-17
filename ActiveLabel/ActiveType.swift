@@ -1,3 +1,4 @@
+
 //
 //  ActiveType.swift
 //  ActiveLabel
@@ -12,6 +13,7 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(String)
+    case Mail(String)
     case None
 }
 
@@ -19,6 +21,7 @@ public enum ActiveType {
     case Mention
     case Hashtag
     case URL
+    case Mail
     case None
 }
 
@@ -76,6 +79,19 @@ struct ActiveBuilder {
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             let element = ActiveElement.URL(word)
             elements.append((url.range, element))
+        }
+        return elements
+    }
+    
+    static func createMailElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
+        let mails = RegexParser.getMails(fromText: text, range: range)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for mail in mails where mail.range.length > 2 {
+            let word = nsstring.substringWithRange(mail.range).stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+            let element = ActiveElement.Mail(word)
+            elements.append((mail.range, element))
         }
         return elements
     }

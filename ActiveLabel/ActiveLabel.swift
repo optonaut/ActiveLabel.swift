@@ -36,6 +36,12 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var URLSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
+    @IBInspectable public var mailColor: UIColor = .blueColor() {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var mailSelectedColor: UIColor? {
+        didSet { updateTextStorage(parseText: false) }
+    }
     @IBInspectable public var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -52,6 +58,10 @@ public protocol ActiveLabelDelegate: class {
     public func handleURLTap(handler: (NSURL) -> ()) {
         urlTapHandler = handler
     }
+    
+    public func handleMailTap(handler: (String) -> ()) {
+        mailTapHandler = handler
+    }
 
     public func filterMention(predicate: (String) -> Bool) {
         mentionFilterPredicate = predicate
@@ -60,6 +70,11 @@ public protocol ActiveLabelDelegate: class {
 
     public func filterHashtag(predicate: (String) -> Bool) {
         hashtagFilterPredicate = predicate
+        updateTextStorage()
+    }
+    
+    public func mailHashtag(predicate: (String) -> Bool) {
+        mailFilterPredicate = predicate
         updateTextStorage()
     }
 
@@ -163,6 +178,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(let userHandle): didTapMention(userHandle)
             case .Hashtag(let hashtag): didTapHashtag(hashtag)
             case .URL(let url): didTapStringURL(url)
+            case .Mail(let url): didTapMail(url)
             case .None: ()
             }
             
@@ -188,9 +204,11 @@ public protocol ActiveLabelDelegate: class {
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
+    private var mailTapHandler: ((String) -> ())?
 
     private var mentionFilterPredicate: ((String) -> Bool)?
     private var hashtagFilterPredicate: ((String) -> Bool)?
+    private var mailFilterPredicate: ((String) -> Bool)?
 
     private var selectedElement: (range: NSRange, element: ActiveElement)?
     private var heightCorrection: CGFloat = 0
@@ -201,6 +219,7 @@ public protocol ActiveLabelDelegate: class {
         .Mention: [],
         .Hashtag: [],
         .URL: [],
+        .Mail: [],
     ]
     
     // MARK: - helper functions
@@ -266,6 +285,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
+            case .Mail: attributes[NSForegroundColorAttributeName] = mailColor
             case .None: ()
             }
             
@@ -292,6 +312,10 @@ public protocol ActiveLabelDelegate: class {
         //MENTIONS
         let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
         activeElements[.Mention]?.appendContentsOf(mentionElements)
+        
+        //MAILS
+        let mailElements = ActiveBuilder.createMailElements(fromText: textString, range: textRange)
+        activeElements[.Mail]?.appendContentsOf(mailElements)
     }
 
     
@@ -309,7 +333,7 @@ public protocol ActiveLabelDelegate: class {
         
         attributes[NSParagraphStyleAttributeName] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
-        
+
         return mutAttrString
     }
     
@@ -324,6 +348,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
+            case .Mail(_): attributes[NSForegroundColorAttributeName] = mailSelectedColor ?? mailColor
             case .None: ()
             }
         } else {
@@ -331,6 +356,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
+            case .Mail(_): attributes[NSForegroundColorAttributeName] = mailColor
             case .None: ()
             }
         }
@@ -412,6 +438,14 @@ public protocol ActiveLabelDelegate: class {
             return
         }
         urlHandler(url)
+    }
+    
+    private func didTapMail(mail: String) {
+        guard let mailHandler = mailTapHandler else {
+            delegate?.didSelectText(mail, type: .Mail)
+            return
+        }
+        mailHandler(mail)
     }
 }
 
