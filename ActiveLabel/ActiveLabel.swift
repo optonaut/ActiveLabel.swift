@@ -72,11 +72,6 @@ public protocol ActiveLabelDelegate: class {
         hashtagFilterPredicate = predicate
         updateTextStorage()
     }
-    
-    public func mailHashtag(predicate: (String) -> Bool) {
-        mailFilterPredicate = predicate
-        updateTextStorage()
-    }
 
     // MARK: - override UILabel properties
     override public var text: String? {
