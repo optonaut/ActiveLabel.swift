@@ -1,6 +1,6 @@
 # ActiveLabel.swift [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![Build Status](https://travis-ci.org/optonaut/ActiveLabel.swift.svg)](https://travis-ci.org/optonaut/ActiveLabel.swift)
 
-UILabel drop-in replacement supporting Hashtags (#), Mentions (@) and URLs (http://) written in Swift
+UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and emails (user@mail.com) written in Swift
 
 ## Features
 
@@ -25,6 +25,9 @@ label.textColor = .blackColor()
 label.handleHashtagTap { hashtag in
   print("Success. You just tapped the \(hashtag) hashtag")
 }
+label.handleMailTap { mail in
+  print("Success. You just tapped the \(mail) mail")
+}
 ```
 
 ## Batched customization
@@ -43,9 +46,14 @@ Example:
             label.hashtagColor = UIColor(red: 85.0/255, green: 172.0/255, blue: 238.0/255, alpha: 1)
             label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
             label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
+            label.mailColor = UIColor(red: 200.0/255, green: 50.0/255, blue: 60/255, alpha: 1)
+            label.mailSelectedColor = UIColor(red: 200.0/255, green: 50.0/255, blue: 60/255, alpha: 0.75)
+
+
             label.handleMentionTap { self.alert("Mention", message: $0) }
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
             label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
+            label.handleMailTap { self.alert("Mail", message: $0) }
         }
 
 
@@ -53,7 +61,8 @@ Example:
 
 
 ## API
-
+##### `mailColor: UIColor = .blueColor()`
+##### `mailSelectedColor: UIColor?`
 ##### `mentionColor: UIColor = .blueColor()`
 ##### `mentionSelectedColor: UIColor?`
 ##### `hashtagColor: UIColor = .blueColor()`
@@ -62,6 +71,11 @@ Example:
 ##### `URLSelectedColor: UIColor?`
 ##### `lineSpacing: Float?`
 
+##### `handleMailTap: (String) -> ()`
+
+```swift
+label.handleMailTap { mailHandle in print("\(mailHandle) tapped") }
+```
 ##### `handleMentionTap: (String) -> ()`
 
 ```swift
