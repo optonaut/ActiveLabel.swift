@@ -27,6 +27,9 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var hashtagColor: UIColor = .blueColor() {
         didSet { updateTextStorage(parseText: false) }
     }
+    @IBInspectable public var dollarSignColor: UIColor = .blueColor() {
+        didSet { updateTextStorage(parseText: false) }
+    }
     @IBInspectable public var hashtagSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -36,10 +39,19 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var URLSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
+    @IBInspectable public var dollarSignSelectedColor: UIColor? {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var stringSignColor: UIColor = .blueColor() {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var stringSignSelectedColor: UIColor = .blueColor() {
+        didSet { updateTextStorage(parseText: false) }
+    }
     @IBInspectable public var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
-
+    
     // MARK: - public methods
     public func handleMentionTap(handler: (String) -> ()) {
         mentionTapHandler = handler
@@ -52,19 +64,31 @@ public protocol ActiveLabelDelegate: class {
     public func handleURLTap(handler: (NSURL) -> ()) {
         urlTapHandler = handler
     }
-
+    
+    public func handleDollarSignTap(handler: (String) -> ()) {
+        dollarSignTapHandler = handler
+    }
+    
+    public func handleString(handler: (String) -> ()) {
+        stringTapHandler = handler
+    }
+    
     public func filterMention(predicate: (String) -> Bool) {
         mentionFilterPredicate = predicate
         updateTextStorage()
     }
-
+    
     public func filterHashtag(predicate: (String) -> Bool) {
         hashtagFilterPredicate = predicate
         updateTextStorage()
     }
-
+    
     // MARK: - override UILabel properties
     override public var text: String? {
+        didSet { updateTextStorage() }
+    }
+    
+    public var specialWords: [String]? {
         didSet { updateTextStorage() }
     }
     
@@ -83,7 +107,7 @@ public protocol ActiveLabelDelegate: class {
     override public var textAlignment: NSTextAlignment {
         didSet { updateTextStorage(parseText: false)}
     }
-
+    
     public override var numberOfLines: Int {
         didSet { textContainer.maximumNumberOfLines = numberOfLines }
     }
@@ -104,7 +128,7 @@ public protocol ActiveLabelDelegate: class {
         _customizing = false
         setupLabel()
     }
-
+    
     public override func awakeFromNib() {
         super.awakeFromNib()
         updateTextStorage()
@@ -129,7 +153,7 @@ public protocol ActiveLabelDelegate: class {
         updateTextStorage()
         return self
     }
-
+    
     // MARK: - Auto layout
     public override func intrinsicContentSize() -> CGSize {
         let superSize = super.intrinsicContentSize()
@@ -163,6 +187,8 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(let userHandle): didTapMention(userHandle)
             case .Hashtag(let hashtag): didTapHashtag(hashtag)
             case .URL(let url): didTapStringURL(url)
+            case .DollarSign(let dollarSign) : didTapDollarSign(dollarSign)
+            case .StringSign(let stringSign) : didTapStringSign(stringSign)
             case .None: ()
             }
             
@@ -188,10 +214,12 @@ public protocol ActiveLabelDelegate: class {
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
-
+    private var dollarSignTapHandler: ((String) -> ())?
+    private var stringTapHandler: ((String) -> ())?
+    
     private var mentionFilterPredicate: ((String) -> Bool)?
     private var hashtagFilterPredicate: ((String) -> Bool)?
-
+    
     private var selectedElement: (range: NSRange, element: ActiveElement)?
     private var heightCorrection: CGFloat = 0
     private lazy var textStorage = NSTextStorage()
@@ -201,6 +229,8 @@ public protocol ActiveLabelDelegate: class {
         .Mention: [],
         .Hashtag: [],
         .URL: [],
+        .DollarSign: [],
+        .StringSign: []
     ]
     
     // MARK: - helper functions
@@ -224,7 +254,7 @@ public protocol ActiveLabelDelegate: class {
         }
         
         let mutAttrString = addLineBreak(attributedText)
-
+        
         if parseText {
             clearActiveElements()
             parseTextAndExtractActiveElements(mutAttrString)
@@ -234,14 +264,14 @@ public protocol ActiveLabelDelegate: class {
         self.textStorage.setAttributedString(mutAttrString)
         self.setNeedsDisplay()
     }
-
+    
     private func clearActiveElements() {
         selectedElement = nil
         for (type, _) in activeElements {
             activeElements[type]?.removeAll()
         }
     }
-
+    
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
         let usedRect = layoutManager.usedRectForTextContainer(textContainer)
         heightCorrection = (rect.height - usedRect.height)/2
@@ -266,6 +296,8 @@ public protocol ActiveLabelDelegate: class {
             case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
+            case .DollarSign: attributes[NSForegroundColorAttributeName] = dollarSignColor
+            case .StringSign: attributes[NSForegroundColorAttributeName] = stringSignColor
             case .None: ()
             }
             
@@ -284,16 +316,29 @@ public protocol ActiveLabelDelegate: class {
         //URLS
         let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
         activeElements[.URL]?.appendContentsOf(urlElements)
-
+        
         //HASHTAGS
         let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
         activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
-
+        
         //MENTIONS
         let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
         activeElements[.Mention]?.appendContentsOf(mentionElements)
+        
+        //DOLLAR SIGN
+        let dollarSignElements = ActiveBuilder.createDollarSignElements(fromText: textString, range: textRange)
+        activeElements[.DollarSign]?.appendContentsOf(dollarSignElements)
+        
+        //STRING SIGN
+        if self.specialWords != nil {
+            for i in 0..<self.specialWords!.count {
+                let stringSignElements = ActiveBuilder.createStringSignElements(fromText: textString, range: textRange, word: self.specialWords![i])
+                activeElements[.StringSign]?.appendContentsOf(stringSignElements)
+            }
+        }
+        
     }
-
+    
     
     /// add line break mode
     private func addLineBreak(attrString: NSAttributedString) -> NSMutableAttributedString {
@@ -324,6 +369,8 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
+            case .DollarSign(_): attributes[NSForegroundColorAttributeName] = dollarSignSelectedColor ?? dollarSignColor
+            case .StringSign(_): attributes[NSForegroundColorAttributeName] = stringSignSelectedColor ?? stringSignColor
             case .None: ()
             }
         } else {
@@ -331,6 +378,8 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
+            case .DollarSign(_): attributes[NSForegroundColorAttributeName] = dollarSignColor
+            case .StringSign(_): attributes[NSForegroundColorAttributeName] = stringSignColor
             case .None: ()
             }
         }
@@ -344,7 +393,7 @@ public protocol ActiveLabelDelegate: class {
         guard textStorage.length > 0 else {
             return nil
         }
-
+        
         var correctLocation = location
         correctLocation.y -= heightCorrection
         let boundingRect = layoutManager.boundingRectForGlyphRange(NSRange(location: 0, length: textStorage.length), inTextContainer: textContainer)
@@ -370,7 +419,7 @@ public protocol ActiveLabelDelegate: class {
         if onTouch(touch) { return }
         super.touchesBegan(touches, withEvent: event)
     }
-
+    
     public override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
         guard let touch = touches.first else { return }
         if onTouch(touch) { return }
@@ -412,6 +461,22 @@ public protocol ActiveLabelDelegate: class {
             return
         }
         urlHandler(url)
+    }
+    
+    private func didTapDollarSign(dollarSign: String) {
+        guard let dollarSignHandler = dollarSignTapHandler else {
+            delegate?.didSelectText(dollarSign, type: .DollarSign)
+            return
+        }
+        dollarSignHandler(dollarSign)
+    }
+    
+    private func didTapStringSign(stringSign: String) {
+        guard let stringTapHandler = stringTapHandler else {
+            delegate?.didSelectText(stringSign, type: .StringSign)
+            return
+        }
+        stringTapHandler(stringSign)
     }
 }
 

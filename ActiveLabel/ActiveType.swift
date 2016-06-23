@@ -12,6 +12,8 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(String)
+    case DollarSign(String)
+    case StringSign(String)
     case None
 }
 
@@ -19,6 +21,8 @@ public enum ActiveType {
     case Mention
     case Hashtag
     case URL
+    case DollarSign
+    case StringSign
     case None
 }
 
@@ -37,7 +41,7 @@ struct ActiveBuilder {
             if word.hasPrefix("@") {
                 word.removeAtIndex(word.startIndex)
             }
-
+            
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.Mention(word)
                 elements.append((mention.range, element))
@@ -57,7 +61,7 @@ struct ActiveBuilder {
             if word.hasPrefix("#") {
                 word.removeAtIndex(word.startIndex)
             }
-
+            
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.Hashtag(word)
                 elements.append((hashtag.range, element))
@@ -79,4 +83,36 @@ struct ActiveBuilder {
         }
         return elements
     }
+    
+    static func createDollarSignElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
+        let dolars = RegexParser.getDollarSign(fromText: text, range: range)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for dolar in dolars where dolar.range.length > 2 {
+            let range = NSRange(location: dolar.range.location + 1, length: dolar.range.length - 1)
+            var word = nsstring.substringWithRange(range)
+            if word.hasPrefix("$") {
+                word.removeAtIndex(word.startIndex)
+            }
+            let element = ActiveElement.DollarSign(word)
+            elements.append((dolar.range, element))
+        }
+        
+        return elements
+    }
+    
+    static func createStringSignElements(fromText text: String, range: NSRange, word: String) -> [(range: NSRange, element: ActiveElement)] {
+        let strings = RegexParser.getStringSign(fromText: text, range: range, word: word)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for str in strings where str.range.length > 2 {
+            let element = ActiveElement.StringSign(word)
+            elements.append((str.range, element))
+        }
+        
+        return elements
+    }
+    
 }
