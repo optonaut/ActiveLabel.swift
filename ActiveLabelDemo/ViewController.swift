@@ -17,7 +17,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         label.customize { label in
-            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co. this is my money $1000"
+            label.specialWords = ["check this out"]
+            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co. this is my money $1000 check this out"
             label.numberOfLines = 0
             label.lineSpacing = 4
             
@@ -28,11 +29,14 @@ class ViewController: UIViewController {
             label.URLSelectedColor = UIColor(red: 82.0/255, green: 190.0/255, blue: 41.0/255, alpha: 1)
             label.dollarSignColor = UIColor.lightGrayColor()
             label.dollarSignSelectedColor = UIColor.darkGrayColor()
+            label.stringSignColor = UIColor.orangeColor()
+            label.stringSignSelectedColor = UIColor.yellowColor()
 
             label.handleMentionTap { self.alert("Mention", message: $0) }
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
             label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
             label.handleDollarSignTap { self.alert("Dollar Sign", message: $0) }
+            label.handleString { self.alert("String", message: $0) }
         }
         
         label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)

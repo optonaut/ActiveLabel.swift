@@ -42,6 +42,12 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var dollarSignSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
+    @IBInspectable public var stringSignColor: UIColor = .blueColor() {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var stringSignSelectedColor: UIColor = .blueColor() {
+        didSet { updateTextStorage(parseText: false) }
+    }
     @IBInspectable public var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -291,7 +297,7 @@ public protocol ActiveLabelDelegate: class {
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
             case .DollarSign: attributes[NSForegroundColorAttributeName] = dollarSignColor
-            case .StringSign: attributes[NSForegroundColorAttributeName] = dollarSignColor
+            case .StringSign: attributes[NSForegroundColorAttributeName] = stringSignColor
             case .None: ()
             }
             
@@ -363,8 +369,8 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
-            case .DollarSign(_): attributes[NSForegroundColorAttributeName] = dollarSignColor
-            case .StringSign(_): attributes[NSForegroundColorAttributeName] = dollarSignColor
+            case .DollarSign(_): attributes[NSForegroundColorAttributeName] = dollarSignSelectedColor ?? dollarSignColor
+            case .StringSign(_): attributes[NSForegroundColorAttributeName] = stringSignSelectedColor ?? stringSignColor
             case .None: ()
             }
         } else {
@@ -372,8 +378,8 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
-            case .DollarSign(_): attributes[NSForegroundColorAttributeName] = dollarSignSelectedColor ?? dollarSignColor
-            case .StringSign(_): attributes[NSForegroundColorAttributeName] = dollarSignSelectedColor ?? dollarSignColor
+            case .DollarSign(_): attributes[NSForegroundColorAttributeName] = dollarSignColor
+            case .StringSign(_): attributes[NSForegroundColorAttributeName] = stringSignColor
             case .None: ()
             }
         }
