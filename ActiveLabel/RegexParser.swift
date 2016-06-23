@@ -39,4 +39,8 @@ struct RegexParser {
         return dollarSignRegex.matchesInString(text, options: [], range: range)
     }
     
+    static func getStringSign(fromText text: String, range: NSRange, word: String) -> [NSTextCheckingResult] {
+        guard let regex = try? NSRegularExpression(pattern: word, options: [.IgnoreMetacharacters]) else { return [] }
+        return regex.matchesInString(text, options: [], range: range)
+    }
 }

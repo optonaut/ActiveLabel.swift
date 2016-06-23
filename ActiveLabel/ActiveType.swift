@@ -13,6 +13,7 @@ enum ActiveElement {
     case Hashtag(String)
     case URL(String)
     case DollarSign(String)
+    case StringSign(String)
     case None
 }
 
@@ -21,6 +22,7 @@ public enum ActiveType {
     case Hashtag
     case URL
     case DollarSign
+    case StringSign
     case None
 }
 
@@ -99,4 +101,18 @@ struct ActiveBuilder {
         
         return elements
     }
+    
+    static func createStringSignElements(fromText text: String, range: NSRange, word: String) -> [(range: NSRange, element: ActiveElement)] {
+        let strings = RegexParser.getStringSign(fromText: text, range: range, word: word)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for str in strings where str.range.length > 2 {
+            let element = ActiveElement.StringSign(word)
+            elements.append((str.range, element))
+        }
+        
+        return elements
+    }
+    
 }

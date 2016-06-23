@@ -63,6 +63,10 @@ public protocol ActiveLabelDelegate: class {
         dollarSignTapHandler = handler
     }
     
+    public func handleString(handler: (String) -> ()) {
+        stringTapHandler = handler
+    }
+    
     public func filterMention(predicate: (String) -> Bool) {
         mentionFilterPredicate = predicate
         updateTextStorage()
@@ -75,6 +79,10 @@ public protocol ActiveLabelDelegate: class {
     
     // MARK: - override UILabel properties
     override public var text: String? {
+        didSet { updateTextStorage() }
+    }
+    
+    public var specialWords: [String]? {
         didSet { updateTextStorage() }
     }
     
@@ -174,6 +182,7 @@ public protocol ActiveLabelDelegate: class {
             case .Hashtag(let hashtag): didTapHashtag(hashtag)
             case .URL(let url): didTapStringURL(url)
             case .DollarSign(let dollarSign) : didTapDollarSign(dollarSign)
+            case .StringSign(let stringSign) : didTapStringSign(stringSign)
             case .None: ()
             }
             
@@ -200,6 +209,7 @@ public protocol ActiveLabelDelegate: class {
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
     private var dollarSignTapHandler: ((String) -> ())?
+    private var stringTapHandler: ((String) -> ())?
     
     private var mentionFilterPredicate: ((String) -> Bool)?
     private var hashtagFilterPredicate: ((String) -> Bool)?
@@ -213,7 +223,8 @@ public protocol ActiveLabelDelegate: class {
         .Mention: [],
         .Hashtag: [],
         .URL: [],
-        .DollarSign: []
+        .DollarSign: [],
+        .StringSign: []
     ]
     
     // MARK: - helper functions
@@ -280,6 +291,7 @@ public protocol ActiveLabelDelegate: class {
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
             case .DollarSign: attributes[NSForegroundColorAttributeName] = dollarSignColor
+            case .StringSign: attributes[NSForegroundColorAttributeName] = dollarSignColor
             case .None: ()
             }
             
@@ -310,6 +322,15 @@ public protocol ActiveLabelDelegate: class {
         //DOLLAR SIGN
         let dollarSignElements = ActiveBuilder.createDollarSignElements(fromText: textString, range: textRange)
         activeElements[.DollarSign]?.appendContentsOf(dollarSignElements)
+        
+        //STRING SIGN
+        if self.specialWords != nil {
+            for i in 0..<self.specialWords!.count {
+                let stringSignElements = ActiveBuilder.createStringSignElements(fromText: textString, range: textRange, word: self.specialWords![i])
+                activeElements[.StringSign]?.appendContentsOf(stringSignElements)
+            }
+        }
+        
     }
     
     
@@ -343,6 +364,7 @@ public protocol ActiveLabelDelegate: class {
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
             case .DollarSign(_): attributes[NSForegroundColorAttributeName] = dollarSignColor
+            case .StringSign(_): attributes[NSForegroundColorAttributeName] = dollarSignColor
             case .None: ()
             }
         } else {
@@ -351,6 +373,7 @@ public protocol ActiveLabelDelegate: class {
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
             case .DollarSign(_): attributes[NSForegroundColorAttributeName] = dollarSignSelectedColor ?? dollarSignColor
+            case .StringSign(_): attributes[NSForegroundColorAttributeName] = dollarSignSelectedColor ?? dollarSignColor
             case .None: ()
             }
         }
@@ -440,6 +463,14 @@ public protocol ActiveLabelDelegate: class {
             return
         }
         dollarSignHandler(dollarSign)
+    }
+    
+    private func didTapStringSign(stringSign: String) {
+        guard let stringTapHandler = stringTapHandler else {
+            delegate?.didSelectText(stringSign, type: .StringSign)
+            return
+        }
+        stringTapHandler(stringSign)
     }
 }
 
