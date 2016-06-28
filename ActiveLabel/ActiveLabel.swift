@@ -62,7 +62,7 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var customSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable public var lineSpacing: Float? {
+    @IBInspectable public var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
 
@@ -114,6 +114,14 @@ public protocol ActiveLabelDelegate: class {
     override public var textAlignment: NSTextAlignment {
         didSet { updateTextStorage(parseText: false)}
     }
+
+    public override var numberOfLines: Int {
+        didSet { textContainer.maximumNumberOfLines = numberOfLines }
+    }
+    
+    public override var lineBreakMode: NSLineBreakMode {
+        didSet { textContainer.lineBreakMode = lineBreakMode }
+    }
     
     // MARK: - init functions
     override public init(frame: CGRect) {
@@ -126,6 +134,11 @@ public protocol ActiveLabelDelegate: class {
         super.init(coder: aDecoder)
         _customizing = false
         setupLabel()
+    }
+
+    public override func awakeFromNib() {
+        super.awakeFromNib()
+        updateTextStorage()
     }
     
     public override func drawTextInRect(rect: CGRect) {
@@ -148,6 +161,14 @@ public protocol ActiveLabelDelegate: class {
         return self
     }
 
+    // MARK: - Auto layout
+    public override func intrinsicContentSize() -> CGSize {
+        let superSize = super.intrinsicContentSize()
+        textContainer.size = CGSize(width: superSize.width, height: CGFloat.max)
+        let size = layoutManager.usedRectForTextContainer(textContainer)
+        return CGSize(width: ceil(size.width), height: ceil(size.height))
+    }
+    
     // MARK: - touch events
     func onTouch(touch: UITouch) -> Bool {
         let location = touch.locationInView(self)
@@ -184,6 +205,7 @@ public protocol ActiveLabelDelegate: class {
             }
             avoidSuperCall = true
         case .Cancelled:
+            updateAttributesWhenSelected(false)
             selectedElement = nil
         case .Stationary:
             break
@@ -222,24 +244,25 @@ public protocol ActiveLabelDelegate: class {
         textStorage.addLayoutManager(layoutManager)
         layoutManager.addTextContainer(textContainer)
         textContainer.lineFragmentPadding = 0
+        textContainer.lineBreakMode = lineBreakMode
+        textContainer.maximumNumberOfLines = numberOfLines
         userInteractionEnabled = true
     }
     
     private func updateTextStorage(parseText parseText: Bool = true) {
         if _customizing { return }
         // clean up previous active elements
-        guard let attributedText = attributedText
-            where attributedText.length > 0 else {
+        guard let attributedText = attributedText where attributedText.length > 0 else {
+            clearActiveElements()
+            textStorage.setAttributedString(NSAttributedString())
+            setNeedsDisplay()
             return
         }
         
         let mutAttrString = addLineBreak(attributedText)
 
         if parseText {
-            selectedElement = nil
-            for (type, _) in activeElements {
-                activeElements[type]?.removeAll()
-            }
+            clearActiveElements()
             parseTextAndExtractActiveElements(mutAttrString)
         }
         
@@ -247,7 +270,14 @@ public protocol ActiveLabelDelegate: class {
         self.textStorage.setAttributedString(mutAttrString)
         self.setNeedsDisplay()
     }
-    
+
+    private func clearActiveElements() {
+        selectedElement = nil
+        for (type, _) in activeElements {
+            activeElements[type]?.removeAll()
+        }
+    }
+
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
         let usedRect = layoutManager.usedRectForTextContainer(textContainer)
         heightCorrection = (rect.height - usedRect.height)/2
@@ -325,9 +355,7 @@ public protocol ActiveLabelDelegate: class {
         let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.ByWordWrapping
         paragraphStyle.alignment = textAlignment
-        if let lineSpacing = lineSpacing {
-            paragraphStyle.lineSpacing = CGFloat(lineSpacing)
-        }
+        paragraphStyle.lineSpacing = CGFloat(lineSpacing)
         
         attributes[NSParagraphStyleAttributeName] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
@@ -343,18 +371,18 @@ public protocol ActiveLabelDelegate: class {
         var attributes = textStorage.attributesAtIndex(0, effectiveRange: nil)
         if isSelected {
             switch selectedElement.element {
-            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
-            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
-            case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
-            case .Custom(_): attributes[NSForegroundColorAttributeName] = UIColor.blueColor()
-            case .None: ()
-            }
-        } else {
-            switch selectedElement.element {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
             case .Custom(_): attributes[NSForegroundColorAttributeName] = customSelectedColor ?? customColor
+            case .None: ()
+            }
+        } else {
+            switch selectedElement.element {
+            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
+            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
+            case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
+            case .Custom(_): attributes[NSForegroundColorAttributeName] = customColor
             case .None: ()
             }
         }
@@ -393,6 +421,12 @@ public protocol ActiveLabelDelegate: class {
         guard let touch = touches.first else { return }
         if onTouch(touch) { return }
         super.touchesBegan(touches, withEvent: event)
+    }
+
+    public override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        if onTouch(touch) { return }
+        super.touchesMoved(touches, withEvent: event)
     }
     
     public override func touchesCancelled(touches: Set<UITouch>, withEvent event: UIEvent?) {

@@ -29,8 +29,8 @@ class ActiveTypeTests: XCTestCase {
         return label.activeElements.flatMap({$0.1.flatMap({$0.element})})
     }
     
-    var currentElementString: String {
-        let currentElement = activeElements.first!
+    var currentElementString: String? {
+        guard let currentElement = activeElements.first else { return nil }
         switch currentElement {
         case .Mention(let mention):
             return mention
@@ -45,8 +45,8 @@ class ActiveTypeTests: XCTestCase {
         }
     }
     
-    var currentElementType: ActiveType {
-        let currentElement = activeElements.first!
+    var currentElementType: ActiveType? {
+        guard let currentElement = activeElements.first else { return nil }
         switch currentElement {
         case .Mention:
             return .Mention

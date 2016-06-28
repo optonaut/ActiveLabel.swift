@@ -28,6 +28,7 @@ class ViewController: UIViewController {
             label.hashtagColor = UIColor(red: 85.0/255, green: 172.0/255, blue: 238.0/255, alpha: 1)
             label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
             label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
+            label.URLSelectedColor = UIColor(red: 82.0/255, green: 190.0/255, blue: 41.0/255, alpha: 1)
             label.customColor = UIColor(red: 85.0/255, green: 85.0/255, blue: 238.0/255, alpha: 1)
             
             label.handleMentionTap { self.alert("Mention", message: $0) }
