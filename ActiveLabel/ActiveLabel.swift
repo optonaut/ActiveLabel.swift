@@ -14,7 +14,7 @@ public protocol ActiveLabelDelegate: class {
 }
 
 @IBDesignable public class ActiveLabel: UILabel {
-    
+    // MARK: - public statuc function
     public static func setupMentionRegex(regex:NSRegularExpression) {
         RegexParser.mentionRegex = regex
     }
@@ -27,15 +27,16 @@ public protocol ActiveLabelDelegate: class {
         RegexParser.urlDetector = regex
     }
     
-    public var on:[ActiveType:Bool] = [
-        .Mention : true,
-        .Hashtag: true,
-        .URL: true,
-        .Optional: true,
-    ]
-    
     // MARK: - public properties
     public weak var delegate: ActiveLabelDelegate?
+    
+    public var onMention: Bool = true
+    
+    public var onHashtag: Bool = true
+    
+    public var onURL: Bool = true
+    
+    public var onCustom: Bool = true
     
     @IBInspectable public var mentionColor: UIColor = .blueColor() {
         didSet { updateTextStorage(parseText: false) }
@@ -55,10 +56,10 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var URLSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable public var optionalColor: UIColor = .blueColor() {
+    @IBInspectable public var customColor: UIColor = .blueColor() {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable public var optionalSelectedColor: UIColor? {
+    @IBInspectable public var customSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var lineSpacing: Float? {
@@ -78,9 +79,9 @@ public protocol ActiveLabelDelegate: class {
         urlTapHandler = handler
     }
     
-    public func handleOptionalTab(pattern:String, handler: (String) -> ()) {
-        optionalPatterns[pattern] = pattern
-        optionalTapHandler[pattern] = handler
+    public func handleCustomTab(pattern: String, handler: (String) -> ()) {
+        customPatterns[pattern] = pattern
+        customTapHandler[pattern] = handler
     }
 
     public func filterMention(predicate: (String) -> Bool) {
@@ -172,7 +173,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(let userHandle): didTapMention(userHandle)
             case .Hashtag(let hashtag): didTapHashtag(hashtag)
             case .URL(let url): didTapStringURL(url)
-            case .Optional(let pattern, let optional): didTapOptional(pattern, optional: optional)
+            case .Custom(let pattern, let custom): didTapCustom(pattern, custom: custom)
             case .None: ()
             }
             
@@ -197,9 +198,9 @@ public protocol ActiveLabelDelegate: class {
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
-    
-    private var optionalPatterns:[String:String] = [:]
-    private var optionalTapHandler:[String:((String) -> ())?] = [:]
+
+    private var customPatterns: [String : String] = [:]
+    private var customTapHandler: [String : ((String) -> ())?] = [:]
 
     private var mentionFilterPredicate: ((String) -> Bool)?
     private var hashtagFilterPredicate: ((String) -> Bool)?
@@ -213,7 +214,7 @@ public protocol ActiveLabelDelegate: class {
         .Mention: [],
         .Hashtag: [],
         .URL: [],
-        .Optional: [],
+        .Custom: [],
     ]
     
     // MARK: - helper functions
@@ -270,7 +271,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
-            case .Optional: attributes[NSForegroundColorAttributeName] = optionalColor
+            case .Custom: attributes[NSForegroundColorAttributeName] = customColor
             case .None: ()
             }
             
@@ -287,27 +288,27 @@ public protocol ActiveLabelDelegate: class {
         let textRange = NSRange(location: 0, length: textLength)
         
         //OPTIIONAL
-        if (on[.Optional] != nil && on[.Optional]!) {
-            for (_, pattern) in optionalPatterns {
-                let optionalElements = ActiveBuilder.createOptionalElements(fromText: textString, range: textRange, pattern: pattern)
-                activeElements[.Optional]?.appendContentsOf(optionalElements)
+        if (onCustom) {
+            for (_, pattern) in customPatterns {
+                let customElements = ActiveBuilder.createCustomElements(fromText: textString, range: textRange, pattern: pattern)
+                activeElements[.Custom]?.appendContentsOf(customElements)
             }
         }
         
         //URLS
-        if (on[.URL] != nil && on[.URL]!) {
+        if (onURL) {
             let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
             activeElements[.URL]?.appendContentsOf(urlElements)
         }
         
         //HASHTAGS
-        if (on[.Hashtag] != nil && on[.Hashtag]!) {
+        if (onHashtag) {
             let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
             activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
         }
         
         //MENTIONS
-        if (on[.Mention] != nil && on[.Mention]!) {
+        if (onMention) {
             let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
             activeElements[.Mention]?.appendContentsOf(mentionElements)
         }
@@ -345,7 +346,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
-            case .Optional(_): attributes[NSForegroundColorAttributeName] = UIColor.blueColor()
+            case .Custom(_): attributes[NSForegroundColorAttributeName] = UIColor.blueColor()
             case .None: ()
             }
         } else {
@@ -353,7 +354,7 @@ public protocol ActiveLabelDelegate: class {
             case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
             case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
             case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
-            case .Optional(_): attributes[NSForegroundColorAttributeName] = optionalSelectedColor ?? optionalColor
+            case .Custom(_): attributes[NSForegroundColorAttributeName] = customSelectedColor ?? customColor
             case .None: ()
             }
         }
@@ -394,8 +395,8 @@ public protocol ActiveLabelDelegate: class {
         super.touchesBegan(touches, withEvent: event)
     }
     
-    public override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
-        guard let touch = touches?.first else { return }
+    public override func touchesCancelled(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        guard let touch = touches.first else { return }
         onTouch(touch)
         super.touchesCancelled(touches, withEvent: event)
     }
@@ -431,12 +432,12 @@ public protocol ActiveLabelDelegate: class {
         urlHandler(url)
     }
     
-    private func didTapOptional(pattern:String, optional: String) {
-        guard let handler = optionalTapHandler[pattern] else {
-            delegate?.didSelectText(optional, type: .Optional)
+    private func didTapCustom(pattern: String, custom: String) {
+        guard let handler = customTapHandler[pattern] else {
+            delegate?.didSelectText(custom, type: .Custom)
             return
         }
-        handler!(optional)
+        handler?(custom)
     }
 }
 

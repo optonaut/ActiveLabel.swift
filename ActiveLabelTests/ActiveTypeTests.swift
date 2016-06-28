@@ -38,7 +38,7 @@ class ActiveTypeTests: XCTestCase {
             return hashtag
         case .URL(let url):
             return url
-        case .Optional(_, let optionaltag):
+        case .Custom(_, let optionaltag):
             return optionaltag
         case .None:
             return ""
@@ -54,8 +54,8 @@ class ActiveTypeTests: XCTestCase {
             return .Hashtag
         case .URL:
             return .URL
-        case .Optional:
-            return .Optional
+        case .Custom:
+            return .Custom
         case .None:
             return .None
         }

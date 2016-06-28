@@ -12,7 +12,7 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(String)
-    case Optional(String, String)
+    case Custom(String, String)
     case None
 }
 
@@ -20,7 +20,7 @@ public enum ActiveType {
     case Mention
     case Hashtag
     case URL
-    case Optional
+    case Custom
     case None
 }
 
@@ -82,16 +82,16 @@ struct ActiveBuilder {
         return elements
     }
     
-    static func createOptionalElements(fromText text: String, range: NSRange, pattern:String) -> [(range: NSRange, element: ActiveElement)] {
-        let optionals = RegexParser.getOptionals(fromText: text, pattern: pattern, range: range)
+    static func createCustomElements(fromText text: String, range: NSRange, pattern:String) -> [(range: NSRange, element: ActiveElement)] {
+        let customs = RegexParser.getCustoms(fromText: text, pattern: pattern, range: range)
         let nsstring = text as NSString
         var elements: [(range: NSRange, element: ActiveElement)] = []
         
-        for optional in optionals where optional.range.length > 2 {
-            let word = nsstring.substringWithRange(optional.range)
+        for custom in customs where custom.range.length > 2 {
+            let word = nsstring.substringWithRange(custom.range)
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            let element = ActiveElement.Optional(pattern, word)
-            elements.append((optional.range, element))
+            let element = ActiveElement.Custom(pattern, word)
+            elements.append((custom.range, element))
         }
         return elements
     }
