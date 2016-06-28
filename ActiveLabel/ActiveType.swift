@@ -12,6 +12,7 @@ enum ActiveElement {
     case Mention(String)
     case Hashtag(String)
     case URL(String)
+    case Custom(String, String)
     case None
 }
 
@@ -19,6 +20,7 @@ public enum ActiveType {
     case Mention
     case Hashtag
     case URL
+    case Custom
     case None
 }
 
@@ -76,6 +78,20 @@ struct ActiveBuilder {
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             let element = ActiveElement.URL(word)
             elements.append((url.range, element))
+        }
+        return elements
+    }
+    
+    static func createCustomElements(fromText text: String, range: NSRange, pattern:String) -> [(range: NSRange, element: ActiveElement)] {
+        let customs = RegexParser.getCustoms(fromText: text, pattern: pattern, range: range)
+        let nsstring = text as NSString
+        var elements: [(range: NSRange, element: ActiveElement)] = []
+        
+        for custom in customs where custom.range.length > 2 {
+            let word = nsstring.substringWithRange(custom.range)
+                .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+            let element = ActiveElement.Custom(pattern, word)
+            elements.append((custom.range, element))
         }
         return elements
     }
