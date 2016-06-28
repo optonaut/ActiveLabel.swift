@@ -14,18 +14,6 @@ public protocol ActiveLabelDelegate: class {
 }
 
 @IBDesignable public class ActiveLabel: UILabel {
-    // MARK: - public statuc function
-    public static func setupMentionRegex(regex:NSRegularExpression) {
-        RegexParser.mentionRegex = regex
-    }
-    
-    public static func setupHashtagRegex(regex:NSRegularExpression) {
-        RegexParser.hashtagRegex = regex
-    }
-    
-    public static func setupURLRegex(regex:NSRegularExpression) {
-        RegexParser.urlDetector = regex
-    }
     
     // MARK: - public properties
     public weak var delegate: ActiveLabelDelegate?
@@ -159,6 +147,19 @@ public protocol ActiveLabelDelegate: class {
         _customizing = false
         updateTextStorage()
         return self
+    }
+    
+    // MARK: - public statuc function
+    public static func setupMentionRegex(regex:NSRegularExpression) {
+        RegexParser.mentionRegex = regex
+    }
+    
+    public static func setupHashtagRegex(regex:NSRegularExpression) {
+        RegexParser.hashtagRegex = regex
+    }
+    
+    public static func setupURLRegex(regex:NSRegularExpression) {
+        RegexParser.urlDetector = regex
     }
 
     // MARK: - Auto layout
