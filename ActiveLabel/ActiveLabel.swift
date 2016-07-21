@@ -39,7 +39,9 @@ public protocol ActiveLabelDelegate: class {
     @IBInspectable public var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
-
+    @IBInspectable public var minimumLineHeight: Float = 0 {
+        didSet { updateTextStorage(parseText: false) }
+    }
     // MARK: - public methods
     public func handleMentionTap(handler: (String) -> ()) {
         mentionTapHandler = handler
@@ -135,7 +137,7 @@ public protocol ActiveLabelDelegate: class {
         let superSize = super.intrinsicContentSize()
         textContainer.size = CGSize(width: superSize.width, height: CGFloat.max)
         let size = layoutManager.usedRectForTextContainer(textContainer)
-        return CGSize(width: ceil(size.width), height: ceil(size.height))
+        return CGSize(width: size.width, height: ceil(size.height))
     }
     
     // MARK: - touch events
@@ -306,7 +308,7 @@ public protocol ActiveLabelDelegate: class {
         paragraphStyle.lineBreakMode = NSLineBreakMode.ByWordWrapping
         paragraphStyle.alignment = textAlignment
         paragraphStyle.lineSpacing = CGFloat(lineSpacing)
-        
+        paragraphStyle.minimumLineHeight = CGFloat(minimumLineHeight > 0 ? minimumLineHeight: self.font.pointSize * 1.14)
         attributes[NSParagraphStyleAttributeName] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
         
