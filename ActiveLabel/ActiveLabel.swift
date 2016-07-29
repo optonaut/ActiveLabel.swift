@@ -292,30 +292,16 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         let textString = attrString.string
         let textLength = textString.utf16.count
         let textRange = NSRange(location: 0, length: textLength)
-        
-        //URLS
-        if enabledTypes.contains(.URL) {
-            let urlElements = ActiveBuilder.createElements(.URL, from: textString, range: textRange, filterPredicate: nil)
-            activeElements[.URL] = urlElements
-        }
 
-        //HASHTAGS
-        if enabledTypes.contains(.Hashtag) {
-            let hashtagElements = ActiveBuilder.createElements(.Hashtag, from: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
-            activeElements[.Hashtag] = hashtagElements
-        }
-
-        //MENTIONS
-        if enabledTypes.contains(.Mention) {
-            let mentionElements = ActiveBuilder.createElements(.Mention, from: textString, range: textRange, filterPredicate: mentionFilterPredicate)
-            activeElements[.Mention] = mentionElements
-        }
-
-        //CUSTOM
-        let customTypes = enabledTypes.filter { $0.isCustom }
-        for customType in customTypes {
-            let elements = ActiveBuilder.createElements(customType, from: textString, range: textRange, filterPredicate: nil)
-            activeElements[customType] = elements
+        for type in enabledTypes {
+            var filter: ((String) -> Bool)? = nil
+            if type == .Mention {
+                filter = mentionFilterPredicate
+            } else if type == .Hashtag {
+                filter = hashtagFilterPredicate
+            }
+            let hashtagElements = ActiveBuilder.createElements(type, from: textString, range: textRange, filterPredicate: filter)
+            activeElements[type] = hashtagElements
         }
     }
 
