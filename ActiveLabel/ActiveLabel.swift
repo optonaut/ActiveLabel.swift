@@ -213,7 +213,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     private lazy var textStorage = NSTextStorage()
     private lazy var layoutManager = NSLayoutManager()
     private lazy var textContainer = NSTextContainer()
-    private lazy var activeElements = [ActiveType: [ElementTuple]]()
+    lazy var activeElements = [ActiveType: [ElementTuple]]()
 
     // MARK: - helper functions
     private func setupLabel() {
@@ -301,13 +301,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
         //HASHTAGS
         if enabledTypes.contains(.Hashtag) {
-            let hashtagElements = ActiveBuilder.createElements(.Hashtag, from: textString, range: textRange, filterPredicate: nil)
+            let hashtagElements = ActiveBuilder.createElements(.Hashtag, from: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
             activeElements[.Hashtag] = hashtagElements
         }
 
         //MENTIONS
         if enabledTypes.contains(.Mention) {
-            let mentionElements = ActiveBuilder.createElements(.Mention, from: textString, range: textRange, filterPredicate: nil)
+            let mentionElements = ActiveBuilder.createElements(.Mention, from: textString, range: textRange, filterPredicate: mentionFilterPredicate)
             activeElements[.Mention] = mentionElements
         }
 

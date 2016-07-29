@@ -91,8 +91,10 @@ struct ActiveBuilder {
         for match in matches where match.range.length > 2 {
             let word = nsstring.substringWithRange(match.range)
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            let element = ActiveElement.create(with: type, text: word)
-            elements.append((match.range, element, type))
+            if filterPredicate?(word) ?? true {
+                let element = ActiveElement.create(with: type, text: word)
+                elements.append((match.range, element, type))
+            }
         }
         return elements
     }
@@ -109,6 +111,9 @@ struct ActiveBuilder {
             let range = NSRange(location: match.range.location + 1, length: match.range.length - 1)
             var word = nsstring.substringWithRange(range)
             if word.hasPrefix("@") {
+                word.removeAtIndex(word.startIndex)
+            }
+            else if word.hasPrefix("#") {
                 word.removeAtIndex(word.startIndex)
             }
 
