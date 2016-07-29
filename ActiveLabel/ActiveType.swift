@@ -30,12 +30,6 @@ public enum ActiveType {
     case URL
     case Custom(pattern: String)
 
-    var isCustom: Bool {
-        if case .Custom = self {
-            return true
-        }
-        return false
-    }
     var pattern: String {
         switch self {
         case .Mention: return RegexParser.mentionPattern
