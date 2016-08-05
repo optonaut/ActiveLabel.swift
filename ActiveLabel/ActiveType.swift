@@ -14,7 +14,17 @@ enum ActiveElement {
     case Hashtag(String)
     case URL(String)
     case Mail(String)
-    case None
+    case Custom(String)
+
+    static func create(with activeType: ActiveType, text: String) -> ActiveElement {
+        switch activeType {
+        case .Mention: return Mention(text)
+        case .Hashtag: return Hashtag(text)
+        case .URL: return URL(text)
+        case .Mail: return Mail(text)
+        case .Custom: return Custom(text)
+        }
+    }
 }
 
 public enum ActiveType {
@@ -22,77 +32,99 @@ public enum ActiveType {
     case Hashtag
     case URL
     case Mail
-    case None
+    case Custom(pattern: String)
+
+    var pattern: String {
+        switch self {
+        case .Mention: return RegexParser.mentionPattern
+        case .Hashtag: return RegexParser.hashtagPattern
+        case .URL: return RegexParser.urlPattern
+        case .Mail: return RegexParser.mailPattern
+        case .Custom(let regex): return regex
+        }
+    }
+}
+
+extension ActiveType: Hashable, Equatable {
+    public var hashValue: Int {
+        switch self {
+        case .Mention: return -1
+        case .Hashtag: return -2
+        case .URL: return -3
+        case .Mail: return -4
+        case .Custom(let regex): return regex.hashValue
+        }
+    }
+}
+
+public func ==(lhs: ActiveType, rhs: ActiveType) -> Bool {
+    switch (lhs, rhs) {
+    case (.Mention, .Mention): return true
+    case (.Hashtag, .Hashtag): return true
+    case (.URL, .URL): return true
+    case (.Mail, .Mail): return true
+    case (.Custom(let pattern1), .Custom(let pattern2)): return pattern1 == pattern2
+    default: return false
+    }
 }
 
 typealias ActiveFilterPredicate = (String -> Bool)
 
 struct ActiveBuilder {
-    
-    static func createMentionElements(fromText text: String, range: NSRange, filterPredicate: ActiveFilterPredicate?) -> [(range: NSRange, element: ActiveElement)] {
-        let mentions = RegexParser.getMentions(fromText: text, range: range)
+
+    static func createElements(type: ActiveType, from text: String, range: NSRange, filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+        switch type {
+        case .Mention, .Hashtag:
+            return createElementsIgnoringFirstCharacter(from: text, for: type, range: range, filterPredicate: filterPredicate)
+        case .URL, .Custom, .Mail:
+            return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
+        }
+    }
+
+    private static func createElements(from text: String,
+                                    for type: ActiveType,
+                                          range: NSRange,
+                                          filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+        let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
-        var elements: [(range: NSRange, element: ActiveElement)] = []
-        
-        for mention in mentions where mention.range.length > 2 {
-            let range = NSRange(location: mention.range.location + 1, length: mention.range.length - 1)
+        var elements: [ElementTuple] = []
+
+        for match in matches where match.range.length > 2 {
+            let word = nsstring.substringWithRange(match.range)
+                .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+            if filterPredicate?(word) ?? true {
+                let element = ActiveElement.create(with: type, text: word)
+                elements.append((match.range, element, type))
+            }
+        }
+        return elements
+    }
+
+    private static func createElementsIgnoringFirstCharacter(from text: String,
+                                                                  for type: ActiveType,
+                                                                range: NSRange,
+                                                                filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+        let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
+        let nsstring = text as NSString
+        var elements: [ElementTuple] = []
+
+        for match in matches where match.range.length > 2 {
+            let range = NSRange(location: match.range.location + 1, length: match.range.length - 1)
             var word = nsstring.substringWithRange(range)
             if word.hasPrefix("@") {
                 word.removeAtIndex(word.startIndex)
             }
-
-            if filterPredicate?(word) ?? true {
-                let element = ActiveElement.Mention(word)
-                elements.append((mention.range, element))
-            }
-        }
-        return elements
-    }
-    
-    static func createHashtagElements(fromText text: String, range: NSRange, filterPredicate: ActiveFilterPredicate?) -> [(range: NSRange, element: ActiveElement)] {
-        let hashtags = RegexParser.getHashtags(fromText: text, range: range)
-        let nsstring = text as NSString
-        var elements: [(range: NSRange, element: ActiveElement)] = []
-        
-        for hashtag in hashtags where hashtag.range.length > 2 {
-            let range = NSRange(location: hashtag.range.location + 1, length: hashtag.range.length - 1)
-            var word = nsstring.substringWithRange(range)
-            if word.hasPrefix("#") {
+            else if word.hasPrefix("#") {
                 word.removeAtIndex(word.startIndex)
             }
 
             if filterPredicate?(word) ?? true {
-                let element = ActiveElement.Hashtag(word)
-                elements.append((hashtag.range, element))
+                let element = ActiveElement.create(with: type, text: word)
+                elements.append((match.range, element, type))
             }
         }
         return elements
-    }
-    
-    static func createURLElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
-        let urls = RegexParser.getURLs(fromText: text, range: range)
-        let nsstring = text as NSString
-        var elements: [(range: NSRange, element: ActiveElement)] = []
         
-        for url in urls where url.range.length > 2 {
-            let word = nsstring.substringWithRange(url.range)
-                .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            let element = ActiveElement.URL(word)
-            elements.append((url.range, element))
-        }
-        return elements
     }
-    
-    static func createMailElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
-        let mails = RegexParser.getMails(fromText: text, range: range)
-        let nsstring = text as NSString
-        var elements: [(range: NSRange, element: ActiveElement)] = []
-        
-        for mail in mails where mail.range.length > 2 {
-            let word = nsstring.substringWithRange(mail.range).stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            let element = ActiveElement.Mail(word)
-            elements.append((mail.range, element))
-        }
-        return elements
-    }
+
 }

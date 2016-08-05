@@ -17,7 +17,7 @@ func ==(a: ActiveElement, b: ActiveElement) -> Bool {
     case (.Hashtag(let a), .Hashtag(let b)) where a == b: return true
     case (.Mail(let a), .Mail(let b)) where a == b: return true
     case (.URL(let a), .URL(let b)) where a == b: return true
-    case (.None, .None): return true
+    case (.Custom(let a), .Custom(let b)) where a == b: return true
     default: return false
     }
 }
@@ -25,6 +25,7 @@ func ==(a: ActiveElement, b: ActiveElement) -> Bool {
 class ActiveTypeTests: XCTestCase {
     
     let label = ActiveLabel()
+    let customEmptyType = ActiveType.Custom(pattern: "")
     
     var activeElements: [ActiveElement] {
         return label.activeElements.flatMap({$0.1.flatMap({$0.element})})
@@ -33,37 +34,29 @@ class ActiveTypeTests: XCTestCase {
     var currentElementString: String? {
         guard let currentElement = activeElements.first else { return nil }
         switch currentElement {
-        case .Mention(let mention):
-            return mention
-        case .Hashtag(let hashtag):
-            return hashtag
-        case .URL(let url):
-            return url
-        case .Mail(let mail):
-            return mail
-        case .None:
-            return ""
+        case .Mention(let mention): return mention
+        case .Hashtag(let hashtag): return hashtag
+        case .URL(let url): return url
+        case .Mail(let mail): return mail
+        case .Custom(let element): return element
+
         }
     }
     
     var currentElementType: ActiveType? {
         guard let currentElement = activeElements.first else { return nil }
         switch currentElement {
-        case .Mention:
-            return .Mention
-        case .Hashtag:
-            return .Hashtag
-        case .URL:
-            return .URL
-        case .Mail:
-            return .Mail
-        case .None:
-            return .None
+        case .Mention: return .Mention
+        case .Hashtag: return .Hashtag
+        case .URL: return .URL
+        case .Mail:  return .Mail
+        case .Custom: return customEmptyType
         }
     }
     
     override func setUp() {
         super.setUp()
+        label.enabledTypes = [.Mention, .Hashtag, .URL, .Mail]
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
     
@@ -210,6 +203,7 @@ class ActiveTypeTests: XCTestCase {
         label.text = "google.com"
         XCTAssertEqual(activeElements.count, 0)
     }
+    
     func testMail(){
         label.text = "test@email.com"
         XCTAssertEqual(activeElements.count, 1)
@@ -240,6 +234,29 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 0)
     }
 
+    func testCustomType() {
+        let newType = ActiveType.Custom(pattern: "\\sare\\b")
+        label.enabledTypes.append(newType)
+
+        label.text = "we are one"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "are")
+        XCTAssertEqual(currentElementType, customEmptyType)
+
+        label.text = "are. are"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "are")
+        XCTAssertEqual(currentElementType, customEmptyType)
+
+        label.text = "helloare are"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "are")
+        XCTAssertEqual(currentElementType, customEmptyType)
+
+        label.text = "google"
+        XCTAssertEqual(activeElements.count, 0)
+    }
+
     func testFiltering() {
         label.text = "@user #tag"
         XCTAssertEqual(activeElements.count, 2)
@@ -261,5 +278,104 @@ class ActiveTypeTests: XCTestCase {
     func testIssue64www() {
         label.text = "wwwbar"
         XCTAssertEqual(activeElements.count, 0)
+    }
+
+    func testOnlyMentionsEnabled() {
+        label.enabledTypes = [.Mention]
+
+        label.text = "@user #hashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "user")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+
+        label.text = "http://www.google.com"
+        XCTAssertEqual(activeElements.count, 0)
+
+        label.text = "#somehashtag"
+        XCTAssertEqual(activeElements.count, 0)
+
+        label.text = "@userNumberOne #hashtag http://www.google.com @anotheruser"
+        XCTAssertEqual(activeElements.count, 2)
+        XCTAssertEqual(currentElementString, "userNumberOne")
+        XCTAssertEqual(currentElementType, ActiveType.Mention)
+    }
+
+    func testOnlyHashtagEnabled() {
+        label.enabledTypes = [.Hashtag]
+
+        label.text = "@user #hashtag"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "hashtag")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+
+        label.text = "http://www.google.com"
+        XCTAssertEqual(activeElements.count, 0)
+
+        label.text = "@someuser"
+        XCTAssertEqual(activeElements.count, 0)
+
+        label.text = "#hashtagNumberOne #hashtag http://www.google.com @anotheruser"
+        XCTAssertEqual(activeElements.count, 2)
+        XCTAssertEqual(currentElementString, "hashtagNumberOne")
+        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+    }
+
+    func testOnlyURLsEnabled() {
+        label.enabledTypes = [.URL]
+
+        label.text = "http://www.google.com #hello"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "http://www.google.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+
+        label.text = "@user"
+        XCTAssertEqual(activeElements.count, 0)
+
+        label.text = "#somehashtag"
+        XCTAssertEqual(activeElements.count, 0)
+
+        label.text = " http://www.apple.com @userNumberOne #hashtag http://www.google.com @anotheruser"
+        XCTAssertEqual(activeElements.count, 2)
+        XCTAssertEqual(currentElementString, "http://www.apple.com")
+        XCTAssertEqual(currentElementType, ActiveType.URL)
+    }
+    func textOnlyEmailEnabled(){
+        label.enabledTypes = [.Mail]
+        
+        label.text = "test@mail.com #hello"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "test@mail.com")
+        XCTAssertEqual(currentElementType, ActiveType.Mail)
+        
+        label.text = "@user"
+        XCTAssertEqual(activeElements.count, 0)
+        
+        label.text = "#somehashtag"
+        XCTAssertEqual(activeElements.count, 0)
+        
+        label.text = " test1@mail.com @userNumberOne #hashtag test2@mail.com @anotheruser"
+        XCTAssertEqual(activeElements.count, 2)
+        XCTAssertEqual(currentElementString, "test1@mail.com")
+        XCTAssertEqual(currentElementType, ActiveType.Mail)
+    }
+    func testOnlyCustomEnabled() {
+        let newType = ActiveType.Custom(pattern: "\\sare\\b")
+        label.enabledTypes = [newType]
+
+        label.text = "http://www.google.com  are #hello"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "are")
+        XCTAssertEqual(currentElementType, customEmptyType)
+
+        label.text = "@user"
+        XCTAssertEqual(activeElements.count, 0)
+
+        label.text = "#somehashtag"
+        XCTAssertEqual(activeElements.count, 0)
+
+        label.text = " http://www.apple.com are @userNumberOne #hashtag http://www.google.com are @anotheruser"
+        XCTAssertEqual(activeElements.count, 2)
+        XCTAssertEqual(currentElementString, "are")
+        XCTAssertEqual(currentElementType, customEmptyType)
     }
 }

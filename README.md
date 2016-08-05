@@ -1,11 +1,14 @@
 # ActiveLabel.swift [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![Build Status](https://travis-ci.org/optonaut/ActiveLabel.swift.svg)](https://travis-ci.org/optonaut/ActiveLabel.swift)
 
-UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and emails (user@mail.com) written in Swift
+
+UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://), emails (user@mail.com) and custom regex patterns, written in Swift
 
 ## Features
 
 * Swift 2+
-* Support for **Hashtags, Mentions and Links**
+* Default support for **Hashtags, Mentions, Links**
+* Support for **custom types** via regex
+* Ability to enable highlighting only for the desired types
 * Super easy to use and lightweight
 * Works as `UILabel` drop-in replacement
 * Well tested and documented
@@ -20,6 +23,7 @@ import ActiveLabel
 let label = ActiveLabel()
 
 label.numberOfLines = 0
+label.enabledTypes = [.Mention, .Hashtag, .URL]
 label.text = "This is a post with #hashtags and a @userhandle."
 label.textColor = .blackColor()
 label.handleHashtagTap { hashtag in
@@ -29,6 +33,31 @@ label.handleMailTap { mail in
   print("Success. You just tapped the \(mail) mail")
 }
 ```
+
+## Custom types
+
+```swift
+    let customType = ActiveType.Custom(pattern: "\\swith\\b") //Regex that looks for "with"
+    label.enabledTypes = [.Mention, .Hashtag, .URL, customType]
+    
+    label.customColor[customType] = UIColor.purpleColor()
+    label.customSelectedColor[customType] = UIColor.greenColor()
+    
+    label.handleCustomTap(for: customType) { element in 
+        print("Custom type tapped: \(element)") 
+    }
+```
+
+## Enable/disable highlighting
+
+By default, an ActiveLabel instance has the following configuration
+
+```swift
+    label.enabledTypes = [.Mention, .Hashtag, .URL]
+```
+
+But feel free to enable/disable to fit your requirements
+
 
 ## Batched customization
 
@@ -69,6 +98,8 @@ Example:
 ##### `hashtagSelectedColor: UIColor?`
 ##### `URLColor: UIColor = .blueColor()`
 ##### `URLSelectedColor: UIColor?`
+#### `customColor: [ActiveType : UIColor]`
+#### `customSelectedColor: [ActiveType : UIColor]`
 ##### `lineSpacing: Float?`
 
 ##### `handleMailTap: (String) -> ()`
@@ -92,6 +123,12 @@ label.handleHashtagTap { hashtag in print("\(hashtag) tapped") }
 
 ```swift
 label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
+```
+
+##### `handleCustomTap(for type: ActiveType, handler: (String) -> ())`
+
+```swift
+label.handleCustomTap(for: customType) { element in print("\(element) tapped") }
 ```
 
 ##### `filterHashtag: (String) -> Bool`

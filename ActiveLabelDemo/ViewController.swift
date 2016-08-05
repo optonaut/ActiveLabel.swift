@@ -15,9 +15,17 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        let customType = ActiveType.Custom(pattern: "\\sare\\b") //Looks for "are"
+        let customType2 = ActiveType.Custom(pattern: "\\sit\\b") //Looks for "it"
+
+        label.enabledTypes.append(customType)
+        label.enabledTypes.append(customType2)
+
         label.customize { label in
-            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like this one: http://optonaut.co.   and email like email@email.com"
+            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
+            " this one: http://optonaut.co and email like email@email.com. Now it also supports custom patterns -> are"
+
             label.numberOfLines = 0
             label.lineSpacing = 4
             
@@ -34,8 +42,17 @@ class ViewController: UIViewController {
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
             label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
             label.handleMailTap { self.alert("Mail", message: $0) }
+
+            //Custom types
+            label.customColor[customType] = UIColor.purpleColor()
+            label.customSelectedColor[customType] = UIColor.greenColor()
+            label.customColor[customType2] = UIColor.magentaColor()
+            label.customSelectedColor[customType2] = UIColor.greenColor()
+
+            label.handleCustomTap(for: customType) { self.alert("Custom type", message: $0) }
+            label.handleCustomTap(for: customType2) { self.alert("Custom type", message: $0) }
         }
-        
+
         label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
         view.addSubview(label)
         

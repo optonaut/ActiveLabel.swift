@@ -13,10 +13,14 @@ public protocol ActiveLabelDelegate: class {
     func didSelectText(text: String, type: ActiveType)
 }
 
+typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveType)
+
 @IBDesignable public class ActiveLabel: UILabel {
     
     // MARK: - public properties
     public weak var delegate: ActiveLabelDelegate?
+    
+    public var enabledTypes: [ActiveType] = [.Mention, .Hashtag, .URL, .Mail]
     
     @IBInspectable public var mentionColor: UIColor = .blueColor() {
         didSet { updateTextStorage(parseText: false) }
@@ -37,15 +41,22 @@ public protocol ActiveLabelDelegate: class {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var mailColor: UIColor = .blueColor() {
-        didSet { updateTextStorage(parseText: false) }
+       didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var mailSelectedColor: UIColor? {
+       didSet { updateTextStorage(parseText: false) }
+    }
+    
+    public var customColor: [ActiveType : UIColor] = [:] {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    public var customSelectedColor: [ActiveType : UIColor] = [:] {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
-
+    
     // MARK: - public methods
     public func handleMentionTap(handler: (String) -> ()) {
         mentionTapHandler = handler
@@ -58,21 +69,25 @@ public protocol ActiveLabelDelegate: class {
     public func handleURLTap(handler: (NSURL) -> ()) {
         urlTapHandler = handler
     }
-    
+
     public func handleMailTap(handler: (String) -> ()) {
         mailTapHandler = handler
     }
 
+    public func handleCustomTap(for type: ActiveType, handler: (String) -> ()) {
+        customTapHandlers[type] = handler
+    }
+    
     public func filterMention(predicate: (String) -> Bool) {
         mentionFilterPredicate = predicate
         updateTextStorage()
     }
-
+    
     public func filterHashtag(predicate: (String) -> Bool) {
         hashtagFilterPredicate = predicate
         updateTextStorage()
     }
-
+    
     // MARK: - override UILabel properties
     override public var text: String? {
         didSet { updateTextStorage() }
@@ -93,7 +108,7 @@ public protocol ActiveLabelDelegate: class {
     override public var textAlignment: NSTextAlignment {
         didSet { updateTextStorage(parseText: false)}
     }
-
+    
     public override var numberOfLines: Int {
         didSet { textContainer.maximumNumberOfLines = numberOfLines }
     }
@@ -114,7 +129,7 @@ public protocol ActiveLabelDelegate: class {
         _customizing = false
         setupLabel()
     }
-
+    
     public override func awakeFromNib() {
         super.awakeFromNib()
         updateTextStorage()
@@ -132,14 +147,14 @@ public protocol ActiveLabelDelegate: class {
     
     
     // MARK: - customzation
-    public func customize(block: (label: ActiveLabel) -> ()) -> ActiveLabel{
+    public func customize(block: (label: ActiveLabel) -> ()) -> ActiveLabel {
         _customizing = true
         block(label: self)
         _customizing = false
         updateTextStorage()
         return self
     }
-
+    
     // MARK: - Auto layout
     public override func intrinsicContentSize() -> CGSize {
         let superSize = super.intrinsicContentSize()
@@ -174,7 +189,7 @@ public protocol ActiveLabelDelegate: class {
             case .Hashtag(let hashtag): didTapHashtag(hashtag)
             case .URL(let url): didTapStringURL(url)
             case .Mail(let url): didTapMail(url)
-            case .None: ()
+            case .Custom(let element): didTap(element, for: selectedElement.type)
             }
             
             let when = dispatch_time(DISPATCH_TIME_NOW, Int64(0.25 * Double(NSEC_PER_SEC)))
@@ -195,27 +210,25 @@ public protocol ActiveLabelDelegate: class {
     
     // MARK: - private properties
     private var _customizing: Bool = true
+    private var defaultCustomColor: UIColor = .blackColor()
     
     private var mentionTapHandler: ((String) -> ())?
     private var hashtagTapHandler: ((String) -> ())?
     private var urlTapHandler: ((NSURL) -> ())?
     private var mailTapHandler: ((String) -> ())?
-
+    private var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
+    
     private var mentionFilterPredicate: ((String) -> Bool)?
     private var hashtagFilterPredicate: ((String) -> Bool)?
     private var mailFilterPredicate: ((String) -> Bool)?
 
-    private var selectedElement: (range: NSRange, element: ActiveElement)?
+    
+    private var selectedElement: ElementTuple?
     private var heightCorrection: CGFloat = 0
     private lazy var textStorage = NSTextStorage()
     private lazy var layoutManager = NSLayoutManager()
     private lazy var textContainer = NSTextContainer()
-    internal lazy var activeElements: [ActiveType: [(range: NSRange, element: ActiveElement)]] = [
-        .Mention: [],
-        .Hashtag: [],
-        .URL: [],
-        .Mail: [],
-    ]
+    lazy var activeElements = [ActiveType: [ElementTuple]]()
     
     // MARK: - helper functions
     private func setupLabel() {
@@ -238,24 +251,24 @@ public protocol ActiveLabelDelegate: class {
         }
         
         let mutAttrString = addLineBreak(attributedText)
-
+        
         if parseText {
             clearActiveElements()
             parseTextAndExtractActiveElements(mutAttrString)
         }
         
-        self.addLinkAttribute(mutAttrString)
-        self.textStorage.setAttributedString(mutAttrString)
-        self.setNeedsDisplay()
+        addLinkAttribute(mutAttrString)
+        textStorage.setAttributedString(mutAttrString)
+        setNeedsDisplay()
     }
-
+    
     private func clearActiveElements() {
         selectedElement = nil
         for (type, _) in activeElements {
             activeElements[type]?.removeAll()
         }
     }
-
+    
     private func textOrigin(inRect rect: CGRect) -> CGPoint {
         let usedRect = layoutManager.usedRectForTextContainer(textContainer)
         heightCorrection = (rect.height - usedRect.height)/2
@@ -281,7 +294,7 @@ public protocol ActiveLabelDelegate: class {
             case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
             case .URL: attributes[NSForegroundColorAttributeName] = URLColor
             case .Mail: attributes[NSForegroundColorAttributeName] = mailColor
-            case .None: ()
+            case .Custom: attributes[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
             }
             
             for element in elements {
@@ -296,23 +309,27 @@ public protocol ActiveLabelDelegate: class {
         let textLength = textString.utf16.count
         let textRange = NSRange(location: 0, length: textLength)
         
-        //URLS
-        let urlElements = ActiveBuilder.createURLElements(fromText: textString, range: textRange)
-        activeElements[.URL]?.appendContentsOf(urlElements)
+        for type in enabledTypes {
+            var filter: ((String) -> Bool)? = nil
+            switch type {
+                case .Mention:
+                    filter = mentionFilterPredicate
+                break;
+                case .Hashtag:
+                    filter = hashtagFilterPredicate
+                break;
+                case .Mail:
+                    filter = mailFilterPredicate
+                    break;
+                default:
+                    break;
+            }
 
-        //HASHTAGS
-        let hashtagElements = ActiveBuilder.createHashtagElements(fromText: textString, range: textRange, filterPredicate: hashtagFilterPredicate)
-        activeElements[.Hashtag]?.appendContentsOf(hashtagElements)
-
-        //MENTIONS
-        let mentionElements = ActiveBuilder.createMentionElements(fromText: textString, range: textRange, filterPredicate: mentionFilterPredicate)
-        activeElements[.Mention]?.appendContentsOf(mentionElements)
-        
-        //MAILS
-        let mailElements = ActiveBuilder.createMailElements(fromText: textString, range: textRange)
-        activeElements[.Mail]?.appendContentsOf(mailElements)
+            let elements = ActiveBuilder.createElements(type, from: textString, range: textRange, filterPredicate: filter)
+            activeElements[type] = elements
+        }
     }
-
+    
     
     /// add line break mode
     private func addLineBreak(attrString: NSAttributedString) -> NSMutableAttributedString {
@@ -328,7 +345,7 @@ public protocol ActiveLabelDelegate: class {
         
         attributes[NSParagraphStyleAttributeName] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
-
+        
         return mutAttrString
     }
     
@@ -338,22 +355,30 @@ public protocol ActiveLabelDelegate: class {
         }
         
         var attributes = textStorage.attributesAtIndex(0, effectiveRange: nil)
+        let type = selectedElement.type
+        
         if isSelected {
-            switch selectedElement.element {
-            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionSelectedColor ?? mentionColor
-            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagSelectedColor ?? hashtagColor
-            case .URL(_): attributes[NSForegroundColorAttributeName] = URLSelectedColor ?? URLColor
-            case .Mail(_): attributes[NSForegroundColorAttributeName] = mailSelectedColor ?? mailColor
-            case .None: ()
+            let selectedColor: UIColor
+            switch type {
+            case .Mention: selectedColor = mentionSelectedColor ?? mentionColor
+            case .Hashtag: selectedColor = hashtagSelectedColor ?? hashtagColor
+            case .URL: selectedColor = URLSelectedColor ?? URLColor
+            case .Mail: selectedColor = mailSelectedColor ?? mailColor
+            case .Custom:
+                let possibleSelectedColor = customSelectedColor[selectedElement.type] ?? customColor[selectedElement.type]
+                selectedColor = possibleSelectedColor ?? defaultCustomColor
             }
+            attributes[NSForegroundColorAttributeName] = selectedColor
         } else {
-            switch selectedElement.element {
-            case .Mention(_): attributes[NSForegroundColorAttributeName] = mentionColor
-            case .Hashtag(_): attributes[NSForegroundColorAttributeName] = hashtagColor
-            case .URL(_): attributes[NSForegroundColorAttributeName] = URLColor
-            case .Mail(_): attributes[NSForegroundColorAttributeName] = mailColor
-            case .None: ()
+            let unselectedColor: UIColor
+            switch type {
+            case .Mention: unselectedColor = mentionColor
+            case .Hashtag: unselectedColor = hashtagColor
+            case .URL: unselectedColor = URLColor
+            case .Mail: unselectedColor = mailColor
+            case .Custom: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
             }
+            attributes[NSForegroundColorAttributeName] = unselectedColor
         }
         
         textStorage.addAttributes(attributes, range: selectedElement.range)
@@ -361,11 +386,11 @@ public protocol ActiveLabelDelegate: class {
         setNeedsDisplay()
     }
     
-    private func elementAtLocation(location: CGPoint) -> (range: NSRange, element: ActiveElement)? {
+    private func elementAtLocation(location: CGPoint) -> ElementTuple? {
         guard textStorage.length > 0 else {
             return nil
         }
-
+        
         var correctLocation = location
         correctLocation.y -= heightCorrection
         let boundingRect = layoutManager.boundingRectForGlyphRange(NSRange(location: 0, length: textStorage.length), inTextContainer: textContainer)
@@ -391,7 +416,7 @@ public protocol ActiveLabelDelegate: class {
         if onTouch(touch) { return }
         super.touchesBegan(touches, withEvent: event)
     }
-
+    
     public override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
         guard let touch = touches.first else { return }
         if onTouch(touch) { return }
@@ -441,6 +466,15 @@ public protocol ActiveLabelDelegate: class {
             return
         }
         mailHandler(mail)
+    }
+            
+    
+    private func didTap(element: String, for type: ActiveType) {
+        guard let elementHandler = customTapHandlers[type] else {
+            delegate?.didSelectText(element, type: type)
+            return
+        }
+        elementHandler(element)
     }
 }
 
