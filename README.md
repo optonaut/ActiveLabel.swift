@@ -29,9 +29,6 @@ label.textColor = .blackColor()
 label.handleHashtagTap { hashtag in
   print("Success. You just tapped the \(hashtag) hashtag")
 }
-label.handleMailTap { mail in
-  print("Success. You just tapped the \(mail) mail")
-}
 ```
 
 ## Custom types
@@ -90,8 +87,6 @@ Example:
 
 
 ## API
-##### `mailColor: UIColor = .blueColor()`
-##### `mailSelectedColor: UIColor?`
 ##### `mentionColor: UIColor = .blueColor()`
 ##### `mentionSelectedColor: UIColor?`
 ##### `hashtagColor: UIColor = .blueColor()`
@@ -100,13 +95,11 @@ Example:
 ##### `URLSelectedColor: UIColor?`
 #### `customColor: [ActiveType : UIColor]`
 #### `customSelectedColor: [ActiveType : UIColor]`
+##### `mailColor: UIColor = .blueColor()`
+##### `mailSelectedColor: UIColor?`
 ##### `lineSpacing: Float?`
 
-##### `handleMailTap: (String) -> ()`
 
-```swift
-label.handleMailTap { mailHandle in print("\(mailHandle) tapped") }
-```
 ##### `handleMentionTap: (String) -> ()`
 
 ```swift
@@ -129,6 +122,12 @@ label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
 
 ```swift
 label.handleCustomTap(for: customType) { element in print("\(element) tapped") }
+```
+
+##### `handleMailTap: (String) -> ()`
+
+```swift
+label.handleMailTap { mailHandle in print("\(mailHandle) tapped") }
 ```
 
 ##### `filterHashtag: (String) -> Bool`

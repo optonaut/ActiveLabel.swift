@@ -1,4 +1,3 @@
-
 //
 //  ActiveType.swift
 //  ActiveLabel
@@ -82,9 +81,9 @@ struct ActiveBuilder {
     }
 
     private static func createElements(from text: String,
-                                    for type: ActiveType,
-                                          range: NSRange,
-                                          filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+                                            for type: ActiveType,
+                                                range: NSRange,
+                                                filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
@@ -102,8 +101,8 @@ struct ActiveBuilder {
 
     private static func createElementsIgnoringFirstCharacter(from text: String,
                                                                   for type: ActiveType,
-                                                                range: NSRange,
-                                                                filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+                                                                      range: NSRange,
+                                                                      filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
@@ -126,5 +125,5 @@ struct ActiveBuilder {
         return elements
         
     }
-
+    
 }
