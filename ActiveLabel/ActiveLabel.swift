@@ -315,6 +315,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .Mention: filter = mentionFilterPredicate
             case .Hashtag: filter = hashtagFilterPredicate
             case .Mail: filter = mailFilterPredicate
+            default: break
             }
 
             let elements = ActiveBuilder.createElements(type, from: textString, range: textRange, filterPredicate: filter)

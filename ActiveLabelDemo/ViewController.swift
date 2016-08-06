@@ -21,6 +21,7 @@ class ViewController: UIViewController {
 
         label.enabledTypes.append(customType)
         label.enabledTypes.append(customType2)
+        label.enabledTypes.append(ActiveType.Mail)
 
         label.customize { label in
             label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
