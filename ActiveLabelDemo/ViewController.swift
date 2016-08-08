@@ -21,10 +21,12 @@ class ViewController: UIViewController {
 
         label.enabledTypes.append(customType)
         label.enabledTypes.append(customType2)
+        label.enabledTypes.append(ActiveType.Mail)
 
         label.customize { label in
             label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
-            " this one: http://optonaut.co. Now it also supports custom patterns -> are"
+            " this one: http://optonaut.co and email like email@email.com. Now it also supports custom patterns -> are"
+
             label.numberOfLines = 0
             label.lineSpacing = 4
             
@@ -33,13 +35,16 @@ class ViewController: UIViewController {
             label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
             label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
             label.URLSelectedColor = UIColor(red: 82.0/255, green: 190.0/255, blue: 41.0/255, alpha: 1)
+            label.mailColor = UIColor(red: 200.0/255, green: 50.0/255, blue: 60/255, alpha: 1)
+            label.mailSelectedColor = UIColor(red: 200.0/255, green: 50.0/255, blue: 60/255, alpha: 0.75)
+
 
             label.handleMentionTap { self.alert("Mention", message: $0) }
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
             label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
+            label.handleMailTap { self.alert("Mail", message: $0) }
 
             //Custom types
-
             label.customColor[customType] = UIColor.purpleColor()
             label.customSelectedColor[customType] = UIColor.greenColor()
             label.customColor[customType2] = UIColor.magentaColor()

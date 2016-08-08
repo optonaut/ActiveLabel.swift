@@ -1,6 +1,7 @@
 # ActiveLabel.swift [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![Build Status](https://travis-ci.org/optonaut/ActiveLabel.swift.svg)](https://travis-ci.org/optonaut/ActiveLabel.swift)
 
-UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and custom regex patterns, written in Swift
+
+UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://), emails (user@mail.com) and custom regex patterns, written in Swift
 
 ## Features
 
@@ -35,12 +36,12 @@ label.handleHashtagTap { hashtag in
 ```swift
     let customType = ActiveType.Custom(pattern: "\\swith\\b") //Regex that looks for "with"
     label.enabledTypes = [.Mention, .Hashtag, .URL, customType]
-    
+
     label.customColor[customType] = UIColor.purpleColor()
     label.customSelectedColor[customType] = UIColor.greenColor()
-    
-    label.handleCustomTap(for: customType) { element in 
-        print("Custom type tapped: \(element)") 
+
+    label.handleCustomTap(for: customType) { element in
+        print("Custom type tapped: \(element)")
     }
 ```
 
@@ -71,9 +72,14 @@ Example:
             label.hashtagColor = UIColor(red: 85.0/255, green: 172.0/255, blue: 238.0/255, alpha: 1)
             label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
             label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
+            label.mailColor = UIColor(red: 200.0/255, green: 50.0/255, blue: 60/255, alpha: 1)
+            label.mailSelectedColor = UIColor(red: 200.0/255, green: 50.0/255, blue: 60/255, alpha: 0.75)
+
+
             label.handleMentionTap { self.alert("Mention", message: $0) }
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
             label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
+            label.handleMailTap { self.alert("Mail", message: $0) }
         }
 
 
@@ -81,7 +87,6 @@ Example:
 
 
 ## API
-
 ##### `mentionColor: UIColor = .blueColor()`
 ##### `mentionSelectedColor: UIColor?`
 ##### `hashtagColor: UIColor = .blueColor()`
@@ -90,6 +95,8 @@ Example:
 ##### `URLSelectedColor: UIColor?`
 #### `customColor: [ActiveType : UIColor]`
 #### `customSelectedColor: [ActiveType : UIColor]`
+##### `mailColor: UIColor = .blueColor()`
+##### `mailSelectedColor: UIColor?`
 ##### `lineSpacing: Float?`
 
 ##### `handleMentionTap: (String) -> ()`
@@ -114,6 +121,12 @@ label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
 
 ```swift
 label.handleCustomTap(for: customType) { element in print("\(element) tapped") }
+```
+
+##### `handleMailTap: (String) -> ()`
+
+```swift
+label.handleMailTap { mailHandle in print("\(mailHandle) tapped") }
 ```
 
 ##### `filterHashtag: (String) -> Bool`
