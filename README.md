@@ -36,12 +36,12 @@ label.handleHashtagTap { hashtag in
 ```swift
     let customType = ActiveType.Custom(pattern: "\\swith\\b") //Regex that looks for "with"
     label.enabledTypes = [.Mention, .Hashtag, .URL, customType]
-    
+
     label.customColor[customType] = UIColor.purpleColor()
     label.customSelectedColor[customType] = UIColor.greenColor()
-    
-    label.handleCustomTap(for: customType) { element in 
-        print("Custom type tapped: \(element)") 
+
+    label.handleCustomTap(for: customType) { element in
+        print("Custom type tapped: \(element)")
     }
 ```
 
@@ -98,7 +98,6 @@ Example:
 ##### `mailColor: UIColor = .blueColor()`
 ##### `mailSelectedColor: UIColor?`
 ##### `lineSpacing: Float?`
-
 
 ##### `handleMentionTap: (String) -> ()`
 
