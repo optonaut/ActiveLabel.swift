@@ -72,38 +72,20 @@ struct ActiveBuilder {
         case .URL:
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         case .Custom:
-            return createElementsCustom(from: text, for: type, range: range, filterPredicate: filterPredicate)
+            return createElements(from: text, for: type, range: range, minLength:0, filterPredicate: filterPredicate)
         }
     }
 
     private static func createElements(from text: String,
                                     for type: ActiveType,
                                           range: NSRange,
+                                          minLength: Int = 2,
                                           filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
 
-        for match in matches where match.range.length > 2 {
-            let word = nsstring.substringWithRange(match.range)
-                .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            if filterPredicate?(word) ?? true {
-                let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
-            }
-        }
-        return elements
-    }
-    
-    private static func createElementsCustom(from text: String,
-                                    for type: ActiveType,
-                                          range: NSRange,
-                                          filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
-        let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
-        let nsstring = text as NSString
-        var elements: [ElementTuple] = []
-
-        for match in matches {
+        for match in matches where match.range.length > minLength {
             let word = nsstring.substringWithRange(match.range)
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             if filterPredicate?(word) ?? true {
