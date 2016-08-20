@@ -105,6 +105,7 @@ struct ActiveBuilder {
 
         for match in matches {
             let word = nsstring.substringWithRange(match.range)
+                .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.create(with: type, text: word)
                 elements.append((match.range, element, type))
