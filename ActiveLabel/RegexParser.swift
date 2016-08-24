@@ -17,8 +17,8 @@ struct RegexParser {
     "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"
 
 
-    static func getElements(from text: String, with pattern: String, range: NSRange) -> [TextCheckingResult]{
-        guard let elementRegex = try? RegularExpression(pattern: pattern, options: [.caseInsensitive]) else { return [] }
+    static func getElements(from text: String, with pattern: String, range: NSRange) -> [NSTextCheckingResult]{
+        guard let elementRegex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else { return [] }
         return elementRegex.matches(in: text, options: [], range: range)
     }
 }

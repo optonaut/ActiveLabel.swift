@@ -74,7 +74,7 @@ struct ActiveBuilder {
         }
     }
 
-    private static func createElements(from text: String,
+    fileprivate static func createElements(from text: String,
                                     for type: ActiveType,
                                           range: NSRange,
                                           filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
@@ -93,7 +93,7 @@ struct ActiveBuilder {
         return elements
     }
 
-    private static func createElementsIgnoringFirstCharacter(from text: String,
+    fileprivate static func createElementsIgnoringFirstCharacter(from text: String,
                                                                   for type: ActiveType,
                                                                 range: NSRange,
                                                                 filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {

@@ -36,14 +36,14 @@ class ViewController: UIViewController {
 
             label.handleMentionTap { self.alert("Mention", message: $0) }
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
-            label.handleURLTap { self.alert("URL", message: $0.absoluteString!) }
+            label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
 
             //Custom types
 
-            label.customColor[customType] = UIColor.purple()
-            label.customSelectedColor[customType] = UIColor.green()
-            label.customColor[customType2] = UIColor.magenta()
-            label.customSelectedColor[customType2] = UIColor.green()
+            label.customColor[customType] = UIColor.purple
+            label.customSelectedColor[customType] = UIColor.green
+            label.customColor[customType2] = UIColor.magenta
+            label.customSelectedColor[customType2] = UIColor.green
 
             label.handleCustomTap(for: customType) { self.alert("Custom type", message: $0) }
             label.handleCustomTap(for: customType2) { self.alert("Custom type", message: $0) }
