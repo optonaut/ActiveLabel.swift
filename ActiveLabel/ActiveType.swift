@@ -72,7 +72,7 @@ struct ActiveBuilder {
         case .URL:
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         case .Custom:
-            return createElements(from: text, for: type, range: range, minLength:0, filterPredicate: filterPredicate)
+            return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
         }
     }
 
