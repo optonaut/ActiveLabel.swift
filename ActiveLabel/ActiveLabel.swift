@@ -23,31 +23,31 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url]
     
     @IBInspectable open var mentionColor: UIColor = .blue {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var mentionSelectedColor: UIColor? {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var hashtagColor: UIColor = .blue {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var hashtagSelectedColor: UIColor? {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var URLColor: UIColor = .blue {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var URLSelectedColor: UIColor? {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     open var customColor: [ActiveType : UIColor] = [:] {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     open var customSelectedColor: [ActiveType : UIColor] = [:] {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var lineSpacing: Float = 0 {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
 
     // MARK: - public methods
@@ -87,15 +87,15 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     override open var font: UIFont! {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     
     override open var textColor: UIColor! {
-        didSet { updateTextStorage(false) }
+        didSet { updateTextStorage(parseText: false) }
     }
     
     override open var textAlignment: NSTextAlignment {
-        didSet { updateTextStorage(false)}
+        didSet { updateTextStorage(parseText: false)}
     }
 
     open override var numberOfLines: Int {
@@ -146,6 +146,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
 
     // MARK: - Auto layout
+
     open override var intrinsicContentSize: CGSize {
         let superSize = super.intrinsicContentSize
         textContainer.size = CGSize(width: superSize.width, height: CGFloat.greatestFiniteMagnitude)
@@ -226,7 +227,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         isUserInteractionEnabled = true
     }
     
-    fileprivate func updateTextStorage(_ parseText: Bool = true) {
+    fileprivate func updateTextStorage(parseText: Bool = true) {
         if _customizing { return }
         // clean up previous active elements
         guard let attributedText = attributedText, attributedText.length > 0 else {

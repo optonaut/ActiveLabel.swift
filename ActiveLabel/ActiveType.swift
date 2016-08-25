@@ -75,9 +75,9 @@ struct ActiveBuilder {
     }
 
     fileprivate static func createElements(from text: String,
-                                    for type: ActiveType,
-                                          range: NSRange,
-                                          filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+                                           for type: ActiveType,
+                                           range: NSRange,
+                                           filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
@@ -94,9 +94,9 @@ struct ActiveBuilder {
     }
 
     fileprivate static func createElementsIgnoringFirstCharacter(from text: String,
-                                                                  for type: ActiveType,
-                                                                range: NSRange,
-                                                                filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+                                                                 for type: ActiveType,
+                                                                 range: NSRange,
+                                                                 filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
