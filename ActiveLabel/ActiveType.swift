@@ -69,20 +69,23 @@ struct ActiveBuilder {
         switch type {
         case .Mention, .Hashtag:
             return createElementsIgnoringFirstCharacter(from: text, for: type, range: range, filterPredicate: filterPredicate)
-        case .URL, .Custom:
+        case .URL:
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
+        case .Custom:
+            return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
         }
     }
 
     private static func createElements(from text: String,
                                     for type: ActiveType,
                                           range: NSRange,
+                                          minLength: Int = 2,
                                           filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
 
-        for match in matches where match.range.length > 2 {
+        for match in matches where match.range.length > minLength {
             let word = nsstring.substringWithRange(match.range)
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
             if filterPredicate?(word) ?? true {
