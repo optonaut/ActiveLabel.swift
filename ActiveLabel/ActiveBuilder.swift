@@ -44,7 +44,7 @@ struct ActiveBuilder {
             text = text.stringByReplacingOccurrencesOfString(word, withString: trimmedWord)
             let element = ActiveElement.URL(original: word, trimmed: trimmedWord)
 
-            let newRange = NSRange(location: match.range.location, length: trimmedWord.characters.count)
+            let newRange = NSRange(location: match.range.location, length: trimmedWord.characters.count + 1)
             elements.append((newRange, element, type))
         }
         return (elements, text)
