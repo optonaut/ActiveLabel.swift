@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
 		UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and custom regex patterns, written in Swift
 
 		Features
-			* Up-to-date: Swift 2+
+			* Up-to-date: Swift 3
 			* Default support for Hashtags, Mentions, Links
 			* Support for custom types via regex
 			* Ability to enable highlighting only for the desired types
