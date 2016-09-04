@@ -35,7 +35,7 @@ class ActiveTypeTests: XCTestCase {
         switch currentElement {
         case .mention(let mention): return mention
         case .hashtag(let hashtag): return hashtag
-        case .url(let url): return url
+        case .url(let url, _): return url
         case .custom(let element): return element
         }
     }

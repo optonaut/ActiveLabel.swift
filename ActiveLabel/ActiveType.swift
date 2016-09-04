@@ -11,14 +11,14 @@ import Foundation
 enum ActiveElement {
     case mention(String)
     case hashtag(String)
-    case url(String)
+    case url(original: String, trimmed: String)
     case custom(String)
 
     static func create(with activeType: ActiveType, text: String) -> ActiveElement {
         switch activeType {
         case .mention: return mention(text)
         case .hashtag: return hashtag(text)
-        case .url: return url(text)
+        case .url: return url(original: text, trimmed: text)
         case .custom: return custom(text)
         }
     }
@@ -58,65 +58,5 @@ public func ==(lhs: ActiveType, rhs: ActiveType) -> Bool {
     case (.url, .url): return true
     case (.custom(let pattern1), .custom(let pattern2)): return pattern1 == pattern2
     default: return false
-    }
-}
-
-typealias ActiveFilterPredicate = ((String) -> Bool)
-
-struct ActiveBuilder {
-
-    static func createElements(_ type: ActiveType, from text: String, range: NSRange, filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
-        switch type {
-        case .mention, .hashtag:
-            return createElementsIgnoringFirstCharacter(from: text, for: type, range: range, filterPredicate: filterPredicate)
-        case .url, .custom:
-            return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
-        }
-    }
-
-    fileprivate static func createElements(from text: String,
-                                           for type: ActiveType,
-                                           range: NSRange,
-                                           filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
-        let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
-        let nsstring = text as NSString
-        var elements: [ElementTuple] = []
-
-        for match in matches where match.range.length > 2 {
-            let word = nsstring.substring(with: match.range)
-                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if filterPredicate?(word) ?? true {
-                let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
-            }
-        }
-        return elements
-    }
-
-    fileprivate static func createElementsIgnoringFirstCharacter(from text: String,
-                                                                 for type: ActiveType,
-                                                                 range: NSRange,
-                                                                 filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
-        let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
-        let nsstring = text as NSString
-        var elements: [ElementTuple] = []
-
-        for match in matches where match.range.length > 2 {
-            let range = NSRange(location: match.range.location + 1, length: match.range.length - 1)
-            var word = nsstring.substring(with: range)
-            if word.hasPrefix("@") {
-                word.remove(at: word.startIndex)
-            }
-            else if word.hasPrefix("#") {
-                word.remove(at: word.startIndex)
-            }
-
-            if filterPredicate?(word) ?? true {
-                let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
-            }
-        }
-        return elements
-        
     }
 }

@@ -8,6 +8,7 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://
 * Default support for **Hashtags, Mentions, Links**
 * Support for **custom types** via regex
 * Ability to enable highlighting only for the desired types
+* Ability to trim urls
 * Super easy to use and lightweight
 * Works as `UILabel` drop-in replacement
 * Well tested and documented
@@ -79,6 +80,17 @@ Example:
 
 ```
 
+## Trim long urls
+
+You have the possiblity to set the maximum lenght a url can have;
+
+```
+        label.urlMaximumLength = 30
+```
+
+From now on, a url that's bigger than that, will be trimmed.
+
+`https://afancyurl.com/whatever` -> `https://afancyurl.com/wh...`
 
 ## API
 
