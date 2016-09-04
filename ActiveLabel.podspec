@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 	s.name    = 'ActiveLabel'
-	s.version = '0.6.1'
+	s.version = '0.6.2'
 
 	s.author      = { 'Optonaut' => 'hello@optonaut.co' }
 	s.homepage    = 'https://github.com/optonaut/ActiveLabel.swift'
@@ -16,6 +16,7 @@ Pod::Spec.new do |s|
 			* Default support for Hashtags, Mentions, Links
 			* Support for custom types via regex
 			* Ability to enable highlighting only for the desired types
+			* Ability to trim urls
 			* Super easy to use and lightweight
 			* Works as UILabel drop-in replacement
 			* Well tested and documented
