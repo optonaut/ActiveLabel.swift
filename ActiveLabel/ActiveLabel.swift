@@ -247,6 +247,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
         addLinkAttribute(mutAttrString)
         textStorage.setAttributedString(mutAttrString)
+        _customizing = true
+        text = mutAttrString.string
+        _customizing = false
         setNeedsDisplay()
     }
 
@@ -291,7 +294,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
 
     /// use regex check all link ranges
-    private func parseTextAndExtractActiveElements(attrString: NSMutableAttributedString) -> String{
+    private func parseTextAndExtractActiveElements(attrString: NSMutableAttributedString) -> String {
         var textString = attrString.string
         var textLength = textString.utf16.count
         var textRange = NSRange(location: 0, length: textLength)

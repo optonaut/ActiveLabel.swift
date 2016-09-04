@@ -35,16 +35,17 @@ struct ActiveBuilder {
                 .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
 
             guard let maxChar = maxChar where word.characters.count > maxChar else {
+                let newRange = (text as NSString).rangeOfString(word)
                 let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
+                elements.append((newRange, element, type))
                 continue
             }
 
             let trimmedWord = word.trim(to: maxChar)
             text = text.stringByReplacingOccurrencesOfString(word, withString: trimmedWord)
-            let element = ActiveElement.URL(original: word, trimmed: trimmedWord)
 
-            let newRange = NSRange(location: match.range.location, length: trimmedWord.characters.count + 1)
+            let newRange = (text as NSString).rangeOfString(trimmedWord)
+            let element = ActiveElement.URL(original: word, trimmed: trimmedWord)
             elements.append((newRange, element, type))
         }
         return (elements, text)
