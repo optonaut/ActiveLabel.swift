@@ -23,7 +23,7 @@ struct ActiveBuilder {
         }
     }
 
-    static func createURLElements(from text: String, range: NSRange, maxChar: Int?) -> ([ElementTuple], String) {
+    static func createURLElements(from text: String, range: NSRange, maximumLenght: Int?) -> ([ElementTuple], String) {
         let type = ActiveType.url
         var text = text
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
@@ -34,17 +34,18 @@ struct ActiveBuilder {
             let word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
-            guard let maxChar = maxChar, word.characters.count > maxChar else {
+            guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
+                let range = maximumLenght == nil ? match.range : (text as NSString).range(of: word)
                 let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
+                elements.append((range, element, type))
                 continue
             }
 
-            let trimmedWord = word.trim(to: maxChar)
+            let trimmedWord = word.trim(to: maxLenght)
             text = text.replacingOccurrences(of: word, with: trimmedWord)
-            let element = ActiveElement.url(original: word, trimmed: trimmedWord)
 
-            let newRange = NSRange(location: match.range.location, length: trimmedWord.characters.count + 1)
+            let newRange = (text as NSString).range(of: trimmedWord)
+            let element = ActiveElement.url(original: word, trimmed: trimmedWord)
             elements.append((newRange, element, type))
         }
         return (elements, text)

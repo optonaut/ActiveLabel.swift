@@ -326,4 +326,12 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(currentElementString, "are")
         XCTAssertEqual(currentElementType, customEmptyType)
     }
+
+    func testStringTrimming() {
+        let text = "Tweet with long url: https://twitter.com/twicket_app/status/649678392372121601 and short url: https://hello.co"
+        label.urlMaximumLength = 30
+        label.text = text
+
+        XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
+    }
 }
