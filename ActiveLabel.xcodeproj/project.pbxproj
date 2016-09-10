@@ -30,6 +30,13 @@
 			remoteGlobalIDString = 8F0249A11B9989B1005D8035;
 			remoteInfo = ActiveLabel;
 		};
+		DB1A5EDA1D842F2900CBEAEE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8F0249991B9989B1005D8035 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F0249A11B9989B1005D8035;
+			remoteInfo = ActiveLabel;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
@@ -196,6 +203,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				DB1A5EDB1D842F2900CBEAEE /* PBXTargetDependency */,
 			);
 			name = ActiveLabelDemo;
 			productName = ActiveLabelDemo;
@@ -222,6 +230,7 @@
 					};
 					8F0249BF1B998A66005D8035 = {
 						CreatedOnToolsVersion = 7.0;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -309,6 +318,11 @@
 			isa = PBXTargetDependency;
 			target = 8F0249A11B9989B1005D8035 /* ActiveLabel */;
 			targetProxy = 8F0249AE1B9989B1005D8035 /* PBXContainerItemProxy */;
+		};
+		DB1A5EDB1D842F2900CBEAEE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F0249A11B9989B1005D8035 /* ActiveLabel */;
+			targetProxy = DB1A5EDA1D842F2900CBEAEE /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -491,6 +505,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = optonaut.ActiveLabelDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -503,6 +518,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = optonaut.ActiveLabelDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};

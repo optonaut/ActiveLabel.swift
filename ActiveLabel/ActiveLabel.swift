@@ -241,8 +241,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
         if parseText {
             clearActiveElements()
-            let newString = parseTextAndExtractActiveElements(mutAttrString)
-            mutAttrString.mutableString.setString(newString)
+            parseTextAndExtractActiveElements(mutAttrString)
         }
 
         addLinkAttribute(mutAttrString)
@@ -269,47 +268,43 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
     /// add link attribute
     private func addLinkAttribute(mutAttrString: NSMutableAttributedString) {
-        var range = NSRange(location: 0, length: 0)
-        var attributes = mutAttrString.attributesAtIndex(0, effectiveRange: &range)
-
-        attributes[NSFontAttributeName] = font!
-        attributes[NSForegroundColorAttributeName] = textColor
-        mutAttrString.addAttributes(attributes, range: range)
-
-        attributes[NSForegroundColorAttributeName] = mentionColor
 
         for (type, elements) in activeElements {
-
-            switch type {
-            case .Mention: attributes[NSForegroundColorAttributeName] = mentionColor
-            case .Hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
-            case .URL: attributes[NSForegroundColorAttributeName] = URLColor
-            case .Custom: attributes[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
-            }
-
+            
             for element in elements {
-                mutAttrString.setAttributes(attributes, range: element.range)
+                
+                var range = NSRange(location: 0, length: 0)
+                var attr = mutAttrString.attributesAtIndex(element.range.location, effectiveRange: &range)
+                
+                switch type {
+                case .Mention: attr[NSForegroundColorAttributeName] = mentionColor
+                case .Hashtag: attr[NSForegroundColorAttributeName] = hashtagColor
+                case .URL: attr[NSForegroundColorAttributeName] = URLColor
+                case .Custom: attr[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
+                }
+                
+                mutAttrString.setAttributes(attr, range: element.range)
             }
         }
     }
 
     /// use regex check all link ranges
-    private func parseTextAndExtractActiveElements(attrString: NSMutableAttributedString) -> String {
-        var textString = attrString.string
-        var textLength = textString.utf16.count
-        var textRange = NSRange(location: 0, length: textLength)
+    private func parseTextAndExtractActiveElements(attrString: NSMutableAttributedString) {
+        let textString = attrString.string
+        let textLength = textString.utf16.count
+        let textRange = NSRange(location: 0, length: textLength)
 
         if enabledTypes.contains(.URL) {
-            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLenght: urlMaximumLength)
-            let urlElements = tuple.0
-            let finalText = tuple.1
-            textString = finalText
-            textLength = textString.utf16.count
-            textRange = NSRange(location: 0, length: textLength)
+            let urlElements = ActiveBuilder.createURLElements(from: attrString, range: textRange, maximumLenght: urlMaximumLength)
+//            let urlElements = tuple.0
+//            let finalText = tuple.1
+//            textString = finalText
+//            textLength = textString.utf16.count
+//            textRange = NSRange(location: 0, length: textLength)
             activeElements[.URL] = urlElements
         }
 
-        for type in enabledTypes where type != .URL{
+        for type in enabledTypes where type != .URL {
             var filter: ((String) -> Bool)? = nil
             if type == .Mention {
                 filter = mentionFilterPredicate
@@ -319,8 +314,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             let hashtagElements = ActiveBuilder.createElements(type, from: textString, range: textRange, filterPredicate: filter)
             activeElements[type] = hashtagElements
         }
-
-        return textString
     }
 
 
@@ -346,8 +339,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         guard let selectedElement = selectedElement else {
             return
         }
-
-        var attributes = textStorage.attributesAtIndex(0, effectiveRange: nil)
+        
+        var attributes = textStorage.attributesAtIndex(selectedElement.range.location, effectiveRange: nil)
         let type = selectedElement.type
 
         if isSelected {

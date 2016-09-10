@@ -12,6 +12,7 @@ import ActiveLabel
 class ViewController: UIViewController {
     
     let label = ActiveLabel()
+    let uiLabel = UILabel()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,13 +26,34 @@ class ViewController: UIViewController {
         label.urlMaximumLength = 31
 
         label.customize { label in
-            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
-            " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
-                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+            
+            let text = NSMutableAttributedString()
+            
+            let s1 = NSAttributedString(string: "HELLO ", attributes: [
+                NSForegroundColorAttributeName : UIColor.orangeColor(),
+                NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline).fontWithSize(30)
+            ])
+            let longText = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
+                " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
+            "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+            let s2 = NSAttributedString(string: longText, attributes: [
+                NSForegroundColorAttributeName : UIColor(red: 102.0/255, green: 117.0/255, blue: 127.0/255, alpha: 1),
+                NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+            ])
+            text.appendAttributedString(s1)
+            text.appendAttributedString(s2)
+
+            label.attributedText = text
+            self.uiLabel.attributedText = NSAttributedString(attributedString: text)
+            self.uiLabel.numberOfLines = 0
+            
+//            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
+//            " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
+//                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
             label.numberOfLines = 0
             label.lineSpacing = 4
             
-            label.textColor = UIColor(red: 102.0/255, green: 117.0/255, blue: 127.0/255, alpha: 1)
+//            label.textColor = UIColor(red: 102.0/255, green: 117.0/255, blue: 127.0/255, alpha: 1)
             label.hashtagColor = UIColor(red: 85.0/255, green: 172.0/255, blue: 238.0/255, alpha: 1)
             label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
             label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
@@ -39,7 +61,7 @@ class ViewController: UIViewController {
 
             label.handleMentionTap { self.alert("Mention", message: $0) }
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
-            label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
+            label.handleURLTap { self.alert("URL", message: $0.absoluteString!) }
 
             //Custom types
 
@@ -55,6 +77,8 @@ class ViewController: UIViewController {
         label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
         view.addSubview(label)
         
+        uiLabel.frame = CGRect(x: 20, y: 350, width: view.frame.width - 40, height: 300)
+        view.addSubview(uiLabel)
         
         // Do any additional setup after loading the view, typically from a nib.
     }
