@@ -525,8 +525,8 @@ public class ActiveLabel: UILabel {
     super.touchesBegan(touches, withEvent: event)
   }
 
-  public override func touchesCancelled(touches: Set<UITouch>?, withEvent event: UIEvent?) {
-    guard let touch = touches?.first else { return }
+  public override func touchesCancelled(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    guard let touch = touches.first else { return }
     onTouch(touch)
     super.touchesCancelled(touches, withEvent: event)
   }
