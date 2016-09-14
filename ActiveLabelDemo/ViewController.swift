@@ -21,14 +21,14 @@ class ViewController: UIViewController {
       CustomExpression(
         regex: "[^\\w#](s[\\w]+)", // any word beginning by s which is not an hashtag
         mapFn: { (result:NSTextCheckingResult) -> NSRange in
-          return result.rangeAtIndex(1) // which range would you like to use?
+          return result.rangeAt(1) // which range would you like to use?
         },
-        options: [NSRegularExpressionOptions.CaseInsensitive]) // some optional options for the regular expression
+        options: [NSRegularExpression.Options.caseInsensitive]) // some optional options for the regular expression
         .identifier("word beginning by 's'") // optional handy identifier
     ]
     
     label.shouldIgnoreElement {
-      if case .Mention(let username) = $0 where username == "thishandle" { return true }
+      if case .mention(let username) = $0, username == "thishandle" { return true }
       return false
     }
 

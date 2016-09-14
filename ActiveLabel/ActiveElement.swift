@@ -9,27 +9,27 @@
 import Foundation
 
 public enum ActiveElement {
-  case Mention(String)
-  case Hashtag(String)
-  case URL(String)
-  case CustomExpression(text: String, identifier: String)
-  case None
+  case mention(String)
+  case hashtag(String)
+  case url(String)
+  case customExpression(text: String, identifier: String)
+  case none
 }
 
 public enum ActiveType {
-  case Mention
-  case Hashtag
-  case URL
-  case CustomExpression
-  case None
+  case mention
+  case hashtag
+  case url
+  case customExpression
+  case none
 
-  func createElement(word: String, identifier: String = "") -> ActiveElement {
+  func createElement(_ word: String, identifier: String = "") -> ActiveElement {
     switch self {
-    case .Mention: return .Mention(word)
-    case .Hashtag: return .Hashtag(word)
-    case .URL: return .URL(word)
-    case .CustomExpression: return .CustomExpression(text: word, identifier: identifier)
-    default: return .None
+    case .mention: return .mention(word)
+    case .hashtag: return .hashtag(word)
+    case .url: return .url(word)
+    case .customExpression: return .customExpression(text: word, identifier: identifier)
+    default: return .none
     }
   }
 }
