@@ -280,6 +280,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         let glyphOriginY = heightCorrection > 0 ? rect.origin.y + heightCorrection : rect.origin.y
         return CGPoint(x: rect.origin.x, y: glyphOriginY)
     }
+	
+	public typealias ConfigureLinkAttribute = (ActiveType, [String: Any]) -> ([String: Any])
+	public var configureLinkAttribute: ConfigureLinkAttribute?
 
     /// add link attribute
     fileprivate func addLinkAttribute(_ mutAttrString: NSMutableAttributedString) {
@@ -304,6 +307,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             if let highlightFont = hightlightFont {
                 attributes[NSFontAttributeName] = highlightFont
             }
+			
+			if let configureLinkAttribute = configureLinkAttribute {
+				attributes = configureLinkAttribute(type, attributes)
+			}
 
             for element in elements {
                 mutAttrString.setAttributes(attributes, range: element.range)
