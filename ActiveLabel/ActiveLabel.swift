@@ -80,6 +80,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open func handleCustomTap(for type: ActiveType, handler: @escaping (String) -> ()) {
         customTapHandlers[type] = handler
     }
+	
+    open func removeHandleCustomTap(for type: ActiveType) {
+        customTapHandlers[type] = nil
+    }
+	
+    open func removeAllHandleCustomTaps() {
+        customTapHandlers.removeAll()
+    }
 
     open func filterMention(_ predicate: @escaping (String) -> Bool) {
         mentionFilterPredicate = predicate
@@ -281,8 +289,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         return CGPoint(x: rect.origin.x, y: glyphOriginY)
     }
 	
-	public typealias ConfigureLinkAttribute = (ActiveType, [String: Any]) -> ([String: Any])
-	public var configureLinkAttribute: ConfigureLinkAttribute?
+    public typealias ConfigureLinkAttribute = (ActiveType, [String: Any]) -> ([String: Any])
+    public var configureLinkAttribute: ConfigureLinkAttribute?
 
     /// add link attribute
     fileprivate func addLinkAttribute(_ mutAttrString: NSMutableAttributedString) {
@@ -308,9 +316,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 attributes[NSFontAttributeName] = highlightFont
             }
 			
-			if let configureLinkAttribute = configureLinkAttribute {
-				attributes = configureLinkAttribute(type, attributes)
-			}
+            if let configureLinkAttribute = configureLinkAttribute {
+                attributes = configureLinkAttribute(type, attributes)
+            }
 
             for element in elements {
                 mutAttrString.setAttributes(attributes, range: element.range)
