@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		880C59C31D88E201000E9C18 /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
 		8F0249A61B9989B1005D8035 /* ActiveLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 8F0249A51B9989B1005D8035 /* ActiveLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8F0249AD1B9989B1005D8035 /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
 		8F0249B21B9989B1005D8035 /* ActiveTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249B11B9989B1005D8035 /* ActiveTypeTests.swift */; };
@@ -74,7 +73,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				880C59C31D88E201000E9C18 /* ActiveLabel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
