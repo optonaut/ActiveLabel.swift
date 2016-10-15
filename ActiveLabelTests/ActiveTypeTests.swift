@@ -13,10 +13,10 @@ extension ActiveElement: Equatable {}
 
 func ==(a: ActiveElement, b: ActiveElement) -> Bool {
     switch (a, b) {
-    case (.Mention(let a), .Mention(let b)) where a == b: return true
-    case (.Hashtag(let a), .Hashtag(let b)) where a == b: return true
-    case (.URL(let a), .URL(let b)) where a == b: return true
-    case (.Custom(let a), .Custom(let b)) where a == b: return true
+    case (.mention(let a), .mention(let b)) where a == b: return true
+    case (.hashtag(let a), .hashtag(let b)) where a == b: return true
+    case (.url(let a), .url(let b)) where a == b: return true
+    case (.custom(let a), .custom(let b)) where a == b: return true
     default: return false
     }
 }
@@ -24,7 +24,7 @@ func ==(a: ActiveElement, b: ActiveElement) -> Bool {
 class ActiveTypeTests: XCTestCase {
     
     let label = ActiveLabel()
-    let customEmptyType = ActiveType.Custom(pattern: "")
+    let customEmptyType = ActiveType.custom(pattern: "")
     
     var activeElements: [ActiveElement] {
         return label.activeElements.flatMap({$0.1.flatMap({$0.element})})
@@ -33,26 +33,26 @@ class ActiveTypeTests: XCTestCase {
     var currentElementString: String? {
         guard let currentElement = activeElements.first else { return nil }
         switch currentElement {
-        case .Mention(let mention): return mention
-        case .Hashtag(let hashtag): return hashtag
-        case .URL(let url, _): return url
-        case .Custom(let element): return element
+        case .mention(let mention): return mention
+        case .hashtag(let hashtag): return hashtag
+        case .url(let url, _): return url
+        case .custom(let element): return element
         }
     }
     
     var currentElementType: ActiveType? {
         guard let currentElement = activeElements.first else { return nil }
         switch currentElement {
-        case .Mention: return .Mention
-        case .Hashtag: return .Hashtag
-        case .URL: return .URL
-        case .Custom: return customEmptyType
+        case .mention: return .mention
+        case .hashtag: return .hashtag
+        case .url: return .url
+        case .custom: return customEmptyType
         }
     }
     
     override func setUp() {
         super.setUp()
-        label.enabledTypes = [.Mention, .Hashtag, .URL]
+        label.enabledTypes = [.mention, .hashtag, .url]
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
     
@@ -78,42 +78,42 @@ class ActiveTypeTests: XCTestCase {
         label.text = "@userhandle"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
         
         label.text = "@userhandle."
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
 
         label.text = "@_with_underscores_"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "_with_underscores_")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
         
         label.text = " . @userhandle"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
         
         label.text = "@user#hashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "user")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
         
         label.text = "@user@mention"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "user")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
         
         label.text = ".@userhandle"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
         
         label.text = " .@userhandle"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "userhandle")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
 
         label.text = "word@mention"
         XCTAssertEqual(activeElements.count, 0)
@@ -129,32 +129,32 @@ class ActiveTypeTests: XCTestCase {
         label.text = "#somehashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "somehashtag")
-        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        XCTAssertEqual(currentElementType, ActiveType.hashtag)
 
         label.text = "#somehashtag."
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "somehashtag")
-        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        XCTAssertEqual(currentElementType, ActiveType.hashtag)
 
         label.text = "#_with_underscores_"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "_with_underscores_")
-        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        XCTAssertEqual(currentElementType, ActiveType.hashtag)
         
         label.text = " . #somehashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "somehashtag")
-        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        XCTAssertEqual(currentElementType, ActiveType.hashtag)
         
         label.text = "#some#hashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "some")
-        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        XCTAssertEqual(currentElementType, ActiveType.hashtag)
         
         label.text = "#some@mention"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "some")
-        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        XCTAssertEqual(currentElementType, ActiveType.hashtag)
         
         label.text = ".#somehashtag"
         XCTAssertEqual(activeElements.count, 0)
@@ -174,34 +174,34 @@ class ActiveTypeTests: XCTestCase {
         label.text = "http://www.google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "http://www.google.com")
-        XCTAssertEqual(currentElementType, ActiveType.URL)
+        XCTAssertEqual(currentElementType, ActiveType.url)
 
         label.text = "https://www.google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "https://www.google.com")
-        XCTAssertEqual(currentElementType, ActiveType.URL)
+        XCTAssertEqual(currentElementType, ActiveType.url)
 
         label.text = "http://www.google.com."
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "http://www.google.com")
-        XCTAssertEqual(currentElementType, ActiveType.URL)
+        XCTAssertEqual(currentElementType, ActiveType.url)
 
         label.text = "www.google.com"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "www.google.com")
-        XCTAssertEqual(currentElementType, ActiveType.URL)
+        XCTAssertEqual(currentElementType, ActiveType.url)
         
         label.text = "pic.twitter.com/YUGdEbUx"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "pic.twitter.com/YUGdEbUx")
-        XCTAssertEqual(currentElementType, ActiveType.URL)
+        XCTAssertEqual(currentElementType, ActiveType.url)
 
         label.text = "google.com"
         XCTAssertEqual(activeElements.count, 0)
     }
 
     func testCustomType() {
-        let newType = ActiveType.Custom(pattern: "\\sare\\b")
+        let newType = ActiveType.custom(pattern: "\\sare\\b")
         label.enabledTypes.append(newType)
 
         label.text = "we are one"
@@ -247,12 +247,12 @@ class ActiveTypeTests: XCTestCase {
     }
 
     func testOnlyMentionsEnabled() {
-        label.enabledTypes = [.Mention]
+        label.enabledTypes = [.mention]
 
         label.text = "@user #hashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "user")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
 
         label.text = "http://www.google.com"
         XCTAssertEqual(activeElements.count, 0)
@@ -263,16 +263,16 @@ class ActiveTypeTests: XCTestCase {
         label.text = "@userNumberOne #hashtag http://www.google.com @anotheruser"
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "userNumberOne")
-        XCTAssertEqual(currentElementType, ActiveType.Mention)
+        XCTAssertEqual(currentElementType, ActiveType.mention)
     }
 
     func testOnlyHashtagEnabled() {
-        label.enabledTypes = [.Hashtag]
+        label.enabledTypes = [.hashtag]
 
         label.text = "@user #hashtag"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "hashtag")
-        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        XCTAssertEqual(currentElementType, ActiveType.hashtag)
 
         label.text = "http://www.google.com"
         XCTAssertEqual(activeElements.count, 0)
@@ -283,16 +283,16 @@ class ActiveTypeTests: XCTestCase {
         label.text = "#hashtagNumberOne #hashtag http://www.google.com @anotheruser"
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "hashtagNumberOne")
-        XCTAssertEqual(currentElementType, ActiveType.Hashtag)
+        XCTAssertEqual(currentElementType, ActiveType.hashtag)
     }
 
     func testOnlyURLsEnabled() {
-        label.enabledTypes = [.URL]
+        label.enabledTypes = [.url]
 
         label.text = "http://www.google.com #hello"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "http://www.google.com")
-        XCTAssertEqual(currentElementType, ActiveType.URL)
+        XCTAssertEqual(currentElementType, ActiveType.url)
 
         label.text = "@user"
         XCTAssertEqual(activeElements.count, 0)
@@ -303,11 +303,11 @@ class ActiveTypeTests: XCTestCase {
         label.text = " http://www.apple.com @userNumberOne #hashtag http://www.google.com @anotheruser"
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "http://www.apple.com")
-        XCTAssertEqual(currentElementType, ActiveType.URL)
+        XCTAssertEqual(currentElementType, ActiveType.url)
     }
 
     func testOnlyCustomEnabled() {
-        let newType = ActiveType.Custom(pattern: "\\sare\\b")
+        let newType = ActiveType.custom(pattern: "\\sare\\b")
         label.enabledTypes = [newType]
 
         label.text = "http://www.google.com  are #hello"
