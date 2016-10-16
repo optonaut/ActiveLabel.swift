@@ -20,6 +20,8 @@
 		C1D15C791D7C9B610041D119 /* StringTrimExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */; };
 		C1D15C7B1D7C9B7E0041D119 /* ActiveBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */; };
 		C1E867D61C3D7AEA00FD687A /* RegexParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E867D51C3D7AEA00FD687A /* RegexParser.swift */; };
+		E267FA251DB3A34900EEAC4C /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
+		E267FA261DB3A34900EEAC4C /* ActiveLabel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,7 +32,28 @@
 			remoteGlobalIDString = 8F0249A11B9989B1005D8035;
 			remoteInfo = ActiveLabel;
 		};
+		E267FA271DB3A34900EEAC4C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8F0249991B9989B1005D8035 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8F0249A11B9989B1005D8035;
+			remoteInfo = ActiveLabel;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E267FA291DB3A34900EEAC4C /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E267FA261DB3A34900EEAC4C /* ActiveLabel.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		8F0249A21B9989B1005D8035 /* ActiveLabel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ActiveLabel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,6 +96,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E267FA251DB3A34900EEAC4C /* ActiveLabel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -192,10 +216,12 @@
 				8F0249BC1B998A66005D8035 /* Sources */,
 				8F0249BD1B998A66005D8035 /* Frameworks */,
 				8F0249BE1B998A66005D8035 /* Resources */,
+				E267FA291DB3A34900EEAC4C /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E267FA281DB3A34900EEAC4C /* PBXTargetDependency */,
 			);
 			name = ActiveLabelDemo;
 			productName = ActiveLabelDemo;
@@ -310,6 +336,11 @@
 			isa = PBXTargetDependency;
 			target = 8F0249A11B9989B1005D8035 /* ActiveLabel */;
 			targetProxy = 8F0249AE1B9989B1005D8035 /* PBXContainerItemProxy */;
+		};
+		E267FA281DB3A34900EEAC4C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F0249A11B9989B1005D8035 /* ActiveLabel */;
+			targetProxy = E267FA271DB3A34900EEAC4C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -493,6 +524,7 @@
 		8F0249CF1B998A66005D8035 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = ActiveLabelDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
@@ -506,6 +538,7 @@
 		8F0249D01B998A66005D8035 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = ActiveLabelDemo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;

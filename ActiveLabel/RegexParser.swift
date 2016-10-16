@@ -16,9 +16,21 @@ struct RegexParser {
         "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
     "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"
 
+    private static var cachedRegularExpressions: [String : NSRegularExpression] = [:]
 
     static func getElements(from text: String, with pattern: String, range: NSRange) -> [NSTextCheckingResult]{
-        guard let elementRegex = try? NSRegularExpression(pattern: pattern, options: [.CaseInsensitive]) else { return [] }
+        guard let elementRegex = regularExpression(for: pattern) else { return [] }
         return elementRegex.matchesInString(text, options: [], range: range)
+    }
+
+    private static func regularExpression(for pattern: String) -> NSRegularExpression? {
+        if let regex = cachedRegularExpressions[pattern] {
+            return regex
+        } else if let createdRegex = try? NSRegularExpression(pattern: pattern, options: [.CaseInsensitive]) {
+            cachedRegularExpressions[pattern] = createdRegex
+            return createdRegex
+        } else {
+            return nil
+        }
     }
 }
