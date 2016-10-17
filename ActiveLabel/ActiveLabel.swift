@@ -274,8 +274,18 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         for (type, elements) in activeElements {
             for element in elements {
                 
+                // The element may include a leading space which 
+                // must be removed to avoid overlapping of text styles.
+                let elementRange: NSRange
+                let elementText = (mutAttrString.string as NSString).substring(with: element.range)
+                if elementText.hasPrefix(" ") && element.range.length > 0 {
+                    elementRange = NSRange(location: element.range.location + 1, length: element.range.length - 1)
+                } else {
+                    elementRange = element.range
+                }
+                
                 var range = NSRange(location: 0, length: 0)
-                var attr = mutAttrString.attributes(at: element.range.location, effectiveRange: &range)
+                var attr = mutAttrString.attributes(at: elementRange.location, effectiveRange: &range)
                 
                 switch type {
                 case .mention: attr[NSForegroundColorAttributeName] = mentionColor
@@ -284,7 +294,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 case .custom: attr[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
                 }
                 
-                mutAttrString.setAttributes(attr, range: element.range)
+                mutAttrString.setAttributes(attr, range: elementRange)
             }
         }
     }
@@ -336,7 +346,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return
         }
 
-        var attributes = textStorage.attributes(at: 0, effectiveRange: nil)
+        var attributes = textStorage.attributes(at: selectedElement.range.location, effectiveRange: nil)
         let type = selectedElement.type
 
         if isSelected {
@@ -396,13 +406,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         if onTouch(touch) { return }
         super.touchesBegan(touches, with: event)
     }
-    
+
     open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         if onTouch(touch) { return }
         super.touchesMoved(touches, with: event)
     }
-    
+
     open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         _ = onTouch(touch)
