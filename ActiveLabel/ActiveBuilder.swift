@@ -30,7 +30,8 @@ struct ActiveBuilder {
         var elements: [ElementTuple] = []
 
         for match in matches where match.range.length > 2 {
-            let word = (originalText as NSString).substring(with: match.range).trimmingCharacters(in: .whitespacesAndNewlines)
+            let word = (originalText as NSString).substring(with: match.range)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
 
             guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
                 let range = maximumLenght == nil ? match.range : (attrString.string as NSString).range(of: word)
@@ -40,14 +41,10 @@ struct ActiveBuilder {
             }
 
             let trimmedWord = word.trim(to: maxLenght)
-
-            while true {
-                let currentRange = (attrString.string as NSString).range(of: word)
-                if currentRange.location == NSNotFound {
-                    break
-                } else {
-                    attrString.replaceCharacters(in: currentRange, with: trimmedWord)
-                }
+            
+            let currentRange = (attrString.string as NSString).range(of: word)
+            if currentRange.location != NSNotFound {
+                attrString.replaceCharacters(in: currentRange, with: trimmedWord)
                 let newRange = (attrString.string as NSString).range(of: trimmedWord)
                 let element = ActiveElement.url(original: word, trimmed: trimmedWord)
                 elements.append((newRange, element, type))
