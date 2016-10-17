@@ -20,6 +20,7 @@
 		C1D15C791D7C9B610041D119 /* StringTrimExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */; };
 		C1D15C7B1D7C9B7E0041D119 /* ActiveBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */; };
 		C1E867D61C3D7AEA00FD687A /* RegexParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E867D51C3D7AEA00FD687A /* RegexParser.swift */; };
+		DB47AA5B1DB3E3E800E4D16A /* AttributedTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB47AA5A1DB3E3E800E4D16A /* AttributedTextTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +52,7 @@
 		C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringTrimExtension.swift; sourceTree = "<group>"; };
 		C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveBuilder.swift; sourceTree = "<group>"; };
 		C1E867D51C3D7AEA00FD687A /* RegexParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegexParser.swift; sourceTree = "<group>"; };
+		DB47AA5A1DB3E3E800E4D16A /* AttributedTextTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttributedTextTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +119,7 @@
 			isa = PBXGroup;
 			children = (
 				8F0249B11B9989B1005D8035 /* ActiveTypeTests.swift */,
+				DB47AA5A1DB3E3E800E4D16A /* AttributedTextTests.swift */,
 				8F0249B31B9989B1005D8035 /* Info.plist */,
 			);
 			path = ActiveLabelTests;
@@ -289,6 +292,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB47AA5B1DB3E3E800E4D16A /* AttributedTextTests.swift in Sources */,
 				8F0249B21B9989B1005D8035 /* ActiveTypeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

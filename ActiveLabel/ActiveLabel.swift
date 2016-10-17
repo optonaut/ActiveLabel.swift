@@ -214,7 +214,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
     fileprivate var selectedElement: ElementTuple?
     fileprivate var heightCorrection: CGFloat = 0
-    fileprivate lazy var textStorage = NSTextStorage()
+    lazy var textStorage = NSTextStorage()
     fileprivate lazy var layoutManager = NSLayoutManager()
     fileprivate lazy var textContainer = NSTextContainer()
     lazy var activeElements = [ActiveType: [ElementTuple]]()
