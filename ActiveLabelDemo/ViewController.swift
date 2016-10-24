@@ -16,8 +16,8 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let customType = ActiveType.Custom(pattern: "\\sare\\b") //Looks for "are"
-        let customType2 = ActiveType.Custom(pattern: "\\sit\\b") //Looks for "it"
+        let customType = ActiveType.custom(pattern: "\\sare\\b") //Looks for "are"
+        let customType2 = ActiveType.custom(pattern: "\\sit\\b") //Looks for "it"
 
         label.enabledTypes.append(customType)
         label.enabledTypes.append(customType2)
@@ -43,10 +43,10 @@ class ViewController: UIViewController {
 
             //Custom types
 
-            label.customColor[customType] = UIColor.purpleColor()
-            label.customSelectedColor[customType] = UIColor.greenColor()
-            label.customColor[customType2] = UIColor.magentaColor()
-            label.customSelectedColor[customType2] = UIColor.greenColor()
+            label.customColor[customType] = UIColor.purple
+            label.customSelectedColor[customType] = UIColor.green
+            label.customColor[customType2] = UIColor.magenta
+            label.customSelectedColor[customType2] = UIColor.green
 
             label.handleCustomTap(for: customType) { self.alert("Custom type", message: $0) }
             label.handleCustomTap(for: customType2) { self.alert("Custom type", message: $0) }
@@ -64,10 +64,10 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func alert(title: String, message: String) {
-        let vc = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.Alert)
-        vc.addAction(UIAlertAction(title: "Ok", style: .Cancel, handler: nil))
-        presentViewController(vc, animated: true, completion: nil)
+    func alert(_ title: String, message: String) {
+        let vc = UIAlertController(title: title, message: message, preferredStyle: UIAlertControllerStyle.alert)
+        vc.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
+        present(vc, animated: true, completion: nil)
     }
 
 }
