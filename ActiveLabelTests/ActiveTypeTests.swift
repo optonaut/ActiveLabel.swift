@@ -254,34 +254,43 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertTrue(foundCustomAttributedStyling)
     }
 
-    func testRemoveHandle() {
+    func testRemoveHandleMention() {
+        label.handleMentionTap({_ in })
+        XCTAssertNotNil(label.handleMentionTap)
+        
+        label.removeHandle(for: .mention)
+        XCTAssertNil(label.mentionTapHandler)
+    }
+    
+    func testRemoveHandleHashtag() {
+        label.handleHashtagTap({_ in })
+        XCTAssertNotNil(label.handleHashtagTap)
+        
+        label.removeHandle(for: .hashtag)
+        XCTAssertNil(label.hashtagTapHandler)
+    }
+    
+    func testRemoveHandleURL() {
+        label.handleURLTap({_ in })
+        XCTAssertNotNil(label.handleURLTap)
+        
+        label.removeHandle(for: .url)
+        XCTAssertNil(label.urlTapHandler)
+    }
+    
+    func testRemoveHandleCustom() {
         let newType1 = ActiveType.custom(pattern: "\\sare1\\b")
         let newType2 = ActiveType.custom(pattern: "\\sare2\\b")
         
-        label.handleMentionTap({_ in })
-        label.handleHashtagTap({_ in })
-        label.handleURLTap({_ in })
         label.handleCustomTap(for: newType1, handler: {_ in })
         label.handleCustomTap(for: newType2, handler: {_ in })
-        
-        // Test some
-        XCTAssertNotNil(label.handleMentionTap)
-        XCTAssertNotNil(label.handleHashtagTap)
-        XCTAssertNotNil(label.handleURLTap)
         XCTAssertEqual(label.customTapHandlers.count, 2)
         
-        // Rest removal
-        label.removeHandle(for: .mention)
-        label.removeHandle(for: .hashtag)
-        label.removeHandle(for: .url)
         label.removeHandle(for: newType1)
-        label.removeHandle(for: newType2)
+        XCTAssertEqual(label.customTapHandlers.count, 1)
         
-        XCTAssertNil(label.mentionTapHandler)
-        XCTAssertNil(label.hashtagTapHandler)
-        XCTAssertNil(label.urlTapHandler)
+        label.removeHandle(for: newType2)
         XCTAssertEqual(label.customTapHandlers.count, 0)
-
     }
 
     func testFiltering() {
