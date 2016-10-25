@@ -243,7 +243,7 @@ class ActiveTypeTests: XCTestCase {
         
         // Find attributed text
         let range = (label.text! as NSString).range(of: "are")
-        let areText = label.textStorageAttributedString.attributedSubstring(from: range)
+        let areText = label.textStorage.attributedSubstring(from: range)
         
         // Enumber after attributes and find our font
         var foundCustomAttributedStyling = false
@@ -254,6 +254,35 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertTrue(foundCustomAttributedStyling)
     }
 
+    func testRemoveHandle() {
+        let newType1 = ActiveType.custom(pattern: "\\sare1\\b")
+        let newType2 = ActiveType.custom(pattern: "\\sare2\\b")
+        
+        label.handleMentionTap({_ in })
+        label.handleHashtagTap({_ in })
+        label.handleURLTap({_ in })
+        label.handleCustomTap(for: newType1, handler: {_ in })
+        label.handleCustomTap(for: newType2, handler: {_ in })
+        
+        // Test some
+        XCTAssertNotNil(label.handleMentionTap)
+        XCTAssertNotNil(label.handleHashtagTap)
+        XCTAssertNotNil(label.handleURLTap)
+        XCTAssertEqual(label.customTapHandlers.count, 2)
+        
+        // Rest removal
+        label.removeHandle(for: .mention)
+        label.removeHandle(for: .hashtag)
+        label.removeHandle(for: .url)
+        label.removeHandle(for: newType1)
+        label.removeHandle(for: newType2)
+        
+        XCTAssertNil(label.mentionTapHandler)
+        XCTAssertNil(label.hashtagTapHandler)
+        XCTAssertNil(label.urlTapHandler)
+        XCTAssertEqual(label.customTapHandlers.count, 0)
+
+    }
 
     func testFiltering() {
         label.text = "@user #tag"

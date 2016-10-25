@@ -232,27 +232,20 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate var _customizing: Bool = true
     fileprivate var defaultCustomColor: UIColor = .black
     
-    fileprivate var mentionTapHandler: ((String) -> ())?
-    fileprivate var hashtagTapHandler: ((String) -> ())?
-    fileprivate var urlTapHandler: ((URL) -> ())?
-    fileprivate var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
+    internal var mentionTapHandler: ((String) -> ())?
+    internal var hashtagTapHandler: ((String) -> ())?
+    internal var urlTapHandler: ((URL) -> ())?
+    internal var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
     
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
     fileprivate var hashtagFilterPredicate: ((String) -> Bool)?
 
     fileprivate var selectedElement: ElementTuple?
     fileprivate var heightCorrection: CGFloat = 0
-    fileprivate lazy var textStorage = NSTextStorage()
+    internal lazy var textStorage = NSTextStorage()
     fileprivate lazy var layoutManager = NSLayoutManager()
     fileprivate lazy var textContainer = NSTextContainer()
     lazy var activeElements = [ActiveType: [ElementTuple]]()
-    
-    // MARK: - internal (used for testing)
-    
-    // Needed for unit testing
-    internal var textStorageAttributedString: NSAttributedString {
-        return NSAttributedString(attributedString: textStorage)
-    }
 
     // MARK: - helper functions
     
