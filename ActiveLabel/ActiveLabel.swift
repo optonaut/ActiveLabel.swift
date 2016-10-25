@@ -13,6 +13,7 @@ public protocol ActiveLabelDelegate: class {
     func didSelect(_ text: String, type: ActiveType)
 }
 
+public typealias ConfigureLinkAttribute = (ActiveType, [String : Any], Bool) -> ([String : Any])
 typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveType)
 
 @IBDesignable open class ActiveLabel: UILabel {
@@ -23,6 +24,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url]
 
     open var urlMaximumLength: Int?
+    
+    open var configureLinkAttribute: ConfigureLinkAttribute?
 
     @IBInspectable open var mentionColor: UIColor = .blue {
         didSet { updateTextStorage(parseText: false) }
@@ -79,6 +82,19 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
     open func handleCustomTap(for type: ActiveType, handler: @escaping (String) -> ()) {
         customTapHandlers[type] = handler
+    }
+	
+    open func removeHandle(for type: ActiveType) {
+        switch type {
+        case .hashtag:
+            hashtagTapHandler = nil
+        case .mention:
+            mentionTapHandler = nil
+        case .url:
+            urlTapHandler = nil
+        case .custom:
+            customTapHandlers[type] = nil
+        }
     }
 
     open func filterMention(_ predicate: @escaping (String) -> Bool) {
@@ -216,22 +232,23 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate var _customizing: Bool = true
     fileprivate var defaultCustomColor: UIColor = .black
     
-    fileprivate var mentionTapHandler: ((String) -> ())?
-    fileprivate var hashtagTapHandler: ((String) -> ())?
-    fileprivate var urlTapHandler: ((URL) -> ())?
-    fileprivate var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
-
+    internal var mentionTapHandler: ((String) -> ())?
+    internal var hashtagTapHandler: ((String) -> ())?
+    internal var urlTapHandler: ((URL) -> ())?
+    internal var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
+    
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
     fileprivate var hashtagFilterPredicate: ((String) -> Bool)?
 
     fileprivate var selectedElement: ElementTuple?
     fileprivate var heightCorrection: CGFloat = 0
-    fileprivate lazy var textStorage = NSTextStorage()
+    internal lazy var textStorage = NSTextStorage()
     fileprivate lazy var layoutManager = NSLayoutManager()
     fileprivate lazy var textContainer = NSTextContainer()
     lazy var activeElements = [ActiveType: [ElementTuple]]()
 
     // MARK: - helper functions
+    
     fileprivate func setupLabel() {
         textStorage.addLayoutManager(layoutManager)
         layoutManager.addTextContainer(textContainer)
@@ -303,6 +320,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             
             if let highlightFont = hightlightFont {
                 attributes[NSFontAttributeName] = highlightFont
+            }
+			
+            if let configureLinkAttribute = configureLinkAttribute {
+                attributes = configureLinkAttribute(type, attributes, false)
             }
 
             for element in elements {
@@ -392,6 +413,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         
         if let highlightFont = hightlightFont {
             attributes[NSFontAttributeName] = highlightFont
+        }
+        
+        if let configureLinkAttribute = configureLinkAttribute {
+            attributes = configureLinkAttribute(type, attributes, isSelected)
         }
 
         textStorage.addAttributes(attributes, range: selectedElement.range)

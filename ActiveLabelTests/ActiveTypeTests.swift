@@ -222,6 +222,76 @@ class ActiveTypeTests: XCTestCase {
         label.text = "google"
         XCTAssertEqual(activeElements.count, 0)
     }
+    
+    func testConfigureLinkAttributes() {
+        // Customize label
+        let newType = ActiveType.custom(pattern: "\\sare\\b")
+        label.customize { label in
+            label.enabledTypes = [newType]
+            
+            // Configure "are" to be system font / bold / 14
+            label.configureLinkAttribute = { type, attributes, isSelected in
+                var atts = attributes
+                if case newType = type {
+                    atts[NSFontAttributeName] = UIFont.boldSystemFont(ofSize: 14)
+                }
+                
+                return atts
+            }
+            label.text = "we are one"
+        }
+        
+        // Find attributed text
+        let range = (label.text! as NSString).range(of: "are")
+        let areText = label.textStorage.attributedSubstring(from: range)
+        
+        // Enumber after attributes and find our font
+        var foundCustomAttributedStyling = false
+        areText.enumerateAttributes(in: NSRange(location: 0, length: areText.length), options: [.longestEffectiveRangeNotRequired], using: { (attributes, range, stop) in
+            foundCustomAttributedStyling = attributes[NSFontAttributeName] as? UIFont == UIFont.boldSystemFont(ofSize: 14)
+        })
+
+        XCTAssertTrue(foundCustomAttributedStyling)
+    }
+
+    func testRemoveHandleMention() {
+        label.handleMentionTap({_ in })
+        XCTAssertNotNil(label.handleMentionTap)
+        
+        label.removeHandle(for: .mention)
+        XCTAssertNil(label.mentionTapHandler)
+    }
+    
+    func testRemoveHandleHashtag() {
+        label.handleHashtagTap({_ in })
+        XCTAssertNotNil(label.handleHashtagTap)
+        
+        label.removeHandle(for: .hashtag)
+        XCTAssertNil(label.hashtagTapHandler)
+    }
+    
+    func testRemoveHandleURL() {
+        label.handleURLTap({_ in })
+        XCTAssertNotNil(label.handleURLTap)
+        
+        label.removeHandle(for: .url)
+        XCTAssertNil(label.urlTapHandler)
+    }
+    
+    func testRemoveHandleCustom() {
+        let newType1 = ActiveType.custom(pattern: "\\sare1\\b")
+        let newType2 = ActiveType.custom(pattern: "\\sare2\\b")
+        
+        label.handleCustomTap(for: newType1, handler: {_ in })
+        label.handleCustomTap(for: newType2, handler: {_ in })
+        XCTAssertEqual(label.customTapHandlers.count, 2)
+        
+        label.removeHandle(for: newType1)
+        XCTAssertEqual(label.customTapHandlers.count, 1)
+        
+        label.removeHandle(for: newType2)
+        XCTAssertEqual(label.customTapHandlers.count, 0)
+    }
 
     func testFiltering() {
         label.text = "@user #tag"
