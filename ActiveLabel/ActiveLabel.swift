@@ -13,7 +13,7 @@ public protocol ActiveLabelDelegate: class {
     func didSelect(_ text: String, type: ActiveType)
 }
 
-public typealias ConfigureLinkAttribute = (ActiveType, [String : Any]) -> ([String : Any])
+public typealias ConfigureLinkAttribute = (ActiveType, [String : Any], Bool) -> ([String : Any])
 typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveType)
 
 @IBDesignable open class ActiveLabel: UILabel {
@@ -246,8 +246,16 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate lazy var layoutManager = NSLayoutManager()
     fileprivate lazy var textContainer = NSTextContainer()
     lazy var activeElements = [ActiveType: [ElementTuple]]()
+    
+    // MARK: - internal (used for testing)
+    
+    // Needed for unit testing
+    internal var textStorageAttributedString: NSAttributedString {
+        return NSAttributedString(attributedString: textStorage)
+    }
 
     // MARK: - helper functions
+    
     fileprivate func setupLabel() {
         textStorage.addLayoutManager(layoutManager)
         layoutManager.addTextContainer(textContainer)
@@ -322,7 +330,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             }
 			
             if let configureLinkAttribute = configureLinkAttribute {
-                attributes = configureLinkAttribute(type, attributes)
+                attributes = configureLinkAttribute(type, attributes, false)
             }
 
             for element in elements {
@@ -412,6 +420,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         
         if let highlightFont = hightlightFont {
             attributes[NSFontAttributeName] = highlightFont
+        }
+        
+        if let configureLinkAttribute = configureLinkAttribute {
+            attributes = configureLinkAttribute(type, attributes, isSelected)
         }
 
         textStorage.addAttributes(attributes, range: selectedElement.range)

@@ -222,6 +222,38 @@ class ActiveTypeTests: XCTestCase {
         label.text = "google"
         XCTAssertEqual(activeElements.count, 0)
     }
+    
+    func testConfigureLinkAttributes() {
+        // Customize label
+        let newType = ActiveType.custom(pattern: "\\sare\\b")
+        label.customize { label in
+            label.enabledTypes = [newType]
+            
+            // Configure "are" to be system font / bold / 14
+            label.configureLinkAttribute = { type, attributes, isSelected in
+                var atts = attributes
+                if case newType = type {
+                    atts[NSFontAttributeName] = UIFont.boldSystemFont(ofSize: 14)
+                }
+                
+                return atts
+            }
+            label.text = "we are one"
+        }
+        
+        // Find attributed text
+        let range = (label.text! as NSString).range(of: "are")
+        let areText = label.textStorageAttributedString.attributedSubstring(from: range)
+        
+        // Enumber after attributes and find our font
+        var foundCustomAttributedStyling = false
+        areText.enumerateAttributes(in: NSRange(location: 0, length: areText.length), options: [.longestEffectiveRangeNotRequired], using: { (attributes, range, stop) in
+            foundCustomAttributedStyling = attributes[NSFontAttributeName] as? UIFont == UIFont.boldSystemFont(ofSize: 14)
+        })
+
+        XCTAssertTrue(foundCustomAttributedStyling)
+    }
+
 
     func testFiltering() {
         label.text = "@user #tag"
