@@ -51,11 +51,17 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     @IBInspectable open var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable public var highlightfontName: String = "" {
+    @IBInspectable public var highlightFontName: String? = nil {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable public var highlightfontSize: CGFloat = 12 {
+    @IBInspectable public var highlightFontSize: CGFloat? = nil {
         didSet { updateTextStorage(parseText: false) }
+    }
+    
+    // MARK: - Computed Properties
+    private var hightlightFont: UIFont? {
+        guard let highlightFontName = highlightFontName, let highlightFontSize = highlightFontSize else { return nil }
+        return UIFont(name: highlightFontName, size: highlightFontSize)
     }
 
     // MARK: - public methods
@@ -295,7 +301,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .custom: attributes[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
             }
             
-            if let highlightFont = UIFont(name: highlightfontName, size: highlightfontSize) {
+            if let highlightFont = hightlightFont {
                 attributes[NSFontAttributeName] = highlightFont
             }
 
@@ -384,7 +390,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             attributes[NSForegroundColorAttributeName] = unselectedColor
         }
         
-        if let highlightFont = UIFont(name: highlightfontName, size: highlightfontSize) {
+        if let highlightFont = hightlightFont {
             attributes[NSFontAttributeName] = highlightFont
         }
 
