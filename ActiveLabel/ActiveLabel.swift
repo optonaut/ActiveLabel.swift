@@ -13,6 +13,7 @@ public protocol ActiveLabelDelegate: class {
     func didSelect(_ text: String, type: ActiveType)
 }
 
+public typealias ConfigureLinkAttribute = (ActiveType, [String : Any]) -> ([String : Any])
 typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveType)
 
 @IBDesignable open class ActiveLabel: UILabel {
@@ -23,6 +24,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url]
 
     open var urlMaximumLength: Int?
+    
+    open var configureLinkAttribute: ConfigureLinkAttribute?
 
     @IBInspectable open var mentionColor: UIColor = .blue {
         didSet { updateTextStorage(parseText: false) }
@@ -81,12 +84,17 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         customTapHandlers[type] = handler
     }
 	
-    open func removeHandleCustomTap(for type: ActiveType) {
-        customTapHandlers[type] = nil
-    }
-	
-    open func removeAllHandleCustomTaps() {
-        customTapHandlers.removeAll()
+    open func removeHandle(for type: ActiveType) {
+        switch type {
+        case .hashtag:
+            hashtagTapHandler = nil
+        case .mention:
+            mentionTapHandler = nil
+        case .url:
+            urlTapHandler = nil
+        case .custom:
+            customTapHandlers[type] = nil
+        }
     }
 
     open func filterMention(_ predicate: @escaping (String) -> Bool) {
@@ -228,7 +236,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate var hashtagTapHandler: ((String) -> ())?
     fileprivate var urlTapHandler: ((URL) -> ())?
     fileprivate var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
-
+    
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
     fileprivate var hashtagFilterPredicate: ((String) -> Bool)?
 
@@ -288,9 +296,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         let glyphOriginY = heightCorrection > 0 ? rect.origin.y + heightCorrection : rect.origin.y
         return CGPoint(x: rect.origin.x, y: glyphOriginY)
     }
-	
-    public typealias ConfigureLinkAttribute = (ActiveType, [String: Any]) -> ([String: Any])
-    public var configureLinkAttribute: ConfigureLinkAttribute?
 
     /// add link attribute
     fileprivate func addLinkAttribute(_ mutAttrString: NSMutableAttributedString) {
