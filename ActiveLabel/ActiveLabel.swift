@@ -51,6 +51,18 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     @IBInspectable open var lineSpacing: Float = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
+    @IBInspectable public var highlightFontName: String? = nil {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var highlightFontSize: CGFloat? = nil {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    
+    // MARK: - Computed Properties
+    private var hightlightFont: UIFont? {
+        guard let highlightFontName = highlightFontName, let highlightFontSize = highlightFontSize else { return nil }
+        return UIFont(name: highlightFontName, size: highlightFontSize)
+    }
 
     // MARK: - public methods
     open func handleMentionTap(_ handler: @escaping (String) -> ()) {
@@ -288,6 +300,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .url: attributes[NSForegroundColorAttributeName] = URLColor
             case .custom: attributes[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
             }
+            
+            if let highlightFont = hightlightFont {
+                attributes[NSFontAttributeName] = highlightFont
+            }
 
             for element in elements {
                 mutAttrString.setAttributes(attributes, range: element.range)
@@ -372,6 +388,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .custom: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
             }
             attributes[NSForegroundColorAttributeName] = unselectedColor
+        }
+        
+        if let highlightFont = hightlightFont {
+            attributes[NSFontAttributeName] = highlightFont
         }
 
         textStorage.addAttributes(attributes, range: selectedElement.range)
