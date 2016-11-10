@@ -11,7 +11,7 @@ import XCTest
 
 extension ActiveElement: Equatable {}
 
-func ==(a: ActiveElement, b: ActiveElement) -> Bool {
+public func ==(a: ActiveElement, b: ActiveElement) -> Bool {
     switch (a, b) {
     case (.mention(let a), .mention(let b)) where a == b: return true
     case (.hashtag(let a), .hashtag(let b)) where a == b: return true
@@ -194,6 +194,11 @@ class ActiveTypeTests: XCTestCase {
         label.text = "pic.twitter.com/YUGdEbUx"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "pic.twitter.com/YUGdEbUx")
+        XCTAssertEqual(currentElementType, ActiveType.url)
+        
+        label.text = "http://url.with.other.language/한글"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "http://url.with.other.language/한글")
         XCTAssertEqual(currentElementType, ActiveType.url)
 
         label.text = "google.com"
