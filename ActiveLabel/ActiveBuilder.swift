@@ -51,7 +51,7 @@ struct ActiveBuilder {
 
             guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
                 let range = maximumLenght == nil ? match.range : (text as NSString).range(of: word)
-                let element = ActiveElement.create(with: type, text: word)
+                let element = ActiveElement.url(original: word, trimmed: word, url: match.url)
                 elements.append((range, element, type))
                 continue
             }
@@ -60,7 +60,7 @@ struct ActiveBuilder {
             text = text.replacingOccurrences(of: word, with: trimmedWord)
 
             let newRange = (text as NSString).range(of: trimmedWord)
-            let element = ActiveElement.url(original: word, trimmed: trimmedWord)
+            let element = ActiveElement.url(original: word, trimmed: trimmedWord, url: match.url)
             elements.append((newRange, element, type))
         }
         return (elements, text)

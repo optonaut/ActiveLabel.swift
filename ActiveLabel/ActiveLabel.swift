@@ -206,10 +206,18 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             guard let selectedElement = selectedElement else { return avoidSuperCall }
 
             switch selectedElement.element {
-            case .mention(let userHandle): didTapMention(userHandle)
-            case .hashtag(let hashtag): didTapHashtag(hashtag)
-            case .url(let originalURL, _): didTapStringURL(originalURL)
-            case .custom(let element): didTap(element, for: selectedElement.type)
+            case .mention(let userHandle):
+                didTapMention(userHandle)
+            case .hashtag(let hashtag):
+                didTapHashtag(hashtag)
+            case .url(let originalURL, _, let url):
+                if let url = url {
+                    didTapURL(url)
+                } else {
+                    didTapStringURL(originalURL)
+                }
+            case .custom(let element):
+                didTap(element, for: selectedElement.type)
             }
             
             let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
@@ -493,6 +501,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate func didTapStringURL(_ stringURL: String) {
         guard let urlHandler = urlTapHandler, let url = URL(string: stringURL) else {
             delegate?.didSelect(stringURL, type: .url)
+            return
+        }
+        urlHandler(url)
+    }
+    
+    fileprivate func didTapURL(_ url: URL) {
+        guard let urlHandler = urlTapHandler else {
+            delegate?.didSelect(url.absoluteString, type: .url)
             return
         }
         urlHandler(url)
