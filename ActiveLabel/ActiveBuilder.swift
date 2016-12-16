@@ -23,7 +23,7 @@ struct ActiveBuilder {
         }
     }
 
-    static func createURLElements(from text: String, range: NSRange, maximumLenght: Int?) -> ([ElementTuple], String) {
+    static func createURLElements(from text: String, range: NSRange, maximumLength: Int?) -> ([ElementTuple], String) {
         let type = ActiveType.url
         var text = text
         
@@ -49,14 +49,14 @@ struct ActiveBuilder {
             let word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
-            guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
-                let range = maximumLenght == nil ? match.range : (text as NSString).range(of: word)
+            guard let maxLength = maximumLength, word.characters.count > maxLength else {
+                let range = maximumLength == nil ? match.range : (text as NSString).range(of: word)
                 let element = ActiveElement.url(original: word, trimmed: word, url: match.url)
                 elements.append((range, element, type))
                 continue
             }
 
-            let trimmedWord = word.trim(to: maxLenght)
+            let trimmedWord = word.trim(to: maxLength)
             text = text.replacingOccurrences(of: word, with: trimmedWord)
 
             let newRange = (text as NSString).range(of: trimmedWord)

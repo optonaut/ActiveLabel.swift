@@ -347,7 +347,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var textRange = NSRange(location: 0, length: textLength)
 
         if enabledTypes.contains(.url) {
-            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLenght: urlMaximumLength)
+            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLength: urlMaximumLength)
             let urlElements = tuple.0
             let finalText = tuple.1
             textString = finalText
