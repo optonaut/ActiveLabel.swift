@@ -26,7 +26,22 @@ struct ActiveBuilder {
     static func createURLElements(from text: String, range: NSRange, maximumLenght: Int?) -> ([ElementTuple], String) {
         let type = ActiveType.url
         var text = text
-        let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
+        
+        let detector: NSDataDetector?
+        var matches: [NSTextCheckingResult] = []
+        
+        do {
+            try detector = NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        } catch {
+            detector = nil
+        }
+        
+        if let detector = detector {
+            matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
+        } else {
+            matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
+        }
+        
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
 
