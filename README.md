@@ -1,11 +1,14 @@
 # ActiveLabel.swift [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![Build Status](https://travis-ci.org/optonaut/ActiveLabel.swift.svg)](https://travis-ci.org/optonaut/ActiveLabel.swift)
 
-UILabel drop-in replacement supporting Hashtags (#), Mentions (@) and URLs (http://) written in Swift
+UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and custom regex patterns, written in Swift
 
 ## Features
 
-* Swift 2+
-* Support for **Hashtags, Mentions and Links**
+* Swift 3
+* Default support for **Hashtags, Mentions, Links**
+* Support for **custom types** via regex
+* Ability to enable highlighting only for the desired types
+* Ability to trim urls
 * Super easy to use and lightweight
 * Works as `UILabel` drop-in replacement
 * Well tested and documented
@@ -20,12 +23,38 @@ import ActiveLabel
 let label = ActiveLabel()
 
 label.numberOfLines = 0
+label.enabledTypes = [.mention, .hashtag, .url]
 label.text = "This is a post with #hashtags and a @userhandle."
-label.textColor = .blackColor()
+label.textColor = .black
 label.handleHashtagTap { hashtag in
   print("Success. You just tapped the \(hashtag) hashtag")
 }
 ```
+
+## Custom types
+
+```swift
+    let customType = ActiveType.custom(pattern: "\\swith\\b") //Regex that looks for "with"
+    label.enabledTypes = [.mention, .hashtag, .url, customType]
+    
+    label.customColor[customType] = UIColor.purple
+    label.customSelectedColor[customType] = UIColor.green
+    
+    label.handleCustomTap(for: customType) { element in 
+        print("Custom type tapped: \(element)") 
+    }
+```
+
+## Enable/disable highlighting
+
+By default, an ActiveLabel instance has the following configuration
+
+```swift
+    label.enabledTypes = [.mention, .hashtag, .url]
+```
+
+But feel free to enable/disable to fit your requirements
+
 
 ## Batched customization
 
@@ -51,6 +80,17 @@ Example:
 
 ```
 
+## Trim long urls
+
+You have the possiblity to set the maximum lenght a url can have;
+
+```
+        label.urlMaximumLength = 30
+```
+
+From now on, a url that's bigger than that, will be trimmed.
+
+`https://afancyurl.com/whatever` -> `https://afancyurl.com/wh...`
 
 ## API
 
@@ -60,6 +100,8 @@ Example:
 ##### `hashtagSelectedColor: UIColor?`
 ##### `URLColor: UIColor = .blueColor()`
 ##### `URLSelectedColor: UIColor?`
+#### `customColor: [ActiveType : UIColor]`
+#### `customSelectedColor: [ActiveType : UIColor]`
 ##### `lineSpacing: Float?`
 
 ##### `handleMentionTap: (String) -> ()`
@@ -77,7 +119,13 @@ label.handleHashtagTap { hashtag in print("\(hashtag) tapped") }
 ##### `handleURLTap: (NSURL) -> ()`
 
 ```swift
-label.handleURLTap { url in UIApplication.sharedApplication().openURL(url) }
+label.handleURLTap { url in UIApplication.shared.openURL(url) }
+```
+
+##### `handleCustomTap(for type: ActiveType, handler: (String) -> ())`
+
+```swift
+label.handleCustomTap(for: customType) { element in print("\(element) tapped") }
 ```
 
 ##### `filterHashtag: (String) -> Bool`
