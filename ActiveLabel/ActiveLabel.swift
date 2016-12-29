@@ -51,7 +51,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open var customSelectedColor: [ActiveType : UIColor] = [:] {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable open var lineSpacing: Float = 0 {
+    @IBInspectable public var lineSpacing: CGFloat = 0 {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var minimumLineHeight: CGFloat = 0 {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable public var highlightFontName: String? = nil {
@@ -373,8 +376,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         let paragraphStyle = attributes[NSParagraphStyleAttributeName] as? NSMutableParagraphStyle ?? NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
         paragraphStyle.alignment = textAlignment
-        paragraphStyle.lineSpacing = CGFloat(lineSpacing)
-
+        paragraphStyle.lineSpacing = lineSpacing
+        paragraphStyle.minimumLineHeight = minimumLineHeight > 0 ? minimumLineHeight: self.font.pointSize * 1.14
         attributes[NSParagraphStyleAttributeName] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
 
