@@ -1,6 +1,8 @@
 language: objective-c
-
-xcode_project: ActiveLabel.xcodeproj
-xcode_scheme: ActiveLabel
 osx_image: xcode8
-xcode_sdk: iphonesimulator10.0
+before_install:
+- gem install scan
+- scan --version
+install: true
+script:
+- scan -p "ActiveLabel.xcodeproj" -s "ActiveLabel"
