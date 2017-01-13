@@ -305,19 +305,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
         for (type, elements) in activeElements {
             for element in elements {
-                
-                // The element may include a leading space which 
-                // must be removed to avoid overlapping of text styles.
-                let elementRange: NSRange
-                let elementText = (mutAttrString.string as NSString).substring(with: element.range)
-                if elementText.hasPrefix(" ") && element.range.length > 0 {
-                    elementRange = NSRange(location: element.range.location + 1, length: element.range.length - 1)
-                } else {
-                    elementRange = element.range
-                }
-                
+                                
                 var range = NSRange(location: 0, length: 0)
-                var attr = mutAttrString.attributes(at: elementRange.location, effectiveRange: &range)
+                var attr = mutAttrString.attributes(at: element.range.location, effectiveRange: &range)
                 
                 switch type {
                 case .mention: attr[NSForegroundColorAttributeName] = mentionColor
@@ -334,7 +324,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                     attr = configureLinkAttribute(type, attr, false)
                 }
                 
-                mutAttrString.setAttributes(attr, range: elementRange)
+                mutAttrString.setAttributes(attr, range: element.range)
             }
         }
     }

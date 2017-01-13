@@ -30,11 +30,11 @@ struct ActiveBuilder {
         var elements: [ElementTuple] = []
 
         for match in matches where match.range.length > 2 {
-            let word = (originalText as NSString).substring(with: match.range)
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let nsstring = originalText as NSString
+            let (word, trimmedRange) = findTrimmedString(from: nsstring, range: match.range)
 
             guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
-                let range = maximumLenght == nil ? match.range : (attrString.string as NSString).range(of: word)
+                let range = maximumLenght == nil ? trimmedRange : (attrString.string as NSString).range(of: word)
                 let element = ActiveElement.create(with: type, text: word)
                 elements.append((range, element, type))
                 continue
@@ -64,11 +64,10 @@ struct ActiveBuilder {
         var elements: [ElementTuple] = []
 
         for match in matches where match.range.length > minLength {
-            let word = nsstring.substring(with: match.range)
-                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            let (word, trimmedRange) = findTrimmedString(from: nsstring, range: match.range)
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
+                elements.append((trimmedRange, element, type))
             }
         }
         return elements
@@ -83,7 +82,8 @@ struct ActiveBuilder {
         var elements: [ElementTuple] = []
 
         for match in matches where match.range.length > 2 {
-            let range = NSRange(location: match.range.location + 1, length: match.range.length - 1)
+            let (_, trimmedRange) = findTrimmedString(from: nsstring, range: match.range)
+            let range = NSRange(location: trimmedRange.location + 1, length: trimmedRange.length - 1)
             var word = nsstring.substring(with: range)
             if word.hasPrefix("@") {
                 word.remove(at: word.startIndex)
@@ -94,9 +94,22 @@ struct ActiveBuilder {
 
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
+                elements.append((trimmedRange, element, type))
             }
         }
         return elements
+    }
+    
+    
+    /// Finds the trimmed substring within the given range of the given string.
+    ///
+    /// - Parameters:
+    ///   - string: original stirng
+    ///   - range: range in which it looks it trims the string
+    /// - Returns: (trimmed substring, range of the trimmed substring wrt the input string)
+    private static func findTrimmedString(from string: NSString, range: NSRange) -> (String, NSRange) {
+        let trimmed = string.substring(with: range).trimmingCharacters(in: .whitespacesAndNewlines)
+        let range = string.range(of: trimmed)
+        return (trimmed, range)
     }
 }
