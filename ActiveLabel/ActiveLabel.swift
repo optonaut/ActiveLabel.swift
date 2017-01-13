@@ -112,11 +112,17 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
     // MARK: - override UILabel properties
     override open var text: String? {
-        didSet { updateTextStorage() }
+        didSet {
+            usingAttributedText = false
+            updateTextStorage()
+        }
     }
 
     override open var attributedText: NSAttributedString? {
-        didSet { updateTextStorage() }
+        didSet {
+            usingAttributedText = true
+            updateTextStorage()
+        }
     }
     
     override open var font: UIFont! {
@@ -243,6 +249,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
     fileprivate var hashtagFilterPredicate: ((String) -> Bool)?
 
+    fileprivate var usingAttributedText = false
     fileprivate var selectedElement: ElementTuple?
     fileprivate var heightCorrection: CGFloat = 0
     internal lazy var textStorage = NSTextStorage()
@@ -302,29 +309,37 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
     /// add link attribute
     private func addLinkAttribute(_ mutAttrString: NSMutableAttributedString) {
+        var range = NSRange(location: 0, length: 0)
+        var attributes = mutAttrString.attributes(at: 0, effectiveRange: &range)
+        if !usingAttributedText {
+            attributes[NSFontAttributeName] = font
+            attributes[NSForegroundColorAttributeName] = textColor
+        }
 
         for (type, elements) in activeElements {
             for element in elements {
-                                
-                var range = NSRange(location: 0, length: 0)
-                var attr = mutAttrString.attributes(at: element.range.location, effectiveRange: &range)
+                
+                if usingAttributedText {
+                    range = NSRange(location: 0, length: 0)
+                    attributes = mutAttrString.attributes(at: element.range.location, effectiveRange: &range)
+                }
                 
                 switch type {
-                case .mention: attr[NSForegroundColorAttributeName] = mentionColor
-                case .hashtag: attr[NSForegroundColorAttributeName] = hashtagColor
-                case .url: attr[NSForegroundColorAttributeName] = URLColor
-                case .custom: attr[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
+                case .mention: attributes[NSForegroundColorAttributeName] = mentionColor
+                case .hashtag: attributes[NSForegroundColorAttributeName] = hashtagColor
+                case .url: attributes[NSForegroundColorAttributeName] = URLColor
+                case .custom: attributes[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
                 }
                 
                 if let highlightFont = hightlightFont {
-                    attr[NSFontAttributeName] = highlightFont
+                    attributes[NSFontAttributeName] = highlightFont
                 }
                 
                 if let configureLinkAttribute = configureLinkAttribute {
-                    attr = configureLinkAttribute(type, attr, false)
+                    attributes = configureLinkAttribute(type, attributes, false)
                 }
                 
-                mutAttrString.setAttributes(attr, range: element.range)
+                mutAttrString.setAttributes(attributes, range: element.range)
             }
         }
     }
