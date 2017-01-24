@@ -11,7 +11,7 @@ import XCTest
 
 extension ActiveElement: Equatable {}
 
-func ==(a: ActiveElement, b: ActiveElement) -> Bool {
+public func ==(a: ActiveElement, b: ActiveElement) -> Bool {
     switch (a, b) {
     case (.mention(let a), .mention(let b)) where a == b: return true
     case (.hashtag(let a), .hashtag(let b)) where a == b: return true
@@ -403,5 +403,34 @@ class ActiveTypeTests: XCTestCase {
         label.text = text
 
         XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
+    }
+
+    func testStringTrimmingURLShorterThanLimit() {
+        let text = "Tweet with short url: https://hello.co"
+        label.urlMaximumLength = 30
+        label.text = text
+
+        XCTAssertEqual(text, label.text!)
+    }
+
+    func testStringTrimmingURLLongerThanLimit() {
+        let trimLimit = 30
+        let url = "https://twitter.com/twicket_app/status/649678392372121601"
+        let trimmedURL = url.trim(to: trimLimit)
+        let text = "Tweet with long url: \(url)"
+        label.urlMaximumLength = trimLimit
+        label.text = text
+
+
+        XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
+
+        switch activeElements.first! {
+        case .url(let original, let trimmed):
+            XCTAssertEqual(original, url)
+            XCTAssertEqual(trimmed, trimmedURL)
+        default:
+            XCTAssert(false)
+        }
+
     }
 }
