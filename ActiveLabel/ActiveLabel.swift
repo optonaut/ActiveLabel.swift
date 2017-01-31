@@ -250,6 +250,39 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate lazy var textContainer = NSTextContainer()
     lazy var activeElements = [ActiveType: [ElementTuple]]()
 
+    // MARK: - Returning Elements
+    open func GetMentions() -> [String] {
+        
+        var Mentions: [String] = []
+        
+        for (_, elements) in activeElements {
+            for (_, element, _) in elements {
+                switch element {
+                case .mention(let mention):
+                    Mentions.append(mention)
+                default: break
+                }
+            }
+        }
+        return Mentions
+    }
+    
+    open func GetHashtags() -> [String] {
+        
+        var Hashtags: [String] = []
+        
+        for (_, elements) in activeElements {
+            for (_, element, _) in elements {
+                switch element {
+                case .hashtag(let hashtag):
+                    Hashtags.append(hashtag)
+                default: break
+                }
+            }
+        }
+        return Hashtags
+    }
+    
     // MARK: - helper functions
     
     fileprivate func setupLabel() {
