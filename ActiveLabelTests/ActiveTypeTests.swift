@@ -233,7 +233,7 @@ class ActiveTypeTests: XCTestCase {
             label.configureLinkAttribute = { type, attributes, isSelected in
                 var atts = attributes
                 if case newType = type {
-                    atts[NSFontAttributeName] = UIFont.boldSystemFont(ofSize: 14)
+                    atts[NSAttributedStringKey.font] = UIFont.boldSystemFont(ofSize: 14)
                 }
                 
                 return atts
@@ -248,7 +248,7 @@ class ActiveTypeTests: XCTestCase {
         // Enumber after attributes and find our font
         var foundCustomAttributedStyling = false
         areText.enumerateAttributes(in: NSRange(location: 0, length: areText.length), options: [.longestEffectiveRangeNotRequired], using: { (attributes, range, stop) in
-            foundCustomAttributedStyling = attributes[NSFontAttributeName] as? UIFont == UIFont.boldSystemFont(ofSize: 14)
+            foundCustomAttributedStyling = attributes[NSAttributedStringKey.font] as? UIFont == UIFont.boldSystemFont(ofSize: 14)
         })
 
         XCTAssertTrue(foundCustomAttributedStyling)
