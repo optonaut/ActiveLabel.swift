@@ -60,13 +60,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     @IBInspectable public var highlightFontName: String? = nil {
         didSet { updateTextStorage(parseText: false) }
     }
-    @IBInspectable public var highlightFontSize: CGFloat? = nil {
+    @IBInspectable public var highlightFontSize: CGFloat = UIFont.systemFontSize {
         didSet { updateTextStorage(parseText: false) }
     }
     
     // MARK: - Computed Properties
     private var hightlightFont: UIFont? {
-        guard let highlightFontName = highlightFontName, let highlightFontSize = highlightFontSize else { return nil }
+        guard let highlightFontName = highlightFontName else { return nil }
         return UIFont(name: highlightFontName, size: highlightFontSize)
     }
 
