@@ -338,7 +338,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 attributes[NSFontAttributeName] = URLFont ?? font!
                 attributes[NSForegroundColorAttributeName] = URLColor
             case .custom:
-                attributes[NSFontAttributeName] = customFont[type] ?? font!
+                attributes[NSFontAttributeName] = customFont[type] ?? defaultCustomFont
                 attributes[NSForegroundColorAttributeName] = customColor[type] ?? defaultCustomColor
             }
             
