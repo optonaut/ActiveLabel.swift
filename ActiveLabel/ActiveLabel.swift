@@ -359,6 +359,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 attributes[NSUnderlineStyleAttributeName] = customUnderlineStyle[type]?.rawValue ?? defaultCustomUnderlineStyle
             }
             
+            // fix: seems that we lose the font during the tap so we need to set it again
+            switch type {
+            case .mention: attributes[NSFontAttributeName] = mentionFont ?? font!
+            case .hashtag: attributes[NSFontAttributeName] = hashtagFont ?? font!
+            case .url: attributes[NSFontAttributeName] = URLFont ?? font!
+            case .custom: attributes[NSFontAttributeName] = customFont[type] ?? defaultCustomFont
+            }
+            
             if let highlightFont = hightlightFont {
                 attributes[NSFontAttributeName] = highlightFont
             }
