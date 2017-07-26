@@ -62,11 +62,15 @@ struct ActiveBuilder {
         var elements: [ElementTuple] = []
 
         for match in matches where match.range.length > minLength {
-            let word = nsstring.substring(with: match.range)
-                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            let matched = nsstring.substring(with: match.range)
+            let word = matched.trimmingCharacters(in: .whitespacesAndNewlines)
+            let rangeInMatched = matched.range(of: word)
+            let distance = matched.distance(from: matched.startIndex, to: rangeInMatched?.lowerBound ?? matched.startIndex)
+            let range = NSRange(location: match.range.location + distance, length: word.characters.count)
+            
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
+                elements.append((range, element, type))
             }
         }
         return elements
