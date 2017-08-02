@@ -54,10 +54,10 @@ class ViewController: UIViewController {
                 var atts = attributes
                 switch type {
                 case customType3:
-                    atts[NSFontAttributeName] = isSelected ? UIFont.boldSystemFont(ofSize: 16) : UIFont.boldSystemFont(ofSize: 14)
+                    atts[NSAttributedStringKey.font] = isSelected ? UIFont.boldSystemFont(ofSize: 16) : UIFont.boldSystemFont(ofSize: 14)
                 default: ()
                 }
-                
+
                 return atts
             }
 
