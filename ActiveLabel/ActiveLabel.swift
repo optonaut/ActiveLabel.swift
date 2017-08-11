@@ -184,6 +184,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         let superSize = super.intrinsicContentSize
         textContainer.size = CGSize(width: superSize.width, height: CGFloat.greatestFiniteMagnitude)
         let size = layoutManager.usedRect(for: textContainer)
+        if size.width == 0 || size.height == 0 {
+            return .zero
+        }
         return CGSize(width: ceil(size.width), height: ceil(size.height))
     }
 
