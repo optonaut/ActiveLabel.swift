@@ -18,6 +18,18 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
 @IBDesignable open class ActiveLabel: UILabel {
     
+    public static func setupMentionRegex(regex:NSRegularExpression) {
+        RegexParser.mentionRegex = regex
+    }
+    
+    public static func setupHashtagRegex(regex:NSRegularExpression) {
+        RegexParser.hashtagRegex = regex
+    }
+    
+    public static func setupURLRegex(regex:NSRegularExpression) {
+        RegexParser.urlDetector = regex
+    }
+    
     // MARK: - public properties
     open weak var delegate: ActiveLabelDelegate?
 

@@ -32,9 +32,9 @@ public enum ActiveType {
 
     var pattern: String {
         switch self {
-        case .mention: return RegexParser.mentionPattern
-        case .hashtag: return RegexParser.hashtagPattern
-        case .url: return RegexParser.urlPattern
+        case .mention: return RegexParser.mentionRegex!.pattern
+        case .hashtag: return RegexParser.hashtagRegex!.pattern
+        case .url: return RegexParser.urlDetector!.pattern
         case .custom(let regex): return regex
         }
     }

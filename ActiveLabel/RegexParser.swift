@@ -9,12 +9,12 @@
 import Foundation
 
 struct RegexParser {
-
-    static let hashtagPattern = "(?:^|\\s|$)#[\\p{L}0-9_]*"
-    static let mentionPattern = "(?:^|\\s|$|[.])@[\\p{L}0-9_]*"
-    static let urlPattern = "(^|[\\s.:;?\\-\\]<\\(])" +
-        "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
-    "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"
+    
+    static var hashtagRegex = try? NSRegularExpression(pattern: "(?:^|\\s|$)#[\\p{L}0-9_]*", options: [.caseInsensitive])
+    static var mentionRegex = try? NSRegularExpression(pattern: "(?:^|\\s|$|[.])@[\\p{L}0-9_]*", options: [.caseInsensitive]);
+    static var urlDetector = try? NSRegularExpression(pattern: "(^|[\\s.:;?\\-\\]<\\(])" +
+            "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
+        "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])", options: [.caseInsensitive])
 
     private static var cachedRegularExpressions: [String : NSRegularExpression] = [:]
 
