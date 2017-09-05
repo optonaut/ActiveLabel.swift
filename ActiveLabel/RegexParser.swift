@@ -11,7 +11,7 @@ import Foundation
 struct RegexParser {
 
     static let hashtagPattern = "(?:^|\\s|$)#[\\p{L}0-9_]*"
-    static let mentionPattern = "(?:^|\\s|$|[.])@[\\p{L}0-9_]*"
+    static let mentionPattern = "(?:^|\\s|$|[.])@[\\p{L}0-9_-]*"
     static let urlPattern = "(^|[\\s.:;?\\-\\]<\\(])" +
         "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
     "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"
