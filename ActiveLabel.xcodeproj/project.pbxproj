@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2BB281C11F3200B50093C54A /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
+		2BB281C21F3200B50093C54A /* ActiveLabel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8F0249A61B9989B1005D8035 /* ActiveLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 8F0249A51B9989B1005D8035 /* ActiveLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8F0249AD1B9989B1005D8035 /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
 		8F0249B21B9989B1005D8035 /* ActiveTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249B11B9989B1005D8035 /* ActiveTypeTests.swift */; };
@@ -20,19 +22,17 @@
 		C1D15C791D7C9B610041D119 /* StringTrimExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */; };
 		C1D15C7B1D7C9B7E0041D119 /* ActiveBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */; };
 		C1E867D61C3D7AEA00FD687A /* RegexParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E867D51C3D7AEA00FD687A /* RegexParser.swift */; };
-		E267FA251DB3A34900EEAC4C /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
-		E267FA261DB3A34900EEAC4C /* ActiveLabel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		8F0249AE1B9989B1005D8035 /* PBXContainerItemProxy */ = {
+		2BB281C31F3200B50093C54A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8F0249991B9989B1005D8035 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 8F0249A11B9989B1005D8035;
 			remoteInfo = ActiveLabel;
 		};
-		E267FA271DB3A34900EEAC4C /* PBXContainerItemProxy */ = {
+		8F0249AE1B9989B1005D8035 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8F0249991B9989B1005D8035 /* Project object */;
 			proxyType = 1;
@@ -42,13 +42,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		E267FA291DB3A34900EEAC4C /* Embed Frameworks */ = {
+		2BB281C51F3200B60093C54A /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				E267FA261DB3A34900EEAC4C /* ActiveLabel.framework in Embed Frameworks */,
+				2BB281C21F3200B50093C54A /* ActiveLabel.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -96,7 +96,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E267FA251DB3A34900EEAC4C /* ActiveLabel.framework in Frameworks */,
+				2BB281C11F3200B50093C54A /* ActiveLabel.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -216,12 +216,12 @@
 				8F0249BC1B998A66005D8035 /* Sources */,
 				8F0249BD1B998A66005D8035 /* Frameworks */,
 				8F0249BE1B998A66005D8035 /* Resources */,
-				E267FA291DB3A34900EEAC4C /* Embed Frameworks */,
+				2BB281C51F3200B60093C54A /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				E267FA281DB3A34900EEAC4C /* PBXTargetDependency */,
+				2BB281C41F3200B50093C54A /* PBXTargetDependency */,
 			);
 			name = ActiveLabelDemo;
 			productName = ActiveLabelDemo;
@@ -235,16 +235,16 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0700;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = Optonaut;
 				TargetAttributes = {
 					8F0249A11B9989B1005D8035 = {
 						CreatedOnToolsVersion = 7.0;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0900;
 					};
 					8F0249AB1B9989B1005D8035 = {
 						CreatedOnToolsVersion = 7.0;
-						LastSwiftMigration = 0800;
+						LastSwiftMigration = 0900;
 					};
 					8F0249BF1B998A66005D8035 = {
 						CreatedOnToolsVersion = 7.0;
@@ -331,15 +331,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		2BB281C41F3200B50093C54A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8F0249A11B9989B1005D8035 /* ActiveLabel */;
+			targetProxy = 2BB281C31F3200B50093C54A /* PBXContainerItemProxy */;
+		};
 		8F0249AF1B9989B1005D8035 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 8F0249A11B9989B1005D8035 /* ActiveLabel */;
 			targetProxy = 8F0249AE1B9989B1005D8035 /* PBXContainerItemProxy */;
-		};
-		E267FA281DB3A34900EEAC4C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 8F0249A11B9989B1005D8035 /* ActiveLabel */;
-			targetProxy = E267FA271DB3A34900EEAC4C /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -371,14 +371,20 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -407,6 +413,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -421,14 +428,20 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -450,6 +463,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -474,7 +488,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -494,7 +509,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = optonaut.ActiveLabel;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -505,7 +521,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = optonaut.ActiveLabelTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -516,7 +533,8 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = optonaut.ActiveLabelTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_SWIFT3_OBJC_INFERENCE = Default;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
@@ -530,7 +548,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = optonaut.ActiveLabelDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Debug;
 		};
@@ -544,7 +562,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = optonaut.ActiveLabelDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 3.0;
+				SWIFT_VERSION = 4.0;
 			};
 			name = Release;
 		};
