@@ -46,7 +46,7 @@ label.handleHashtagTap { hashtag in
     }
 ```
 
-## Custom types
+## Custom Emoji Types
 
 ```swift
     // Looks for pattern :{emoji_name}:
