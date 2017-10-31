@@ -65,13 +65,16 @@ struct ActiveBuilder {
         let word = nsstring.substring(with: match.range)
           .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         
+        // If emoji not exists just go to the next match
+        guard let _ = onImage?(word) else { continue }
+        
         var newRange = (text as NSString).range(of: word)
         newRange = NSRange(location: newRange.location, length: 1)
         
         let element = ActiveElement.emoji(range: newRange, name: word, onImage: onImage)
         elements.append((newRange, element, type))
         
-        text = (text as NSString).replacingCharacters(in: match.range, with: " ")
+        text = (text as NSString).replacingCharacters(in: NSRange(location: newRange.location, length: match.range.length), with: " ")
       }
       
       return (elements, text)

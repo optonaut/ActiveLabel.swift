@@ -375,31 +375,22 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var textLength = textString.utf16.count
         var textRange = NSRange(location: 0, length: textLength)
       
-        // Sort Types in specific order, at the top of list must be URL which may trim http link and change String Length
-        // At the second should be always Emoji which replaces patterns to Empty Space, it also changes  String Length
+        // Sort Types in specific order, at the top of list must be URL which may trim http link and change String Length as well, it changes  String Length
+        // At the second should be Emoji which replaces patterns to Empty Space and change String Length as well
         let types = enabledTypes.sorted { (type1, type2) -> Bool in
           if type1 == .url || type2 == .url {
             return type1 == .url
-          } else if case ActiveType.emoji(_, _) = type1 {
+          }
+          if case ActiveType.emoji(_, _) = type1 {
             return true
           }
           
           return false
         }
       
+      
         for type in types {
-          if type == .url {
-            
-            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLenght: urlMaximumLength)
-            let urlElements = tuple.0
-            let finalText = tuple.1
-            
-            textString = finalText
-            textLength = textString.utf16.count
-            textRange = NSRange(location: 0, length: textLength)
-            
-            activeElements[.url] = urlElements
-          } else if case ActiveType.emoji(_, _) = type {
+          if case ActiveType.emoji(_, _) = type {
             
             guard let tuple = ActiveBuilder.createEmojiElements(from: textString, range: textRange, type: type) else { continue }
             
@@ -411,6 +402,17 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             textRange = NSRange(location: 0, length: textLength)
             
             activeElements[type] = urlElements
+          } else if type == .url {
+            
+            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLenght: urlMaximumLength)
+            let urlElements = tuple.0
+            let finalText = tuple.1
+            
+            textString = finalText
+            textLength = textString.utf16.count
+            textRange = NSRange(location: 0, length: textLength)
+            
+            activeElements[.url] = urlElements
           } else {
             
             var filter: ((String) -> Bool)? = nil
