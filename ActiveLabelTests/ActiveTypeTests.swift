@@ -228,7 +228,7 @@ class ActiveTypeTests: XCTestCase {
   
     func testEmojiType() {
         let newType = ActiveType.emoji(pattern: ":(\\w+):") { word  in
-          return UIImage(named: "ghost")
+          return UIImage()
         }
         label.enabledTypes.append(newType)
       
@@ -427,7 +427,7 @@ class ActiveTypeTests: XCTestCase {
   
     func testOnlyEmojiEnabled() {
         let newType = ActiveType.emoji(pattern: ":(\\w+):") { word  in
-          return UIImage(named: "ghost")
+          return UIImage()
         }
         label.enabledTypes = [newType]
       
