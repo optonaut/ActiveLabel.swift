@@ -25,6 +25,7 @@ class ActiveTypeTests: XCTestCase {
     
     let label = ActiveLabel()
     let customEmptyType = ActiveType.custom(pattern: "")
+    let emojiEmptyType = ActiveType.emoji(pattern: "", onImage: nil)
     
     var activeElements: [ActiveElement] {
         return label.activeElements.flatMap({$0.1.flatMap({$0.element})})
@@ -37,6 +38,7 @@ class ActiveTypeTests: XCTestCase {
         case .hashtag(let hashtag): return hashtag
         case .url(let url, _): return url
         case .custom(let element): return element
+        case .emoji(_, let name, _): return name
         }
     }
     
@@ -47,6 +49,7 @@ class ActiveTypeTests: XCTestCase {
         case .hashtag: return .hashtag
         case .url: return .url
         case .custom: return customEmptyType
+        case .emoji: return emojiEmptyType
         }
     }
     
@@ -219,6 +222,31 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(currentElementString, "are")
         XCTAssertEqual(currentElementType, customEmptyType)
 
+        label.text = "google"
+        XCTAssertEqual(activeElements.count, 0)
+    }
+  
+    func testEmojiType() {
+        let newType = ActiveType.emoji(pattern: ":(\\w+):") { word  in
+          return UIImage(named: "ghost")
+        }
+        label.enabledTypes.append(newType)
+      
+        label.text = ":ghost:"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, ":ghost:")
+        XCTAssertEqual(currentElementType, emojiEmptyType)
+      
+        label.text = "::emoji: :gost"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, ":emoji:")
+        XCTAssertEqual(currentElementType, emojiEmptyType)
+      
+        label.text = "test :emoji: test"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, ":emoji:")
+        XCTAssertEqual(currentElementType, emojiEmptyType)
+      
         label.text = "google"
         XCTAssertEqual(activeElements.count, 0)
     }
@@ -395,6 +423,29 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "are")
         XCTAssertEqual(currentElementType, customEmptyType)
+    }
+  
+    func testOnlyEmojiEnabled() {
+        let newType = ActiveType.emoji(pattern: ":(\\w+):") { word  in
+          return UIImage(named: "ghost")
+        }
+        label.enabledTypes = [newType]
+      
+        label.text = "http://www.google.com :ghost:"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, ":ghost:")
+        XCTAssertEqual(currentElementType, emojiEmptyType)
+      
+        label.text = "@user"
+        XCTAssertEqual(activeElements.count, 0)
+      
+        label.text = "#somehashtag"
+        XCTAssertEqual(activeElements.count, 0)
+      
+        label.text = ":ghost: are @userNumberOne #hashtag http://www.google.com :ghost: are @anotheruser"
+        XCTAssertEqual(activeElements.count, 2)
+        XCTAssertEqual(currentElementString, ":ghost:")
+        XCTAssertEqual(currentElementType, emojiEmptyType)
     }
 
     func testStringTrimming() {

@@ -22,6 +22,7 @@
 		C1E867D61C3D7AEA00FD687A /* RegexParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E867D51C3D7AEA00FD687A /* RegexParser.swift */; };
 		E267FA251DB3A34900EEAC4C /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
 		E267FA261DB3A34900EEAC4C /* ActiveLabel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		EF5AE5341FA8777E00E13009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8F0249C91B998A66005D8035 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -284,6 +285,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF5AE5341FA8777E00E13009 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -14,7 +14,7 @@ enum ActiveElement {
     case hashtag(String)
     case url(original: String, trimmed: String)
     case custom(String)
-    case emoji(range: NSRange, name: String, onImage: (_ word: String) -> UIImage?)
+    case emoji(range: NSRange, name: String, onImage: ((_ word: String) -> UIImage?)?)
 
     static func create(with activeType: ActiveType, text: String) -> ActiveElement {
         switch activeType {
@@ -32,7 +32,7 @@ public enum ActiveType {
     case hashtag
     case url
     case custom(pattern: String)
-    case emoji(pattern: String, onImage: (_ word: String) -> UIImage?)
+    case emoji(pattern: String, onImage: ((_ word: String) -> UIImage?)?)
 
     var pattern: String {
         switch self {

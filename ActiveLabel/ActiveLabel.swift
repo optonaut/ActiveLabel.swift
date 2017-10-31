@@ -313,7 +313,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     fileprivate func addEmojiAttribute(_ mutAttrString: NSMutableAttributedString, emoji: ElementTuple) {
         guard case ActiveElement.emoji(let range, let name, let onImage) = emoji.element else { return }
 
-        let image = onImage(name) ?? UIImage()
+        let image = onImage?(name) ?? UIImage()
         let maxHeight: CGFloat = font.lineHeight
       
         // Calcualte correct size - proportional to the font height
