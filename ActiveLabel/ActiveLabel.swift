@@ -69,6 +69,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         guard let highlightFontName = highlightFontName, let highlightFontSize = highlightFontSize else { return nil }
         return UIFont(name: highlightFontName, size: highlightFontSize)
     }
+  
+    private var lineHeight: CGFloat {
+        return minimumLineHeight > 0 ? minimumLineHeight: font.pointSize * 1.14
+    }
 
     // MARK: - public methods
     open func handleMentionTap(_ handler: @escaping (String) -> ()) {
@@ -96,7 +100,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         case .url:
             urlTapHandler = nil
         case .custom:
-            customTapHandlers[type] = nil
+          customTapHandlers[type] = nil
+        case .emoji:
+          emojiTapHandlers[type] = nil
         }
     }
 
@@ -213,6 +219,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .hashtag(let hashtag): didTapHashtag(hashtag)
             case .url(let originalURL, _): didTapStringURL(originalURL)
             case .custom(let element): didTap(element, for: selectedElement.type)
+            case .emoji(_, let name, _): didTapEmoji(name, for: selectedElement.type)
             }
             
             let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
@@ -239,6 +246,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     internal var hashtagTapHandler: ((String) -> ())?
     internal var urlTapHandler: ((URL) -> ())?
     internal var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
+    internal var emojiTapHandlers: [ActiveType : ((String) -> ())] = [:]
     
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
     fileprivate var hashtagFilterPredicate: ((String) -> Bool)?
@@ -301,6 +309,25 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         return CGPoint(x: rect.origin.x, y: glyphOriginY)
     }
 
+    /// add emoji attribute
+    fileprivate func addEmojiAttribute(_ mutAttrString: NSMutableAttributedString, emoji: ElementTuple) {
+        guard case ActiveElement.emoji(let range, let name, let onImage) = emoji.element else { return }
+
+        let image = onImage(name) ?? UIImage()
+        let maxHeight: CGFloat = font.lineHeight
+      
+        // Calcualte correct size - proportional to the font height
+        let ratio = max(1, image.size.height / maxHeight)
+        let newWidth = max(1, image.size.width / ratio)
+
+        let attachment = NSTextAttachment()
+        attachment.image = image
+      
+        // Moves a little down inject image to keep it in one line with text
+        attachment.bounds = CGRect(x: 0, y: -maxHeight*0.25, width: newWidth, height: maxHeight)
+        mutAttrString.replaceCharacters(in: range, with: NSAttributedString(attachment: attachment))
+    }
+  
     /// add link attribute
     fileprivate func addLinkAttribute(_ mutAttrString: NSMutableAttributedString) {
         var range = NSRange(location: 0, length: 0)
@@ -319,6 +346,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .hashtag: attributes[NSAttributedStringKey.foregroundColor] = hashtagColor
             case .url: attributes[NSAttributedStringKey.foregroundColor] = URLColor
             case .custom: attributes[NSAttributedStringKey.foregroundColor] = customColor[type] ?? defaultCustomColor
+            case .emoji:
+              break
             }
             
             if let highlightFont = hightlightFont {
@@ -330,7 +359,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             }
 
             for element in elements {
-                mutAttrString.setAttributes(attributes, range: element.range)
+              if case ActiveElement.emoji(_, _ , _) = element.element {
+                  addEmojiAttribute(mutAttrString, emoji: element)
+                } else {
+                  mutAttrString.setAttributes(attributes, range: element.range)
+              }
+              
             }
         }
     }
@@ -340,26 +374,55 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var textString = attrString.string
         var textLength = textString.utf16.count
         var textRange = NSRange(location: 0, length: textLength)
-
-        if enabledTypes.contains(.url) {
+      
+        // Sort Types in specific order, at the top of list must be URL which may trim http link and change String Length
+        // At the second should be always Emoji which replaces patterns to Empty Space, it also changes  String Length
+        let types = enabledTypes.sorted { (type1, type2) -> Bool in
+          if type1 == .url || type2 == .url {
+            return type1 == .url
+          } else if case ActiveType.emoji(_, _) = type1 {
+            return true
+          }
+          
+          return false
+        }
+      
+        for type in types {
+          if type == .url {
+            
             let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLenght: urlMaximumLength)
             let urlElements = tuple.0
             let finalText = tuple.1
+            
             textString = finalText
             textLength = textString.utf16.count
             textRange = NSRange(location: 0, length: textLength)
+            
             activeElements[.url] = urlElements
-        }
-
-        for type in enabledTypes where type != .url {
+          } else if case ActiveType.emoji(_, _) = type {
+            
+            guard let tuple = ActiveBuilder.createEmojiElements(from: textString, range: textRange, type: type) else { continue }
+            
+            let urlElements = tuple.0
+            let finalText = tuple.1
+            
+            textString = finalText
+            textLength = textString.utf16.count
+            textRange = NSRange(location: 0, length: textLength)
+            
+            activeElements[type] = urlElements
+          } else {
+            
             var filter: ((String) -> Bool)? = nil
             if type == .mention {
-                filter = mentionFilterPredicate
+              filter = mentionFilterPredicate
             } else if type == .hashtag {
-                filter = hashtagFilterPredicate
+              filter = hashtagFilterPredicate
             }
-            let hashtagElements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
-            activeElements[type] = hashtagElements
+            
+            let elements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
+            activeElements[type] = elements
+          }
         }
 
         return textString
@@ -377,7 +440,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         paragraphStyle.lineBreakMode = NSLineBreakMode.byWordWrapping
         paragraphStyle.alignment = textAlignment
         paragraphStyle.lineSpacing = lineSpacing
-        paragraphStyle.minimumLineHeight = minimumLineHeight > 0 ? minimumLineHeight: self.font.pointSize * 1.14
+        paragraphStyle.minimumLineHeight = lineHeight
         attributes[NSAttributedStringKey.paragraphStyle] = paragraphStyle
         mutAttrString.setAttributes(attributes, range: range)
 
@@ -393,7 +456,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         let type = selectedElement.type
 
         if isSelected {
-            let selectedColor: UIColor
+            var selectedColor: UIColor = defaultCustomColor
             switch type {
             case .mention: selectedColor = mentionSelectedColor ?? mentionColor
             case .hashtag: selectedColor = hashtagSelectedColor ?? hashtagColor
@@ -401,15 +464,20 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .custom:
                 let possibleSelectedColor = customSelectedColor[selectedElement.type] ?? customColor[selectedElement.type]
                 selectedColor = possibleSelectedColor ?? defaultCustomColor
+            default:
+              break
             }
+          
             attributes[NSAttributedStringKey.foregroundColor] = selectedColor
         } else {
-            let unselectedColor: UIColor
+            var unselectedColor: UIColor = defaultCustomColor
             switch type {
             case .mention: unselectedColor = mentionColor
             case .hashtag: unselectedColor = hashtagColor
             case .url: unselectedColor = URLColor
             case .custom: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
+            default:
+              break
             }
             attributes[NSAttributedStringKey.foregroundColor] = unselectedColor
         }
@@ -500,13 +568,21 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         urlHandler(url)
     }
-
+  
     fileprivate func didTap(_ element: String, for type: ActiveType) {
-        guard let elementHandler = customTapHandlers[type] else {
-            delegate?.didSelect(element, type: type)
-            return
-        }
-        elementHandler(element)
+      guard let elementHandler = customTapHandlers[type] else {
+        delegate?.didSelect(element, type: type)
+        return
+      }
+      elementHandler(element)
+    }
+  
+    fileprivate func didTapEmoji(_ element: String, for type: ActiveType) {
+      guard let emojiHandler = emojiTapHandlers[type] else {
+        delegate?.didSelect(element, type: type)
+        return
+      }
+      emojiHandler(element)
     }
 }
 

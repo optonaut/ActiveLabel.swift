@@ -20,6 +20,8 @@ struct ActiveBuilder {
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         case .custom:
             return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
+        case .emoji:
+          return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
         }
     }
 
@@ -50,12 +52,36 @@ struct ActiveBuilder {
         }
         return (elements, text)
     }
+  
+    static func createEmojiElements(from text: String, range: NSRange, type: ActiveType) -> ([ElementTuple], String)? {
+      guard case ActiveType.emoji(let regex, let onImage) = type else { return nil }
+      
+      var text = text
+      let matches = RegexParser.getElements(from: text, with: regex, range: range)
+      let nsstring = text as NSString
+      var elements: [ElementTuple] = []
+      
+      for match in matches {
+        let word = nsstring.substring(with: match.range)
+          .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        
+        var newRange = (text as NSString).range(of: word)
+        newRange = NSRange(location: newRange.location, length: 1)
+        
+        let element = ActiveElement.emoji(range: newRange, name: word, onImage: onImage)
+        elements.append((newRange, element, type))
+        
+        text = (text as NSString).replacingCharacters(in: match.range, with: " ")
+      }
+      
+      return (elements, text)
+    }
 
     private static func createElements(from text: String,
-                                            for type: ActiveType,
-                                                range: NSRange,
-                                                minLength: Int = 2,
-                                                filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+                                       for type: ActiveType,
+                                       range: NSRange,
+                                       minLength: Int = 2,
+                                       filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
 
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString

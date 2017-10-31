@@ -1,12 +1,13 @@
 # ActiveLabel.swift [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![Build Status](https://travis-ci.org/optonaut/ActiveLabel.swift.svg)](https://travis-ci.org/optonaut/ActiveLabel.swift)
 
-UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and custom regex patterns, written in Swift
+UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://), Emojis (:emoji:) and custom regex patterns, written in Swift
 
 ## Features
 
 * Swift 3
 * Default support for **Hashtags, Mentions, Links**
 * Support for **custom types** via regex
+* Support for custom emojis
 * Ability to enable highlighting only for the desired types
 * Ability to trim urls
 * Super easy to use and lightweight
@@ -43,6 +44,16 @@ label.handleHashtagTap { hashtag in
     label.handleCustomTap(for: customType) { element in 
         print("Custom type tapped: \(element)") 
     }
+```
+
+## Custom types
+
+```swift
+    // Looks for pattern :{emoji_name}:
+    let emojiType = ActiveType.emoji(pattern: ":(\\w+):") { word in
+        return UIImage(named: "ghost")
+    }
+    label.enabledTypes = [.mention, .hashtag, .url, emojiType]
 ```
 
 ## Enable/disable highlighting

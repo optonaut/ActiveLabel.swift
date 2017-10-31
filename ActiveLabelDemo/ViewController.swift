@@ -16,20 +16,26 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        // Looks for :ghost:
+        let emojiType = ActiveType.emoji(pattern: ":(\\w+):") { word  in
+            return UIImage(named: "ghost")
+        }
         let customType = ActiveType.custom(pattern: "\\sare\\b") //Looks for "are"
         let customType2 = ActiveType.custom(pattern: "\\sit\\b") //Looks for "it"
         let customType3 = ActiveType.custom(pattern: "\\ssupports\\b") //Looks for "supports"
-
+      
         label.enabledTypes.append(customType)
         label.enabledTypes.append(customType2)
         label.enabledTypes.append(customType3)
+        label.enabledTypes.append(emojiType)
 
         label.urlMaximumLength = 31
 
         label.customize { label in
             label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
-            " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
-                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+              " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
+              "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601 \n" +
+            "I'm so scary :ghost:"
             label.numberOfLines = 0
             label.lineSpacing = 4
             
