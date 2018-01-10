@@ -188,7 +188,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
 
     // MARK: - touch events
-    func onTouch(_ touch: UITouch) -> Bool {
+    open func onTouch(_ touch: UITouch) -> Bool {
         let location = touch.location(in: self)
         var avoidSuperCall = false
 
