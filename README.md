@@ -4,7 +4,7 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://
 
 ## Features
 
-* Swift 3
+* Swift 4
 * Default support for **Hashtags, Mentions, Links**
 * Support for **custom types** via regex
 * Ability to enable highlighting only for the desired types
