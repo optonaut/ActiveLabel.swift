@@ -433,4 +433,14 @@ class ActiveTypeTests: XCTestCase {
         }
 
     }
+    
+    func testIgnoreTouches() {
+        label.text = "#somehashtag"
+        var notIgnored = label.onTouch(UITouch())
+        XCTAssertTrue(notIgnored)
+        
+        label.ignoreTouches = true
+        notIgnored = label.onTouch(UITouch())
+        XCTAssertFalse(notIgnored)
+    }
 }

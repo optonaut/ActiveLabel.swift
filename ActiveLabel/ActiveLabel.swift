@@ -60,6 +60,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     @IBInspectable public var highlightFontName: String? = nil {
         didSet { updateTextStorage(parseText: false) }
     }
+    @IBInspectable public var ignoreTouches: Bool = false
     public var highlightFontSize: CGFloat? = nil {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -189,6 +190,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
     // MARK: - touch events
     func onTouch(_ touch: UITouch) -> Bool {
+        if (ignoreTouches) {
+            return false
+        }
+        
         let location = touch.location(in: self)
         var avoidSuperCall = false
 
