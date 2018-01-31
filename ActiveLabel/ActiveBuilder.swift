@@ -34,14 +34,14 @@ struct ActiveBuilder {
             let word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 
-            guard let maxLenght = maximumLenght, word.characters.count > maxLenght else {
+            guard let maxLength = maximumLenght, word.characters.count > maxLength else {
                 let range = maximumLenght == nil ? match.range : (text as NSString).range(of: word)
                 let element = ActiveElement.create(with: type, text: word)
                 elements.append((range, element, type))
                 continue
             }
 
-            let trimmedWord = word.trim(to: maxLenght)
+            let trimmedWord = word.trim(to: maxLength)
             text = text.replacingOccurrences(of: word, with: trimmedWord)
 
             let newRange = (text as NSString).range(of: trimmedWord)
