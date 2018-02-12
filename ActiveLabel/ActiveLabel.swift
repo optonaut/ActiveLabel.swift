@@ -440,6 +440,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
 
         let index = layoutManager.glyphIndex(for: correctLocation, in: textContainer)
+		
+		if index == textStorage.length - 1 {
+			let lastCharRect = layoutManager.boundingRect(forGlyphRange: NSRange(location: index, length: 1), in: textContainer)
+			if !lastCharRect.contains(correctLocation) {
+				return nil
+			}
+		}
         
         for element in activeElements.map({ $0.1 }).joined() {
             if index >= element.range.location && index <= element.range.location + element.range.length {
