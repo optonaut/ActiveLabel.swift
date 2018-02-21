@@ -277,6 +277,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             clearActiveElements()
             let newString = parseTextAndExtractActiveElements(mutAttrString)
             mutAttrString.mutableString.setString(newString)
+            attributedText.enumerateAttributes(in: NSRange(location: 0, length: attributedText.length), options: .longestEffectiveRangeNotRequired, using: { (attribute, range, stop) in
+                mutAttrString.addAttributes(attribute, range: range)
+            })
         }
 
         addLinkAttribute(mutAttrString)
