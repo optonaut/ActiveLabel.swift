@@ -71,15 +71,15 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
 
     // MARK: - public methods
-    open func handleMentionTap(_ handler: @escaping (String) -> ()) {
+    @objc open func handleMentionTap(_ handler: @escaping (String) -> ()) {
         mentionTapHandler = handler
     }
 
-    open func handleHashtagTap(_ handler: @escaping (String) -> ()) {
+    @objc open func handleHashtagTap(_ handler: @escaping (String) -> ()) {
         hashtagTapHandler = handler
     }
     
-    open func handleURLTap(_ handler: @escaping (URL) -> ()) {
+    @objc open func handleURLTap(_ handler: @escaping (URL) -> ()) {
         urlTapHandler = handler
     }
 
