@@ -29,7 +29,8 @@ class ViewController: UIViewController {
         label.customize { label in
             label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
             " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
-                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601" +
+            "\n#bag #กระเป๋า"
             label.numberOfLines = 0
             label.lineSpacing = 4
             
