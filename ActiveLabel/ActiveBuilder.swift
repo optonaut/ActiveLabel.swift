@@ -20,6 +20,8 @@ struct ActiveBuilder {
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         case .custom:
             return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
+        case .customRange:
+            return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         }
     }
 
@@ -56,20 +58,25 @@ struct ActiveBuilder {
                                                 range: NSRange,
                                                 minLength: Int = 2,
                                                 filterPredicate: ActiveFilterPredicate?) -> [ElementTuple] {
+        switch type {
+        case .customRange(let range):
+            let substring = (text as NSString).substring(with: range)
+            return [(range, ActiveElement.create(with: type, text: substring), type)]
+        default:
+            let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
+            let nsstring = text as NSString
+            var elements: [ElementTuple] = []
 
-        let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
-        let nsstring = text as NSString
-        var elements: [ElementTuple] = []
-
-        for match in matches where match.range.length > minLength {
-            let word = nsstring.substring(with: match.range)
-                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if filterPredicate?(word) ?? true {
-                let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
+            for match in matches where match.range.length > minLength {
+                let word = nsstring.substring(with: match.range)
+                    .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+                if filterPredicate?(word) ?? true {
+                    let element = ActiveElement.create(with: type, text: word)
+                    elements.append((match.range, element, type))
+                }
             }
+            return elements
         }
-        return elements
     }
 
     private static func createElementsIgnoringFirstCharacter(from text: String,
