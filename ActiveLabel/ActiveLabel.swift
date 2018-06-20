@@ -11,6 +11,7 @@ import UIKit
 
 public protocol ActiveLabelDelegate: class {
     func didSelect(_ text: String, type: ActiveType)
+    func didLongPressWithURL(_ url: URL!, touchPoint: CGPoint)
 }
 
 public typealias ConfigureLinkAttribute = (ActiveType, [NSAttributedStringKey : Any], Bool) -> ([NSAttributedStringKey : Any])
@@ -26,6 +27,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open var urlMaximumLength: Int?
     
     open var configureLinkAttribute: ConfigureLinkAttribute?
+    
+    open var copyLinksActive: Bool = false
 
     @IBInspectable open var mentionColor: UIColor = .blue {
         didSet { updateTextStorage(parseText: false) }
@@ -138,23 +141,93 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open override var lineBreakMode: NSLineBreakMode {
         didSet { textContainer.lineBreakMode = lineBreakMode }
     }
+    
+    private let longPressGesture = UILongPressGestureRecognizer()
+    
+    private func setupLongPressGesture() {
+        self.longPressGesture.minimumPressDuration = 1
+        self.longPressGesture.addTarget(self, action: #selector(self.longPress(_:)))
+        self.addGestureRecognizer(self.longPressGesture)
+    }
+    
+    @objc private func longPress(_ sender: UILongPressGestureRecognizer) {
+        let location = sender.location(in: sender.view)
+        if let element = element(at: location) {
+            switch element.element {
+            case .mention(let userHandle):
+                guard let url = URL(string: "@" + userHandle) else {
+                    return
+                }
+                self.delegate?.didLongPressWithURL(url, touchPoint: location)
+                if self.copyLinksActive {
+                    print("\(url.description)")
+                    self.highlightLink()
+                }
+            case .hashtag(let hashtag):
+                guard let url = URL(string: "#" + hashtag) else {
+                    return
+                }
+                self.delegate?.didLongPressWithURL(url, touchPoint: location)
+                if self.copyLinksActive {
+                    print("\(url.description)")
+                }
+            case .url(let originalURL, _):
+                guard let url = URL(string: originalURL) else {
+                    return
+                }
+                self.delegate?.didLongPressWithURL(url, touchPoint: location)
+                if self.copyLinksActive {
+                    print("\(url.description)")
+                }
+            case .custom(_):
+                break
+            }
+        }
+    }
+    
+    private func showCopyMenu(rect: CGRect, sender: UILongPressGestureRecognizer) {
+        guard let responder = sender.view else {
+            return
+        }
+        let menuController = UIMenuController.shared
+        menuController.arrowDirection = .default
+        menuController.setTargetRect(rect, in: responder)
+        menuController.setMenuVisible(true, animated: true)
+    }
+    
+    private func highlightLink() {
+        //add highlight
+        guard let attributedText = self.attributedText, let text = self.text else {
+            return
+        }
+        let attributedString = NSMutableAttributedString(attributedString: attributedText)
+        attributedString.addAttribute(.backgroundColor, value: UIColor.red, range: NSRange(location: 2,length: 10)) //create new range 
+        self.attributedText = attributedString
+    }
+    
+    private func resetHighlight() {
+        //reset Highlight
+    }
 
     // MARK: - init functions
     override public init(frame: CGRect) {
         super.init(frame: frame)
         _customizing = false
         setupLabel()
+        self.setupLongPressGesture()
     }
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         _customizing = false
         setupLabel()
+        self.setupLongPressGesture()
     }
 
     open override func awakeFromNib() {
         super.awakeFromNib()
         updateTextStorage()
+        self.setupLongPressGesture()
     }
 
     open override func drawText(in rect: CGRect) {
@@ -482,7 +555,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             delegate?.didSelect(username, type: .mention)
             return
         }
-        mentionHandler(username)
+        mentionHandler("@" + username)
     }
 
     fileprivate func didTapHashtag(_ hashtag: String) {
@@ -490,7 +563,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             delegate?.didSelect(hashtag, type: .hashtag)
             return
         }
-        hashtagHandler(hashtag)
+        hashtagHandler("#" + hashtag)
     }
 
     fileprivate func didTapStringURL(_ stringURL: String) {
