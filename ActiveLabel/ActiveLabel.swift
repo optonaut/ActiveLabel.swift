@@ -77,6 +77,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     private let longPressGesture = UILongPressGestureRecognizer()
     private let highlightColor = UIColor(red: 229.0 / 255.0, green: 229.0 / 255.0, blue: 254.0 / 255.0, alpha: 0.7)
     private var lastCopyMenuRect: CGRect = .zero
+    private var copyLink: String? = nil
 
     // MARK: - public methods
     open func handleMentionTap(_ handler: @escaping (String) -> ()) {
@@ -189,6 +190,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         self.lastCopyMenuRect = rect
         self.showCopyMenu(rect: rect, sender: sender)
+        self.copyLink = url.description
     }
     
     private func selectedLinkRectangle(link: String, touchPoint: CGPoint) -> CGRect? {
@@ -236,6 +238,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     private func showCopyMenu(rect: CGRect, sender: UILongPressGestureRecognizer) {
         guard let responder = sender.view, responder.becomeFirstResponder() else {
+            self.copyLink = nil
             return
         }
         self.menuController.arrowDirection = .default
@@ -245,13 +248,11 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     private func hideCopyMenu() {
         self.lastCopyMenuRect = .zero
+        self.copyLink = nil
         self.menuController.setMenuVisible(false, animated: true)
     }
     
     private func highlightLink(range: NSRange) {
-        guard self.attributedText != nil, let text = self.text, text.count > range.upperBound else { //redundant checking ???
-            return
-        }
         self.textStorage.removeAttribute(.backgroundColor, range: NSRange(location: 0, length: self.textStorage.length))
         self.textStorage.addAttribute(.backgroundColor, value: self.highlightColor, range: range)
         setNeedsDisplay()
@@ -648,7 +649,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     override open func copy(_ sender: Any?) {
-        UIPasteboard.general.string = "test" // change copy string
+        UIPasteboard.general.string = self.copyLink
+        print("link - \(self.copyLink)")
     }
     
     override open func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
