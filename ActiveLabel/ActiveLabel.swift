@@ -72,6 +72,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         guard let highlightFontName = highlightFontName, let highlightFontSize = highlightFontSize else { return nil }
         return UIFont(name: highlightFontName, size: highlightFontSize)
     }
+    
+    private let menuController = UIMenuController.shared
+    private let longPressGesture = UILongPressGestureRecognizer()
+    private var lastCopyMenuRect: CGRect = .zero
 
     // MARK: - public methods
     open func handleMentionTap(_ handler: @escaping (String) -> ()) {
@@ -141,9 +145,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open override var lineBreakMode: NSLineBreakMode {
         didSet { textContainer.lineBreakMode = lineBreakMode }
     }
-    
-    private let longPressGesture = UILongPressGestureRecognizer()
-    
+
     private func setupLongPressGesture() {
         self.longPressGesture.minimumPressDuration = 1
         self.longPressGesture.addTarget(self, action: #selector(self.longPress(_:)))
@@ -175,16 +177,17 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             
         }
     }
-    
+
     private func processLink(_ url: URL!, touchPoint: CGPoint, sender: UILongPressGestureRecognizer) {
         self.delegate?.didLongPressWithURL(url, touchPoint: touchPoint)
         guard self.copyLinksActive else {
             return
         }
         print("\(url)")
-        guard let rect = self.selectedLinkRectangle(link: url.description, touchPoint: touchPoint) else {
+        guard let rect = self.selectedLinkRectangle(link: url.description, touchPoint: touchPoint), self.lastCopyMenuRect != rect else {
             return
         }
+        self.lastCopyMenuRect = rect
         self.showCopyMenu(rect: rect, sender: sender)
     }
     
@@ -234,10 +237,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         guard let responder = sender.view, responder.becomeFirstResponder() else {
             return
         }
-        let menuController = UIMenuController.shared
-        menuController.arrowDirection = .default
-        menuController.setTargetRect(rect, in: responder)
-        menuController.setMenuVisible(true, animated: true)
+        self.menuController.arrowDirection = .default
+        self.menuController.setTargetRect(rect, in: responder)
+        self.menuController.setMenuVisible(true, animated: true)
+    }
+    
+    private func hideCopyMenu() {
+        self.lastCopyMenuRect = .zero
+        self.menuController.setMenuVisible(false, animated: true)
     }
     
     private func highlightLink() {
@@ -309,7 +316,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     func onTouch(_ touch: UITouch) -> Bool {
         let location = touch.location(in: self)
         var avoidSuperCall = false
-
+        
         switch touch.phase {
         case .began, .moved:
             if let element = element(at: location) {
@@ -323,6 +330,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 updateAttributesWhenSelected(false)
                 selectedElement = nil
             }
+            self.hideCopyMenu()
         case .ended:
             guard let selectedElement = selectedElement else { return avoidSuperCall }
 
