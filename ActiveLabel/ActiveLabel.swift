@@ -75,6 +75,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     private let menuController = UIMenuController.shared
     private let longPressGesture = UILongPressGestureRecognizer()
+    private let highlightColor = UIColor(red: 229.0 / 255.0, green: 229.0 / 255.0, blue: 254.0 / 255.0, alpha: 0.7)
     private var lastCopyMenuRect: CGRect = .zero
 
     // MARK: - public methods
@@ -174,7 +175,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .custom(_):
                 break
             }
-            
         }
     }
 
@@ -201,6 +201,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             let boundRect = processBoundRect(forCharacterRange: characterRange)
             let correctBoundRect = CGRect(x: boundRect.minX, y: boundRect.minY + self.heightCorrection, width: boundRect.width, height: boundRect.height)
             guard !correctBoundRect.contains(touchPoint) else {
+                self.highlightLink(range: characterRange)
                 return correctBoundRect
             }
         }
@@ -247,18 +248,18 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         self.menuController.setMenuVisible(false, animated: true)
     }
     
-    private func highlightLink() {
-        //add highlight
-        guard let attributedText = self.attributedText, let text = self.text else {
+    private func highlightLink(range: NSRange) {
+        guard self.attributedText != nil, let text = self.text, text.count > range.upperBound else { //redundant checking ???
             return
         }
-        let attributedString = NSMutableAttributedString(attributedString: attributedText)
-        attributedString.addAttribute(.backgroundColor, value: UIColor.red, range: NSRange(location: 2,length: 10)) //create new range 
-        self.attributedText = attributedString
+        self.textStorage.removeAttribute(.backgroundColor, range: NSRange(location: 0, length: self.textStorage.length))
+        self.textStorage.addAttribute(.backgroundColor, value: self.highlightColor, range: range)
+        setNeedsDisplay()
     }
     
-    private func resetHighlight() {
-        //reset Highlight
+    @objc private func resetHighlight() {
+        self.textStorage.removeAttribute(.backgroundColor, range: NSRange(location: 0, length: self.textStorage.length))
+        setNeedsDisplay()
     }
 
     // MARK: - init functions
@@ -267,6 +268,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         _customizing = false
         setupLabel()
         self.setupLongPressGesture()
+        self.addCopyMenuObserver()
     }
 
     required public init?(coder aDecoder: NSCoder) {
@@ -274,12 +276,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         _customizing = false
         setupLabel()
         self.setupLongPressGesture()
+        self.addCopyMenuObserver()
     }
 
     open override func awakeFromNib() {
         super.awakeFromNib()
         updateTextStorage()
         self.setupLongPressGesture()
+        self.addCopyMenuObserver()
     }
 
     open override func drawText(in rect: CGRect) {
@@ -418,6 +422,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         for (type, _) in activeElements {
             activeElements[type]?.removeAll()
         }
+    }
+    
+    private func addCopyMenuObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(self.resetHighlight), name: .UIMenuControllerDidHideMenu, object: nil)
     }
 
     fileprivate func textOrigin(inRect rect: CGRect) -> CGPoint {
