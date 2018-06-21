@@ -205,12 +205,17 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     private func processLinkRanges(text: String, link: String) -> [Range<String.Index>] {
-        var linkRanges = text.ranges(of: link)
-        guard let range = link.range(of: "://") else {
+        var correctLink = link
+        if let maxLength = self.urlMaximumLength,
+            correctLink.count > maxLength {
+            correctLink = correctLink.trim(to: maxLength)
+        }
+        var linkRanges = text.ranges(of: correctLink)
+        guard let range = correctLink.range(of: "://") else {
             return linkRanges
         }
-        let linkRange = range.upperBound..<link.endIndex
-        let clippedLink = String(link[linkRange])
+        let linkRange = range.upperBound..<correctLink.endIndex
+        let clippedLink = String(correctLink[linkRange])
         let clippedLinkRanges = text.ranges(of: clippedLink)
         for clippedLinkRange in clippedLinkRanges {
             linkRanges.append(clippedLinkRange)
@@ -627,7 +632,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     override open func copy(_ sender: Any?) {
-        UIPasteboard.general.string = "test"
+        UIPasteboard.general.string = "test" // change copy string
     }
     
     override open func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
