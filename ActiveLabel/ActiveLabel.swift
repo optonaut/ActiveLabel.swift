@@ -149,7 +149,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
 
     private func setupLongPressGesture() {
-        self.longPressGesture.minimumPressDuration = 1
+        self.longPressGesture.minimumPressDuration = 0.5
         self.longPressGesture.addTarget(self, action: #selector(self.longPress(_:)))
         self.addGestureRecognizer(self.longPressGesture)
     }
@@ -184,7 +184,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         guard self.copyLinksActive else {
             return
         }
-        print("\(url)")
         guard let rect = self.selectedLinkRectangle(link: url.description, touchPoint: touchPoint), self.lastCopyMenuRect != rect else {
             return
         }
@@ -650,7 +649,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     override open func copy(_ sender: Any?) {
         UIPasteboard.general.string = self.copyLink
-        print("link - \(self.copyLink)")
     }
     
     override open func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
@@ -678,6 +676,8 @@ extension ActiveLabel: UIGestureRecognizerDelegate {
     }
 }
 
+
+//TODO: Remove this extension!!!
 extension String {
     func ranges(of substring: String, options: CompareOptions = [], locale: Locale? = nil) -> [Range<Index>] {
         var ranges: [Range<Index>] = []
