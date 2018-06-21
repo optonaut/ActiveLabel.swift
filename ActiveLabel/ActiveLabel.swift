@@ -158,35 +158,75 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 guard let url = URL(string: "@" + userHandle) else {
                     return
                 }
-                self.delegate?.didLongPressWithURL(url, touchPoint: location)
-                if self.copyLinksActive {
-                    print("\(url.description)")
-                    self.highlightLink()
-                }
+                self.processLink(url, touchPoint: location, sender: sender)
             case .hashtag(let hashtag):
                 guard let url = URL(string: "#" + hashtag) else {
                     return
                 }
-                self.delegate?.didLongPressWithURL(url, touchPoint: location)
-                if self.copyLinksActive {
-                    print("\(url.description)")
-                }
+                self.processLink(url, touchPoint: location, sender: sender)
             case .url(let originalURL, _):
                 guard let url = URL(string: originalURL) else {
                     return
                 }
-                self.delegate?.didLongPressWithURL(url, touchPoint: location)
-                if self.copyLinksActive {
-                    print("\(url.description)")
-                }
+                self.processLink(url, touchPoint: location, sender: sender)
             case .custom(_):
                 break
             }
+            
         }
     }
     
+    private func processLink(_ url: URL!, touchPoint: CGPoint, sender: UILongPressGestureRecognizer) {
+        self.delegate?.didLongPressWithURL(url, touchPoint: touchPoint)
+        guard self.copyLinksActive else {
+            return
+        }
+        print("\(url)")
+        guard let rect = self.selectedLinkRectangle(link: url.description, touchPoint: touchPoint) else {
+            return
+        }
+        self.showCopyMenu(rect: rect, sender: sender)
+    }
+    
+    private func selectedLinkRectangle(link: String, touchPoint: CGPoint) -> CGRect? {
+        guard let text = self.text else {
+            return nil
+        }
+        let linkRanges = self.processLinkRanges(text: text, link: link)
+        for linkRange in linkRanges {
+            let characterRange = NSRange(linkRange, in: text)
+            let boundRect = processBoundRect(forCharacterRange: characterRange)
+            let correctBoundRect = CGRect(x: boundRect.minX, y: boundRect.minY + self.heightCorrection, width: boundRect.width, height: boundRect.height)
+            guard !correctBoundRect.contains(touchPoint) else {
+                return correctBoundRect
+            }
+        }
+        return nil
+    }
+    
+    private func processLinkRanges(text: String, link: String) -> [Range<String.Index>] {
+        var linkRanges = text.ranges(of: link)
+        guard let range = link.range(of: "://") else {
+            return linkRanges
+        }
+        let linkRange = range.upperBound..<link.endIndex
+        let clippedLink = String(link[linkRange])
+        let clippedLinkRanges = text.ranges(of: clippedLink)
+        for clippedLinkRange in clippedLinkRanges {
+            linkRanges.append(clippedLinkRange)
+        }
+        return linkRanges
+    }
+    
+    private func processBoundRect(forCharacterRange range: NSRange) -> CGRect {
+        var glyphRange = NSRange(location: 0, length: textStorage.length)
+        self.layoutManager.characterRange(forGlyphRange: range, actualGlyphRange: &glyphRange)
+        let boundingRect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
+        return boundingRect
+    }
+    
     private func showCopyMenu(rect: CGRect, sender: UILongPressGestureRecognizer) {
-        guard let responder = sender.view else {
+        guard let responder = sender.view, responder.becomeFirstResponder() else {
             return
         }
         let menuController = UIMenuController.shared
@@ -581,6 +621,23 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         elementHandler(element)
     }
+    
+    override open var canBecomeFirstResponder: Bool {
+        return true
+    }
+    
+    override open func copy(_ sender: Any?) {
+        UIPasteboard.general.string = "test"
+    }
+    
+    override open func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        switch action {
+        case #selector(UIResponderStandardEditActions.copy(_:)):
+            return true
+        default:
+            return false
+        }
+    }
 }
 
 extension ActiveLabel: UIGestureRecognizerDelegate {
@@ -595,5 +652,18 @@ extension ActiveLabel: UIGestureRecognizerDelegate {
     
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
+    }
+}
+
+extension String {
+    func ranges(of substring: String, options: CompareOptions = [], locale: Locale? = nil) -> [Range<Index>] {
+        var ranges: [Range<Index>] = []
+        while let range = self.range(
+            of: substring,
+            options: options,
+            range: (ranges.last?.upperBound ?? self.startIndex)..<self.endIndex, locale: locale) {
+                ranges.append(range)
+        }
+        return ranges
     }
 }
