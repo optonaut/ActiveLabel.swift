@@ -181,10 +181,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
 
     private func processLink(_ url: URL!, touchPoint: CGPoint, sender: UILongPressGestureRecognizer) {
         self.delegate?.didLongPressWithURL(url, touchPoint: touchPoint)
-        guard self.copyLinksActive else {
-            return
-        }
-        guard let rect = self.selectedLinkRectangle(link: url.description, touchPoint: touchPoint), self.lastCopyMenuRect != rect else {
+        guard self.copyLinksActive,
+            let rect = self.selectedLinkRectangle(link: url.description, touchPoint: touchPoint),
+            self.lastCopyMenuRect != rect else {
             return
         }
         self.lastCopyMenuRect = rect
@@ -320,7 +319,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     func onTouch(_ touch: UITouch) -> Bool {
         let location = touch.location(in: self)
         var avoidSuperCall = false
-        
         switch touch.phase {
         case .began, .moved:
             if let element = element(at: location) {
@@ -673,20 +671,5 @@ extension ActiveLabel: UIGestureRecognizerDelegate {
     
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         return true
-    }
-}
-
-
-//TODO: Remove this extension!!!
-extension String {
-    func ranges(of substring: String, options: CompareOptions = [], locale: Locale? = nil) -> [Range<Index>] {
-        var ranges: [Range<Index>] = []
-        while let range = self.range(
-            of: substring,
-            options: options,
-            range: (ranges.last?.upperBound ?? self.startIndex)..<self.endIndex, locale: locale) {
-                ranges.append(range)
-        }
-        return ranges
     }
 }
