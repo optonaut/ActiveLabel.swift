@@ -11,6 +11,7 @@ import UIKit
 
 public protocol ActiveLabelDelegate: class {
     func didSelect(_ text: String, type: ActiveType)
+    func didLongPressWithURL(_ url: URL!, touchPoint: CGPoint)
 }
 
 public typealias ConfigureLinkAttribute = (ActiveType, [NSAttributedStringKey : Any], Bool) -> ([NSAttributedStringKey : Any])
@@ -26,6 +27,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open var urlMaximumLength: Int?
     
     open var configureLinkAttribute: ConfigureLinkAttribute?
+    
+    open var copyLinksActive: Bool = false
 
     @IBInspectable open var mentionColor: UIColor = .blue {
         didSet { updateTextStorage(parseText: false) }
@@ -69,6 +72,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         guard let highlightFontName = highlightFontName, let highlightFontSize = highlightFontSize else { return nil }
         return UIFont(name: highlightFontName, size: highlightFontSize)
     }
+    
+    private let menuController = UIMenuController.shared
+    private let longPressGesture = UILongPressGestureRecognizer()
+    private let highlightColor = UIColor(red: 229.0 / 255.0, green: 229.0 / 255.0, blue: 254.0 / 255.0, alpha: 0.7)
+    private var lastCopyMenuRect: CGRect = .zero
+    private var copyLink: String? = nil
 
     // MARK: - public methods
     open func handleMentionTap(_ handler: @escaping (String) -> ()) {
@@ -139,22 +148,141 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         didSet { textContainer.lineBreakMode = lineBreakMode }
     }
 
+    private func setupLongPressGesture() {
+        self.longPressGesture.minimumPressDuration = 0.5
+        self.longPressGesture.addTarget(self, action: #selector(self.longPress(_:)))
+        self.addGestureRecognizer(self.longPressGesture)
+    }
+    
+    @objc private func longPress(_ sender: UILongPressGestureRecognizer) {
+        let location = sender.location(in: sender.view)
+        if let element = element(at: location) {
+            switch element.element {
+            case .mention(let userHandle):
+                guard let url = URL(string: "@" + userHandle) else {
+                    return
+                }
+                self.processLink(url, touchPoint: location, sender: sender)
+            case .hashtag(let hashtag):
+                guard let url = URL(string: "#" + hashtag) else {
+                    return
+                }
+                self.processLink(url, touchPoint: location, sender: sender)
+            case .url(let originalURL, _):
+                guard let url = URL(string: originalURL) else {
+                    return
+                }
+                self.processLink(url, touchPoint: location, sender: sender)
+            case .custom(_):
+                break
+            }
+        }
+    }
+
+    private func processLink(_ url: URL!, touchPoint: CGPoint, sender: UILongPressGestureRecognizer) {
+        self.delegate?.didLongPressWithURL(url, touchPoint: touchPoint)
+        guard self.copyLinksActive,
+            let rect = self.selectedLinkRectangle(link: url.description, touchPoint: touchPoint),
+            self.lastCopyMenuRect != rect else {
+            return
+        }
+        self.lastCopyMenuRect = rect
+        self.showCopyMenu(rect: rect, sender: sender)
+        self.copyLink = url.description
+    }
+    
+    private func selectedLinkRectangle(link: String, touchPoint: CGPoint) -> CGRect? {
+        guard let text = self.text else {
+            return nil
+        }
+        let linkRanges = self.processLinkRanges(text: text, link: link)
+        for linkRange in linkRanges {
+            let characterRange = NSRange(linkRange, in: text)
+            let boundRect = processBoundRect(forCharacterRange: characterRange)
+            let correctBoundRect = CGRect(x: boundRect.minX, y: boundRect.minY + self.heightCorrection, width: boundRect.width, height: boundRect.height)
+            guard !correctBoundRect.contains(touchPoint) else {
+                self.highlightLink(range: characterRange)
+                return correctBoundRect
+            }
+        }
+        return nil
+    }
+    
+    private func processLinkRanges(text: String, link: String) -> [Range<String.Index>] {
+        var correctLink = link
+        if let maxLength = self.urlMaximumLength,
+            correctLink.count > maxLength {
+            correctLink = correctLink.trim(to: maxLength)
+        }
+        var linkRanges = text.ranges(of: correctLink)
+        guard let range = correctLink.range(of: "://") else {
+            return linkRanges
+        }
+        let linkRange = range.upperBound..<correctLink.endIndex
+        let clippedLink = String(correctLink[linkRange])
+        let clippedLinkRanges = text.ranges(of: clippedLink)
+        for clippedLinkRange in clippedLinkRanges {
+            linkRanges.append(clippedLinkRange)
+        }
+        return linkRanges
+    }
+    
+    private func processBoundRect(forCharacterRange range: NSRange) -> CGRect {
+        var glyphRange = NSRange(location: 0, length: textStorage.length)
+        self.layoutManager.characterRange(forGlyphRange: range, actualGlyphRange: &glyphRange)
+        let boundingRect = layoutManager.boundingRect(forGlyphRange: glyphRange, in: textContainer)
+        return boundingRect
+    }
+    
+    private func showCopyMenu(rect: CGRect, sender: UILongPressGestureRecognizer) {
+        guard let responder = sender.view, responder.becomeFirstResponder() else {
+            self.copyLink = nil
+            return
+        }
+        self.menuController.arrowDirection = .default
+        self.menuController.setTargetRect(rect, in: responder)
+        self.menuController.setMenuVisible(true, animated: true)
+    }
+    
+    private func hideCopyMenu() {
+        self.lastCopyMenuRect = .zero
+        self.copyLink = nil
+        self.menuController.setMenuVisible(false, animated: true)
+    }
+    
+    private func highlightLink(range: NSRange) {
+        self.textStorage.removeAttribute(.backgroundColor, range: NSRange(location: 0, length: self.textStorage.length))
+        self.textStorage.addAttribute(.backgroundColor, value: self.highlightColor, range: range)
+        setNeedsDisplay()
+    }
+    
+    @objc private func resetHighlight() {
+        self.textStorage.removeAttribute(.backgroundColor, range: NSRange(location: 0, length: self.textStorage.length))
+        setNeedsDisplay()
+    }
+
     // MARK: - init functions
     override public init(frame: CGRect) {
         super.init(frame: frame)
         _customizing = false
         setupLabel()
+        self.setupLongPressGesture()
+        self.addCopyMenuObserver()
     }
 
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         _customizing = false
         setupLabel()
+        self.setupLongPressGesture()
+        self.addCopyMenuObserver()
     }
 
     open override func awakeFromNib() {
         super.awakeFromNib()
         updateTextStorage()
+        self.setupLongPressGesture()
+        self.addCopyMenuObserver()
     }
 
     open override func drawText(in rect: CGRect) {
@@ -191,7 +319,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     func onTouch(_ touch: UITouch) -> Bool {
         let location = touch.location(in: self)
         var avoidSuperCall = false
-
         switch touch.phase {
         case .began, .moved:
             if let element = element(at: location) {
@@ -205,6 +332,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 updateAttributesWhenSelected(false)
                 selectedElement = nil
             }
+            self.hideCopyMenu()
         case .ended:
             guard let selectedElement = selectedElement else { return avoidSuperCall }
 
@@ -292,6 +420,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         for (type, _) in activeElements {
             activeElements[type]?.removeAll()
         }
+    }
+    
+    private func addCopyMenuObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(self.resetHighlight), name: .UIMenuControllerDidHideMenu, object: nil)
     }
 
     fileprivate func textOrigin(inRect rect: CGRect) -> CGPoint {
@@ -482,7 +614,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             delegate?.didSelect(username, type: .mention)
             return
         }
-        mentionHandler(username)
+        mentionHandler("@" + username)
     }
 
     fileprivate func didTapHashtag(_ hashtag: String) {
@@ -490,7 +622,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             delegate?.didSelect(hashtag, type: .hashtag)
             return
         }
-        hashtagHandler(hashtag)
+        hashtagHandler("#" + hashtag)
     }
 
     fileprivate func didTapStringURL(_ stringURL: String) {
@@ -507,6 +639,23 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return
         }
         elementHandler(element)
+    }
+    
+    override open var canBecomeFirstResponder: Bool {
+        return true
+    }
+    
+    override open func copy(_ sender: Any?) {
+        UIPasteboard.general.string = self.copyLink
+    }
+    
+    override open func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        switch action {
+        case #selector(UIResponderStandardEditActions.copy(_:)):
+            return true
+        default:
+            return false
+        }
     }
 }
 
