@@ -36,7 +36,8 @@ label.handleHashtagTap { hashtag in
 ```swift
     let customType = ActiveType.custom(pattern: "\\swith\\b") //Regex that looks for "with"
     label.enabledTypes = [.mention, .hashtag, .url, customType]
-    
+    label.text = "This is a post with #hashtags and a @userhandle."
+
     label.customColor[customType] = UIColor.purple
     label.customSelectedColor[customType] = UIColor.green
     
