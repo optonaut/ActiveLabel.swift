@@ -431,14 +431,32 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         guard textStorage.length > 0 else {
             return nil
         }
-
+        
         var correctLocation = location
         correctLocation.y -= heightCorrection
-        let boundingRect = layoutManager.boundingRect(forGlyphRange: NSRange(location: 0, length: textStorage.length), in: textContainer)
-        guard boundingRect.contains(correctLocation) else {
+        
+        let numberOfGlyphs = layoutManager.numberOfGlyphs
+        var lineRange = NSRange()
+        
+        var textCursorPosition: Int = 0
+        var didTapText: Bool = false
+        
+        while textCursorPosition < numberOfGlyphs {
+            let usedRect = layoutManager.lineFragmentUsedRect(forGlyphAt: textCursorPosition, effectiveRange: &lineRange)
+            if usedRect.contains(correctLocation) {
+                didTapText = true
+                break
+            } else if usedRect.minY > correctLocation.y {
+                break
+            }
+            
+            textCursorPosition += lineRange.length
+        }
+        
+        if !didTapText {
             return nil
         }
-
+        
         let index = layoutManager.glyphIndex(for: correctLocation, in: textContainer)
         
         for element in activeElements.map({ $0.1 }).joined() {
@@ -446,7 +464,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 return element
             }
         }
-
+        
         return nil
     }
 
