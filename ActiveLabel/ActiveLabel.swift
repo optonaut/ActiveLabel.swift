@@ -433,7 +433,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         
         var correctLocation = location
-        correctLocation.y -= heightCorrection
         
         let numberOfGlyphs = layoutManager.numberOfGlyphs
         var lineRange = NSRange()
@@ -442,7 +441,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var didTapText: Bool = false
         
         while textCursorPosition < numberOfGlyphs {
-            let usedRect = layoutManager.lineFragmentUsedRect(forGlyphAt: textCursorPosition, effectiveRange: &lineRange)
+            var usedRect = layoutManager.lineFragmentUsedRect(forGlyphAt: textCursorPosition, effectiveRange: &lineRange)
+            usedRect.origin.y += heightCorrection
+            
             if usedRect.contains(correctLocation) {
                 didTapText = true
                 break
@@ -457,6 +458,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return nil
         }
         
+        correctLocation.y -= heightCorrection
         let index = layoutManager.glyphIndex(for: correctLocation, in: textContainer)
         
         for element in activeElements.map({ $0.1 }).joined() {
