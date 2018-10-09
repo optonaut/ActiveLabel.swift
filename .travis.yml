@@ -1,6 +1,8 @@
 language: objective-c
 osx_image: xcode10
 before_install:
+- gem install bundler
+- gem update bundler
 - gem install scan
 - scan --version
 install: true
