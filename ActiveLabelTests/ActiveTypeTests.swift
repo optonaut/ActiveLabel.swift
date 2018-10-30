@@ -27,7 +27,7 @@ class ActiveTypeTests: XCTestCase {
     let customEmptyType = ActiveType.custom(pattern: "")
     
     var activeElements: [ActiveElement] {
-        return label.activeElements.flatMap({$0.1.flatMap({$0.element})})
+        return label.activeElements.flatMap({$0.1.compactMap({$0.element})})
     }
     
     var currentElementString: String? {
@@ -233,7 +233,7 @@ class ActiveTypeTests: XCTestCase {
             label.configureLinkAttribute = { type, attributes, isSelected in
                 var atts = attributes
                 if case newType = type {
-                    atts[NSAttributedStringKey.font] = UIFont.boldSystemFont(ofSize: 14)
+                    atts[NSAttributedString.Key.font] = UIFont.boldSystemFont(ofSize: 14)
                 }
                 
                 return atts
@@ -248,7 +248,7 @@ class ActiveTypeTests: XCTestCase {
         // Enumber after attributes and find our font
         var foundCustomAttributedStyling = false
         areText.enumerateAttributes(in: NSRange(location: 0, length: areText.length), options: [.longestEffectiveRangeNotRequired], using: { (attributes, range, stop) in
-            foundCustomAttributedStyling = attributes[NSAttributedStringKey.font] as? UIFont == UIFont.boldSystemFont(ofSize: 14)
+            foundCustomAttributedStyling = attributes[NSAttributedString.Key.font] as? UIFont == UIFont.boldSystemFont(ofSize: 14)
         })
 
         XCTAssertTrue(foundCustomAttributedStyling)
@@ -402,7 +402,7 @@ class ActiveTypeTests: XCTestCase {
         label.urlMaximumLength = 30
         label.text = text
 
-        XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
+        XCTAssertNotEqual(text.count, label.text!.count)
     }
 
     func testStringTrimmingURLShorterThanLimit() {
@@ -422,7 +422,7 @@ class ActiveTypeTests: XCTestCase {
         label.text = text
 
 
-        XCTAssertNotEqual(text.characters.count, label.text!.characters.count)
+        XCTAssertNotEqual(text.count, label.text!.count)
 
         switch activeElements.first! {
         case .url(let original, let trimmed):

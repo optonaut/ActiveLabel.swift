@@ -1,8 +1,9 @@
 language: objective-c
-osx_image: xcode9
+osx_image: xcode10
 before_install:
-- gem install scan
-- scan --version
+- gem install bundler
+- gem update bundler
+- gem install fastlane
 install: true
 script:
-- scan -p "ActiveLabel.xcodeproj" -s "ActiveLabel"
+- fastlane scan -p "ActiveLabel.xcodeproj" -s "ActiveLabel"
