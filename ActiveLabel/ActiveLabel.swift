@@ -15,6 +15,7 @@ public protocol ActiveLabelDelegate: class {
 
 public typealias ConfigureLinkAttribute = (ActiveType, [NSAttributedStringKey : Any], Bool) -> ([NSAttributedStringKey : Any])
 typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveType)
+public typealias MentionToPass = (userId: Int, name: String)
 
 @IBDesignable open class ActiveLabel: UILabel {
     
@@ -22,7 +23,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open weak var delegate: ActiveLabelDelegate?
 
     open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url]
-
+    open var mentionsArray: [MentionToPass]?
     open var urlMaximumLength: Int?
     
     open var configureLinkAttribute: ConfigureLinkAttribute?
@@ -358,7 +359,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             } else if type == .hashtag {
                 filter = hashtagFilterPredicate
             }
-            let hashtagElements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
+            let hashtagElements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter, mentionsArray: self.mentionsArray)
             activeElements[type] = hashtagElements
         }
 
@@ -500,13 +501,27 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         urlHandler(url)
     }
-
+    
     fileprivate func didTap(_ element: String, for type: ActiveType) {
+        var isMention: Bool = false
         guard let elementHandler = customTapHandlers[type] else {
             delegate?.didSelect(element, type: type)
             return
         }
-        elementHandler(element)
+        if let mentionsToPass = mentionsArray {
+            for mention in mentionsToPass {
+                if mention.name == element {
+                    isMention = true
+                    elementHandler(String(mention.userId))
+                    break
+                }
+            }
+            if !isMention {
+                elementHandler(element)
+            }
+        } else {
+            elementHandler(element)
+        }
     }
 }
 
