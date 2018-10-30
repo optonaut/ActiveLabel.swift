@@ -509,12 +509,9 @@ public typealias MentionToPass = (userId: Int, name: String)
             return
         }
         if let mentionsToPass = mentionsArray {
-            for mention in mentionsToPass {
-                if mention.name == element {
-                    isMention = true
-                    elementHandler(String(mention.userId))
-                    break
-                }
+            if let mention = mentionsToPass.first(where: {$0.name == element}) {
+                isMention = true
+                elementHandler(String(mention.userId))
             }
             if !isMention {
                 elementHandler(element)

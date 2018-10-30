@@ -67,11 +67,8 @@ struct ActiveBuilder {
             var word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if word.hasPrefix("@"), let mentions = mentions {
-                for mention in mentions {
-                    if word.contains(mention.name) && word != mention.name || word == mention.name {
-                        word = mention.name
-                        break
-                    }
+                if let mention = mentions.first(where: {(word.contains($0.name) && word != $0.name) || word == $0.name }) {
+                    word = mention.name
                 }
                 if filterPredicate?(word) ?? true {
                     let element = ActiveElement.create(with: type, text: word)
@@ -99,33 +96,12 @@ struct ActiveBuilder {
         for match in matches where match.range.length > 2 {
             let range = NSRange(location: match.range.location + 1, length: match.range.length - 1)
             var word = nsstring.substring(with: range)
-            if word.hasPrefix("@") {
+            if word.hasPrefix("@") || word.hasPrefix("#") {
                 word.remove(at: word.startIndex)
-                var mentionName = ""
-                let wordArray = word.split(separator: " ")
-                for element in wordArray {
-                    if String(element.prefix(1)) != element.prefix(1).capitalized {
-                        break
-                    } else {
-                        if !mentionName.isEmpty {
-                            mentionName += " "
-                        }
-                        mentionName += String(element)
-                    }
-                }
-                word = mentionName
-                if filterPredicate?(word) ?? true {
-                    let element = ActiveElement.create(with: type, text: word)
-                    let range = NSRange(location: match.range.location, length: word.count)
-                    elements.append((range, element, type))
-                }
             }
-            else if word.hasPrefix("#") {
-                word.remove(at: word.startIndex)
-                if filterPredicate?(word) ?? true {
-                    let element = ActiveElement.create(with: type, text: word)
-                    elements.append((match.range, element, type))
-                }
+            if filterPredicate?(word) ?? true {
+                let element = ActiveElement.create(with: type, text: word)
+                elements.append((match.range, element, type))
             }
         }
         return elements
