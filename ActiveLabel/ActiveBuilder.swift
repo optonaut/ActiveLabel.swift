@@ -61,22 +61,21 @@ struct ActiveBuilder {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
-
-        
         for match in matches where match.range.length > minLength {
             var word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if word.hasPrefix("@"), let mentions = mentions {
-                if let mention = mentions.first(where: {(word.contains($0.name) && word != $0.name) || word == $0.name }) {
-                    word = mention.name
-                }
+            if word.hasPrefix("@"), let mentions = mentions, let mention = mentions.first(where: {(word.contains($0.name) && word != $0.name) || word == $0.name }) {
+                word = mention.name
                 if filterPredicate?(word) ?? true {
                     let element = ActiveElement.create(with: type, text: word)
-                    let range = NSRange(location: match.range.location, length: word.count + 1)
+                    var range = NSRange(location: match.range.location, length: word.count + 1)
+                    if range.location + range.length >= text.count {
+                        range = NSRange(location: range.location, length: text.count - range.location)
+                    }
                     elements.append((range, element, type))
                 }
             } else {
-                if filterPredicate?(word) ?? true {
+                if word.hasPrefix("#"), filterPredicate?(word) ?? true {
                     let element = ActiveElement.create(with: type, text: word)
                     elements.append((match.range, element, type))
                 }
