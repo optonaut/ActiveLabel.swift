@@ -27,8 +27,8 @@ public typealias MentionToPass = (userId: Int, name: String)
     open var urlMaximumLength: Int?
     
     open var configureLinkAttribute: ConfigureLinkAttribute?
-
-    @IBInspectable open var mentionColor: UIColor = .blue {
+    
+    @IBInspectable open var mentionColor: UIColor = .black {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var mentionSelectedColor: UIColor? {
