@@ -64,7 +64,7 @@ struct ActiveBuilder {
         for match in matches where match.range.length > minLength {
             var word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if word.hasPrefix("@"), let mentions = mentions, let mention = mentions.first(where: {(word.contains($0.name) && word != $0.name) || word == $0.name }) {
+            if word.hasPrefix("@"), let mentions = mentions, let mention = mentions.first(where: {(word.contains($0.name))}) {
                 word = mention.name
                 if filterPredicate?(word) ?? true {
                     let element = ActiveElement.create(with: type, text: word)
