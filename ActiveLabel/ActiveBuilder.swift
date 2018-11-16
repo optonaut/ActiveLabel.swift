@@ -61,13 +61,24 @@ struct ActiveBuilder {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
+        var mentionsArray = mentions
+        var k = 0
         for match in matches where match.range.length > minLength {
             var word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if word.hasPrefix("@"), let mentions = mentions, let mention = mentions.first(where: {(word.contains($0.name))}) {
+            var id: Int? = nil
+            if word.hasPrefix("@"), let mentionsArrayUnwrapped = mentionsArray, let mention = mentionsArrayUnwrapped.first(where: {(word.contains($0.name))}) {
                 word = mention.name
+                id = mention.userId
+                for mentionIdentified in mentionsArrayUnwrapped {
+                    if mentionIdentified == mention {
+                        mentionsArray!.remove(at: k)
+                        break
+                    }
+                    k += 1
+                }
                 if filterPredicate?(word) ?? true {
-                    let element = ActiveElement.create(with: type, text: word)
+                    let element = ActiveElement.create(with: type, text: word, id: id)
                     var range = NSRange(location: match.range.location, length: word.count + 1)
                     if range.location + range.length >= text.count {
                         range = NSRange(location: range.location, length: text.count - range.location)
@@ -76,7 +87,7 @@ struct ActiveBuilder {
                 }
             } else {
                 if word.hasPrefix("#"), filterPredicate?(word) ?? true {
-                    let element = ActiveElement.create(with: type, text: word)
+                    let element = ActiveElement.create(with: type, text: word, id: id)
                     elements.append((match.range, element, type))
                 }
             }
