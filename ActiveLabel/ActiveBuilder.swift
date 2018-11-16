@@ -62,7 +62,6 @@ struct ActiveBuilder {
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
         var mentionsArray = mentions
-        var k = 0
         for match in matches where match.range.length > minLength {
             var word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
@@ -70,12 +69,11 @@ struct ActiveBuilder {
             if word.hasPrefix("@"), let mentionsArrayUnwrapped = mentionsArray, let mention = mentionsArrayUnwrapped.first(where: {(word.contains($0.name))}) {
                 word = mention.name
                 id = mention.userId
-                for mentionIdentified in mentionsArrayUnwrapped {
+                for (index, mentionIdentified) in mentionsArrayUnwrapped.enumerated() {
                     if mentionIdentified == mention {
-                        mentionsArray!.remove(at: k)
+                        mentionsArray!.remove(at: index)
                         break
                     }
-                    k += 1
                 }
                 if filterPredicate?(word) ?? true {
                     let element = ActiveElement.create(with: type, text: word, id: id)
