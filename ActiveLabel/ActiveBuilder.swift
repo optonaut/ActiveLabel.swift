@@ -61,29 +61,55 @@ struct ActiveBuilder {
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
         let nsstring = text as NSString
         var elements: [ElementTuple] = []
+        var mentionsArray = mentions
         for match in matches where match.range.length > minLength {
             var word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if word.hasPrefix("@"), let mentions = mentions, let mention = mentions.first(where: {(word.contains($0.name))}) {
-                word = mention.name
-                if filterPredicate?(word) ?? true {
-                    let element = ActiveElement.create(with: type, text: word)
-                    var range = NSRange(location: match.range.location, length: word.count + 1)
-                    if range.location + range.length >= text.count {
-                        range = NSRange(location: range.location, length: text.count - range.location)
-                    }
+            var id: Int? = nil
+            if word.hasPrefix("@") {
+                let filterResult = extractMention(mentionsArray, word: word, filterPredicate: filterPredicate, type: type, textCount: text.count, match: match)
+                word = filterResult.word ?? ""
+                id = filterResult.id
+                if let index = filterResult.index {
+                    mentionsArray?.remove(at: index)
+                }
+                if let element = filterResult.element, let range = filterResult.range {
                     elements.append((range, element, type))
                 }
             } else {
                 if word.hasPrefix("#"), filterPredicate?(word) ?? true {
-                    let element = ActiveElement.create(with: type, text: word)
+                    let element = ActiveElement.create(with: type, text: word, id: id)
                     elements.append((match.range, element, type))
                 }
             }
         }
         return elements
     }
+    
+    private static func extractMention(_ mentions: [MentionToPass]?,
+                             word: String,
+                             filterPredicate: ActiveFilterPredicate?,
+                             type: ActiveType,
+                             textCount: Int,
+                             match: NSTextCheckingResult) -> (word: String?, id: Int?, index: Int?, element: ActiveElement?, range: NSRange?) {
+        if let mentionsArray = mentions, let mention = mentionsArray.first(where: {(word.contains($0.name))}) {
+            let newId = mention.userId
+            let word = mention.name
+            let index = mentionsArray.enumerated().first(where: {($0.element == mention)})?.offset
+            if filterPredicate?(word) ?? true {
+                let element = ActiveElement.create(with: type, text: word, id: newId)
+                var range = NSRange(location: match.range.location, length: word.count + 1)
+                if range.location + range.length >= textCount {
+                    range = NSRange(location: range.location, length: textCount - range.location)
+                }
+                return (word: word, id: newId, index: index, element: element, range: range)
+            }
+            return (word: word, id: newId, index: index, element: nil, range: nil)
+        }
+        return (word: nil, id: nil, index: nil, element: nil, range: nil)
+    }
 
+    
     private static func createElementsIgnoringFirstCharacter(from text: String,
                                                              for type: ActiveType,
                                                              range: NSRange,

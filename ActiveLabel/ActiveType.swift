@@ -12,14 +12,14 @@ enum ActiveElement {
     case mention(String)
     case hashtag(String)
     case url(original: String, trimmed: String)
-    case custom(String)
-
-    static func create(with activeType: ActiveType, text: String) -> ActiveElement {
+    case custom(String, Int?)
+    
+    static func create(with activeType: ActiveType, text: String, id: Int? = nil) -> ActiveElement {
         switch activeType {
         case .mention: return mention(text)
         case .hashtag: return hashtag(text)
         case .url: return url(original: text, trimmed: text)
-        case .custom: return custom(text)
+        case .custom: return custom(text, id)
         }
     }
 }

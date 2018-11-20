@@ -213,7 +213,7 @@ public typealias MentionToPass = (userId: Int, name: String)
             case .mention(let userHandle): didTapMention(userHandle)
             case .hashtag(let hashtag): didTapHashtag(hashtag)
             case .url(let originalURL, _): didTapStringURL(originalURL)
-            case .custom(let element): didTap(element, for: selectedElement.type)
+            case .custom(let element, let id): didTap(element, id: id, for: selectedElement.type)
             }
             
             let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
@@ -502,14 +502,14 @@ public typealias MentionToPass = (userId: Int, name: String)
         urlHandler(url)
     }
     
-    fileprivate func didTap(_ element: String, for type: ActiveType) {
+    fileprivate func didTap(_ element: String, id: Int? = nil, for type: ActiveType) {
         var isMention: Bool = false
         guard let elementHandler = customTapHandlers[type] else {
             delegate?.didSelect(element, type: type)
             return
         }
-        if let mentionsToPass = mentionsArray {
-            if let mention = mentionsToPass.first(where: {$0.name == element}) {
+        if let mentionsToPass = mentionsArray, let id = id {
+            if let mention = mentionsToPass.first(where: {$0.name == element && $0.userId == id}) {
                 isMention = true
                 elementHandler(String(mention.userId))
             }
