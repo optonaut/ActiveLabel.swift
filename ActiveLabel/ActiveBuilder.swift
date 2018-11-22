@@ -98,10 +98,8 @@ struct ActiveBuilder {
             let index = mentionsArray.enumerated().first(where: {($0.element == mention)})?.offset
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.create(with: type, text: word, id: newId)
-                var range = NSRange(location: match.range.location, length: word.count + 1)
-                if range.location + range.length >= textCount {
-                    range = NSRange(location: range.location, length: textCount - range.location)
-                }
+                let range = NSRange(location: match.range.location, length: word.count + 1)
+                
                 return (word: word, id: newId, index: index, element: element, range: range)
             }
             return (word: word, id: newId, index: index, element: nil, range: nil)
