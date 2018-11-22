@@ -68,10 +68,7 @@ struct ActiveBuilder {
                 word = mention.name
                 if filterPredicate?(word) ?? true {
                     let element = ActiveElement.create(with: type, text: word)
-                    var range = NSRange(location: match.range.location, length: word.count + 1)
-                    if range.location + range.length >= text.count {
-                        range = NSRange(location: range.location, length: text.count - range.location)
-                    }
+                    let range = NSRange(location: match.range.location, length: word.count + 1)
                     elements.append((range, element, type))
                 }
             } else {
