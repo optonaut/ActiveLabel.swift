@@ -19,17 +19,20 @@ class ViewController: UIViewController {
         let customType = ActiveType.custom(pattern: "\\sare\\b") //Looks for "are"
         let customType2 = ActiveType.custom(pattern: "\\sit\\b") //Looks for "it"
         let customType3 = ActiveType.custom(pattern: "\\ssupports\\b") //Looks for "supports"
+        let customType4 = ActiveType.custom(pattern: "housing.temp")
 
         label.enabledTypes.append(customType)
         label.enabledTypes.append(customType2)
         label.enabledTypes.append(customType3)
+        label.enabledTypes.append(customType4)
 
         label.urlMaximumLength = 31
 
         label.customize { label in
             label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
             " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
-                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601" +
+            "Let's try my link: housing.temp"
             label.numberOfLines = 0
             label.lineSpacing = 4
             
@@ -64,6 +67,7 @@ class ViewController: UIViewController {
             label.handleCustomTap(for: customType) { self.alert("Custom type", message: $0) }
             label.handleCustomTap(for: customType2) { self.alert("Custom type", message: $0) }
             label.handleCustomTap(for: customType3) { self.alert("Custom type", message: $0) }
+            label.handleCustomTap(for: customType4) { self.alert("Custom type", message: $0) }
         }
 
         label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
