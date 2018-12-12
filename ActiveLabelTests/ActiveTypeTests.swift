@@ -24,7 +24,6 @@ public func ==(a: ActiveElement, b: ActiveElement) -> Bool {
 class ActiveTypeTests: XCTestCase {
     
     let label = ActiveLabel()
-    let customEmptyType = ActiveType.custom(pattern: "")
     
     var activeElements: [ElementTuple] {
         return label.activeElements.flatMap({$0.1.compactMap({$0})})
@@ -202,17 +201,17 @@ class ActiveTypeTests: XCTestCase {
         label.text = "we are one"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "are")
-        XCTAssertEqual(currentElementType, customEmptyType)
+        XCTAssertEqual(currentElementType, newType)
 
         label.text = "are. are"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "are")
-        XCTAssertEqual(currentElementType, customEmptyType)
+        XCTAssertEqual(currentElementType, newType)
 
         label.text = "helloare are"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "are")
-        XCTAssertEqual(currentElementType, customEmptyType)
+        XCTAssertEqual(currentElementType, newType)
 
         label.text = "google"
         XCTAssertEqual(activeElements.count, 0)
@@ -378,7 +377,7 @@ class ActiveTypeTests: XCTestCase {
         label.text = "http://www.google.com  are #hello"
         XCTAssertEqual(activeElements.count, 1)
         XCTAssertEqual(currentElementString, "are")
-        XCTAssertEqual(currentElementType, customEmptyType)
+        XCTAssertEqual(currentElementType, newType)
 
         label.text = "@user"
         XCTAssertEqual(activeElements.count, 0)
@@ -389,7 +388,7 @@ class ActiveTypeTests: XCTestCase {
         label.text = " http://www.apple.com are @userNumberOne #hashtag http://www.google.com are @anotheruser"
         XCTAssertEqual(activeElements.count, 2)
         XCTAssertEqual(currentElementString, "are")
-        XCTAssertEqual(currentElementType, customEmptyType)
+        XCTAssertEqual(currentElementType, newType)
     }
 
     func testStringTrimming() {
