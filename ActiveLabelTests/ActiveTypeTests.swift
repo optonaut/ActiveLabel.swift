@@ -26,12 +26,12 @@ class ActiveTypeTests: XCTestCase {
     let label = ActiveLabel()
     let customEmptyType = ActiveType.custom(pattern: "")
     
-    var activeElements: [ActiveElement] {
-        return label.activeElements.flatMap({$0.1.compactMap({$0.element})})
+    var activeElements: [ElementTuple] {
+        return label.activeElements.flatMap({$0.1.compactMap({$0})})
     }
     
     var currentElementString: String? {
-        guard let currentElement = activeElements.first else { return nil }
+        guard let (_, currentElement, _) = activeElements.first else { return nil }
         switch currentElement {
         case .mention(let mention): return mention
         case .hashtag(let hashtag): return hashtag
@@ -41,13 +41,8 @@ class ActiveTypeTests: XCTestCase {
     }
     
     var currentElementType: ActiveType? {
-        guard let currentElement = activeElements.first else { return nil }
-        switch currentElement {
-        case .mention: return .mention
-        case .hashtag: return .hashtag
-        case .url: return .url
-        case .custom: return customEmptyType
-        }
+        guard let (_, _, type) = activeElements.first else { return nil }
+        return type
     }
     
     override func setUp() {
@@ -424,7 +419,7 @@ class ActiveTypeTests: XCTestCase {
 
         XCTAssertNotEqual(text.count, label.text!.count)
 
-        switch activeElements.first! {
+        switch activeElements.first!.element {
         case .url(let original, let trimmed):
             XCTAssertEqual(original, url)
             XCTAssertEqual(trimmed, trimmedURL)
