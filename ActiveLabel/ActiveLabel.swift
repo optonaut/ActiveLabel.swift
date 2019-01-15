@@ -205,7 +205,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 updateAttributesWhenSelected(false)
                 selectedElement = nil
             }
-        case .ended:
+        case .ended, .cancelled:
             guard let selectedElement = selectedElement else { return avoidSuperCall }
 
             switch selectedElement.element {
@@ -221,10 +221,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 self.selectedElement = nil
             }
             avoidSuperCall = true
-        case .cancelled:
-            updateAttributesWhenSelected(false)
-            selectedElement = nil
-        case .stationary:
+        default:
             break
         }
 
