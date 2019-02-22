@@ -18,9 +18,16 @@ struct RegexParser {
 
     private static var cachedRegularExpressions: [String : NSRegularExpression] = [:]
 
-    static func getElements(from text: String, with pattern: String, range: NSRange) -> [NSTextCheckingResult]{
+    static func getElements(from text: NSAttributedString, with pattern: String, range: NSRange) -> [NSRange]{
         guard let elementRegex = regularExpression(for: pattern) else { return [] }
-        return elementRegex.matches(in: text, options: [], range: range)
+        var matches = elementRegex.matches(in: text.string, options: [], range: range).map { $0.range }
+
+        text.enumerateAttributes(in: NSRange(location: 0, length: text.length), options: .longestEffectiveRangeNotRequired, using: { (attribute, range, stop) in
+            if nil != attribute[.link] {
+                matches.append(range)
+            }
+        })
+        return matches
     }
 
     private static func regularExpression(for pattern: String) -> NSRegularExpression? {

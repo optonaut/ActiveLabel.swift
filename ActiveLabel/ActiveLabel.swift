@@ -276,7 +276,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         if parseText {
             clearActiveElements()
             let newString = parseTextAndExtractActiveElements(mutAttrString)
-            mutAttrString.mutableString.setString(newString)
+            mutAttrString.mutableString.setString(newString.string)
+            attributedText.enumerateAttributes(in: NSRange(location: 0, length: min(attributedText.length, mutAttrString.length)), options: .longestEffectiveRangeNotRequired, using: { (attribute, range, stop) in
+                mutAttrString.addAttributes(attribute, range: range)
+            })
         }
 
         addLinkAttribute(mutAttrString)
@@ -336,17 +339,17 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
 
     /// use regex check all link ranges
-    fileprivate func parseTextAndExtractActiveElements(_ attrString: NSAttributedString) -> String {
-        var textString = attrString.string
-        var textLength = textString.utf16.count
+    fileprivate func parseTextAndExtractActiveElements(_ attrString: NSAttributedString) -> NSAttributedString {
+        var attrString = attrString
+        var textLength = attrString.string.utf16.count
         var textRange = NSRange(location: 0, length: textLength)
 
         if enabledTypes.contains(.url) {
-            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLength: urlMaximumLength)
+            let tuple = ActiveBuilder.createURLElements(from: attrString, range: textRange, maximumLength: urlMaximumLength)
             let urlElements = tuple.0
             let finalText = tuple.1
-            textString = finalText
-            textLength = textString.utf16.count
+            attrString = finalText
+            textLength = attrString.string.utf16.count
             textRange = NSRange(location: 0, length: textLength)
             activeElements[.url] = urlElements
         }
@@ -358,11 +361,11 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             } else if type == .hashtag {
                 filter = hashtagFilterPredicate
             }
-            let hashtagElements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
+            let hashtagElements = ActiveBuilder.createElements(type: type, from: attrString, range: textRange, filterPredicate: filter)
             activeElements[type] = hashtagElements
         }
 
-        return textString
+        return attrString
     }
 
 

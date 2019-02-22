@@ -9,10 +9,16 @@
 import UIKit
 import ActiveLabel
 
+private extension StringProtocol where Index == String.Index {
+    func nsRange(from range: Range<Index>) -> NSRange {
+        return NSRange(range, in: self)
+    }
+}
+
 class ViewController: UIViewController {
     
     let label = ActiveLabel()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -27,9 +33,24 @@ class ViewController: UIViewController {
         label.urlMaximumLength = 31
 
         label.customize { label in
-            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
-            " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
-                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+            let font = UIFont.systemFont(ofSize: 17)
+            let boldFont = UIFont.boldSystemFont(ofSize: 18)
+
+            let plainString = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
+                " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
+            "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+            let attrText = NSMutableAttributedString(string: plainString,
+                                                      attributes: [.font: font, .foregroundColor: UIColor.orange])
+            attrText.addAttributes([.font: boldFont, .foregroundColor: UIColor.magenta], range: NSRange(location: 1, length: 2))
+            let wholeRange = plainString.startIndex..<plainString.endIndex
+            let link1Range = plainString.range(of: "http://optonaut.co", options: .literal, range: wholeRange, locale: nil)
+            let link2Range = plainString.range(of: "https://twitter.com/twicket_app/status/649678392372121601", options: .literal, range: wholeRange, locale: nil)
+            attrText.addAttribute(.link, value: "http://optonaut.co", range: plainString.nsRange(from: link1Range!))
+            attrText.addAttribute(.link, value: "https://twitter.com/twicket_app/status/649678392372121601", range: plainString.nsRange(from: link2Range!))
+            
+            
+            label.attributedText = attrText
+            
             label.numberOfLines = 0
             label.lineSpacing = 4
             
@@ -66,16 +87,15 @@ class ViewController: UIViewController {
             label.handleCustomTap(for: customType3) { self.alert("Custom type", message: $0) }
         }
 
-        label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
+        label.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(label)
         
         
-        // Do any additional setup after loading the view, typically from a nib.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        NSLayoutConstraint.activate([
+            label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            label.topAnchor.constraint(equalTo: topLayoutGuide.bottomAnchor, constant: 24),
+        ])
     }
     
     func alert(_ title: String, message: String) {
@@ -83,6 +103,22 @@ class ViewController: UIViewController {
         vc.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
         present(vc, animated: true, completion: nil)
     }
-
 }
 
+
+extension String {
+    var html2Attributed: NSAttributedString? {
+        do {
+            guard let data = data(using: String.Encoding.utf8) else {
+                return nil
+            }
+            return try NSAttributedString(data: data,
+                                          options: [.documentType: NSAttributedString.DocumentType.html,
+                                                    .characterEncoding: String.Encoding.utf8.rawValue],
+                                          documentAttributes: nil)
+        } catch {
+            print("error: ", error)
+            return nil
+        }
+    }
+}
