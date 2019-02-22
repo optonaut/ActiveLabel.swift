@@ -24,11 +24,11 @@ class ViewController: UIViewController {
         label.enabledTypes.append(customType2)
         label.enabledTypes.append(customType3)
 
-        label.urlMaximumLength = 31
+        label.urlMaximumLength = 35
 
         label.customize { label in
             label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
-            " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
+            " this one: http://optonaut.co. Automatic URL escaping also works, check out https://ko.wikipedia.org/wiki/위키백과:대문 \nNow it also supports custom patterns -> are\n\n" +
                 "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
             label.numberOfLines = 0
             label.lineSpacing = 4
