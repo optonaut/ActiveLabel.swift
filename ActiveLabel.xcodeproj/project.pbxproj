@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		786936A722200FAE00E52AC5 /* ActiveLabelHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786936A622200FAD00E52AC5 /* ActiveLabelHandler.swift */; };
 		8F0249A61B9989B1005D8035 /* ActiveLabel.h in Headers */ = {isa = PBXBuildFile; fileRef = 8F0249A51B9989B1005D8035 /* ActiveLabel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8F0249AD1B9989B1005D8035 /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
 		8F0249B21B9989B1005D8035 /* ActiveTypeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0249B11B9989B1005D8035 /* ActiveTypeTests.swift */; };
@@ -56,6 +57,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		786936A622200FAD00E52AC5 /* ActiveLabelHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveLabelHandler.swift; sourceTree = "<group>"; };
 		8F0249A21B9989B1005D8035 /* ActiveLabel.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ActiveLabel.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F0249A51B9989B1005D8035 /* ActiveLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ActiveLabel.h; sourceTree = "<group>"; };
 		8F0249A71B9989B1005D8035 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -126,6 +128,7 @@
 		8F0249A41B9989B1005D8035 /* ActiveLabel */ = {
 			isa = PBXGroup;
 			children = (
+				786936A622200FAD00E52AC5 /* ActiveLabelHandler.swift */,
 				8F0249A51B9989B1005D8035 /* ActiveLabel.h */,
 				8F0249D41B998D21005D8035 /* ActiveType.swift */,
 				8F0249D21B998C00005D8035 /* ActiveLabel.swift */,
@@ -310,6 +313,7 @@
 				8F0249D51B998D21005D8035 /* ActiveType.swift in Sources */,
 				C1D15C7B1D7C9B7E0041D119 /* ActiveBuilder.swift in Sources */,
 				C1E867D61C3D7AEA00FD687A /* RegexParser.swift in Sources */,
+				786936A722200FAE00E52AC5 /* ActiveLabelHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
