@@ -26,7 +26,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open var urlMaximumLength: Int?
     
     open var configureLinkAttribute: ConfigureLinkAttribute?
-    
+
+    let handler = ActiveLabelHandler()
+
     @IBInspectable open var mentionColor: UIColor = .blue {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -72,32 +74,27 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     // MARK: - public methods
     open func handleMentionTap(_ handler: @escaping (String) -> ()) {
-        mentionTapHandler = handler
+        self.handler.mentionTapHandler = handler
     }
     
     open func handleHashtagTap(_ handler: @escaping (String) -> ()) {
-        hashtagTapHandler = handler
+        self.handler.hashtagTapHandler = handler
     }
     
     open func handleURLTap(_ handler: @escaping (URL) -> ()) {
-        urlTapHandler = handler
+        self.handler.urlTapHandler = handler
     }
     
     open func handleCustomTap(for type: ActiveType, handler: @escaping (String) -> ()) {
-        customTapHandlers[type] = handler
+        self.handler.customTapHandlers[type] = handler
     }
-    
-    open func removeHandle(for type: ActiveType) {
-        switch type {
-        case .hashtag:
-            hashtagTapHandler = nil
-        case .mention:
-            mentionTapHandler = nil
-        case .url:
-            urlTapHandler = nil
-        case .custom:
-            customTapHandlers[type] = nil
-        }
+	
+    open func removeHandler(for type: ActiveType) {
+        handler.removeHandler(for: type)
+    }
+
+    open func removeAllHandlers() {
+        handler.removeAllHandlers()
     }
     
     open func filterMention(_ predicate: @escaping (String) -> Bool) {
@@ -128,7 +125,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     
     override open var textAlignment: NSTextAlignment {
-        didSet { updateTextStorage(parseText: false)}
+        didSet { updateTextStorage(parseText: false) }
     }
     
     open override var numberOfLines: Int {
@@ -207,12 +204,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             }
         case .ended:
             guard let selectedElement = selectedElement else { return avoidSuperCall }
-            
-            switch selectedElement.element {
-            case .mention(let userHandle): didTapMention(userHandle)
-            case .hashtag(let hashtag): didTapHashtag(hashtag)
-            case .url(let originalURL, _): didTapStringURL(originalURL)
-            case .custom(let element): didTap(element, for: selectedElement.type)
+
+            let (handled, text) = handler.handle(selectedElement: selectedElement)
+            if !handled {
+                delegate?.didSelect(text, type: selectedElement.type)
             }
             
             let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
@@ -236,11 +231,6 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     // MARK: - private properties
     fileprivate var _customizing: Bool = true
     fileprivate var defaultCustomColor: UIColor = .black
-    
-    internal var mentionTapHandler: ((String) -> ())?
-    internal var hashtagTapHandler: ((String) -> ())?
-    internal var urlTapHandler: ((URL) -> ())?
-    internal var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
     
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
     fileprivate var hashtagFilterPredicate: ((String) -> Bool)?
@@ -477,39 +467,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         if onTouch(touch) { return }
         super.touchesEnded(touches, with: event)
     }
-    
-    //MARK: - ActiveLabel handler
-    fileprivate func didTapMention(_ username: String) {
-        guard let mentionHandler = mentionTapHandler else {
-            delegate?.didSelect(username, type: .mention)
-            return
-        }
-        mentionHandler(username)
-    }
-    
-    fileprivate func didTapHashtag(_ hashtag: String) {
-        guard let hashtagHandler = hashtagTapHandler else {
-            delegate?.didSelect(hashtag, type: .hashtag)
-            return
-        }
-        hashtagHandler(hashtag)
-    }
-    
-    fileprivate func didTapStringURL(_ stringURL: String) {
-        guard let urlHandler = urlTapHandler, let url = URL(string: stringURL) else {
-            delegate?.didSelect(stringURL, type: .url)
-            return
-        }
-        urlHandler(url)
-    }
-    
-    fileprivate func didTap(_ element: String, for type: ActiveType) {
-        guard let elementHandler = customTapHandlers[type] else {
-            delegate?.didSelect(element, type: type)
-            return
-        }
-        elementHandler(element)
-    }
+
 }
 
 extension ActiveLabel: UIGestureRecognizerDelegate {
