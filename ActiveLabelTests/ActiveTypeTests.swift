@@ -58,6 +58,7 @@ class ActiveTypeTests: XCTestCase {
     
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
+        label.removeAllHandlers()
         super.tearDown()
     }
     
@@ -256,41 +257,64 @@ class ActiveTypeTests: XCTestCase {
 
     func testRemoveHandleMention() {
         label.handleMentionTap({_ in })
-        XCTAssertNotNil(label.handleMentionTap)
-        
-        label.removeHandle(for: .mention)
-        XCTAssertNil(label.mentionTapHandler)
+        XCTAssertNotNil(label.handler.mentionTapHandler)
+
+        label.removeHandler(for: .mention)
+        XCTAssertNil(label.handler.mentionTapHandler)
     }
-    
+
     func testRemoveHandleHashtag() {
         label.handleHashtagTap({_ in })
-        XCTAssertNotNil(label.handleHashtagTap)
-        
-        label.removeHandle(for: .hashtag)
-        XCTAssertNil(label.hashtagTapHandler)
+        XCTAssertNotNil(label.handler.hashtagTapHandler)
+
+        label.removeHandler(for: .hashtag)
+        XCTAssertNil(label.handler.hashtagTapHandler)
     }
-    
+
     func testRemoveHandleURL() {
         label.handleURLTap({_ in })
-        XCTAssertNotNil(label.handleURLTap)
-        
-        label.removeHandle(for: .url)
-        XCTAssertNil(label.urlTapHandler)
+        XCTAssertNotNil(label.handler.urlTapHandler)
+
+        label.removeHandler(for: .url)
+        XCTAssertNil(label.handler.urlTapHandler)
     }
-    
+
     func testRemoveHandleCustom() {
         let newType1 = ActiveType.custom(pattern: "\\sare1\\b")
         let newType2 = ActiveType.custom(pattern: "\\sare2\\b")
-        
+
         label.handleCustomTap(for: newType1, handler: {_ in })
         label.handleCustomTap(for: newType2, handler: {_ in })
-        XCTAssertEqual(label.customTapHandlers.count, 2)
-        
-        label.removeHandle(for: newType1)
-        XCTAssertEqual(label.customTapHandlers.count, 1)
-        
-        label.removeHandle(for: newType2)
-        XCTAssertEqual(label.customTapHandlers.count, 0)
+        XCTAssertEqual(label.handler.customTapHandlers.count, 2)
+
+        label.removeHandler(for: newType1)
+        XCTAssertEqual(label.handler.customTapHandlers.count, 1)
+
+        label.removeHandler(for: newType2)
+        XCTAssertEqual(label.handler.customTapHandlers.count, 0)
+    }
+
+    func testRemoveAllHandlers() {
+        let label = ActiveLabel()
+        label.handleMentionTap({_ in })
+        label.handleHashtagTap({_ in })
+        label.handleURLTap({_ in })
+
+        let newType1 = ActiveType.custom(pattern: "\\sare1\\b")
+        let newType2 = ActiveType.custom(pattern: "\\sare2\\b")
+        label.handleCustomTap(for: newType1, handler: {_ in })
+        label.handleCustomTap(for: newType2, handler: {_ in })
+
+        XCTAssertNotNil(label.handler.mentionTapHandler)
+        XCTAssertNotNil(label.handler.hashtagTapHandler)
+        XCTAssertNotNil(label.handler.urlTapHandler)
+        XCTAssertEqual(label.handler.customTapHandlers.count, 2)
+
+        label.removeAllHandlers()
+        XCTAssertNil(label.handler.mentionTapHandler)
+        XCTAssertNil(label.handler.hashtagTapHandler)
+        XCTAssertNil(label.handler.urlTapHandler)
+        XCTAssertEqual(label.handler.customTapHandlers.count, 0)
     }
 
     func testFiltering() {
