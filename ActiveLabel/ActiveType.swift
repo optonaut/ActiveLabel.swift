@@ -11,14 +11,14 @@ import Foundation
 enum ActiveElement {
     case mention(String)
     case hashtag(String)
-    case url(original: String, trimmed: String)
+    case url(original: String, trimmed: String, link: URL?)
     case custom(String)
 
-    static func create(with activeType: ActiveType, text: String) -> ActiveElement {
+    static func create(with activeType: ActiveType, text: String, link: URL?) -> ActiveElement {
         switch activeType {
         case .mention: return mention(text)
         case .hashtag: return hashtag(text)
-        case .url: return url(original: text, trimmed: text)
+        case .url: return url(original: text, trimmed: text, link: link)
         case .custom: return custom(text)
         }
     }

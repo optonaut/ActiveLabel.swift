@@ -50,6 +50,14 @@ struct ActiveBuilder {
         let plainString = text.string
         let nsstring = plainString as NSString
         var elements: [ElementTuple] = []
+        
+        typealias URLMatch = (range: NSRange, url: URL?)
+        var links: [URLMatch] = []
+        text.enumerateAttributes(in: NSRange(location: 0, length: text.length), options: .longestEffectiveRangeNotRequired, using: { (attribute, range, stop) in
+            if nil != attribute[.link] {
+                links.append(URLMatch(range: range, url: attribute[.link] as? URL))
+            }
+        })
 
         for match in matches where match.length > 2 {
             let word = nsstring.substring(with: match)
@@ -57,7 +65,7 @@ struct ActiveBuilder {
 
             guard let maxLength = maximumLength, word.count > maxLength else {
                 let range = maximumLength == nil ? match : (plainString as NSString).range(of: word)
-                let element = ActiveElement.create(with: type, text: word)
+                let element = ActiveElement.create(with: type, text: word, link: nil)
                 elements.append((range, element, type))
                 continue
             }
@@ -67,9 +75,30 @@ struct ActiveBuilder {
             text = text.replacingOccurrences(of: word, with: trimmedWord)
 
             let newRange = (text.string as NSString).range(of: trimmedWord)
-            let element = ActiveElement.url(original: word, trimmed: trimmedWord)
+            let element = ActiveElement.url(original: word, trimmed: trimmedWord, link: nil)
             elements.append((newRange, element, type))
         }
+        
+        for link in links {
+            let word = nsstring.substring(with: link.range)
+                .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            
+            guard let maxLength = maximumLength, word.count > maxLength else {
+                let range = maximumLength == nil ? link.range : (plainString as NSString).range(of: word)
+                let element = ActiveElement.create(with: type, text: word, link: link.url)
+                elements.append((range, element, type))
+                continue
+            }
+            
+            let trimmedWord = word.trim(to: maxLength)
+            
+            text = text.replacingOccurrences(of: word, with: trimmedWord)
+            
+            let newRange = (text.string as NSString).range(of: trimmedWord)
+            let element = ActiveElement.url(original: word, trimmed: trimmedWord, link: link.url)
+            elements.append((newRange, element, type))
+        }
+        
         return (elements, text)
     }
 
@@ -87,7 +116,7 @@ struct ActiveBuilder {
             let word = nsstring.substring(with: match)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if filterPredicate?(word) ?? true {
-                let element = ActiveElement.create(with: type, text: word)
+                let element = ActiveElement.create(with: type, text: word, link: nil)
                 elements.append((match, element, type))
             }
         }
@@ -113,7 +142,7 @@ struct ActiveBuilder {
             }
 
             if filterPredicate?(word) ?? true {
-                let element = ActiveElement.create(with: type, text: word)
+                let element = ActiveElement.create(with: type, text: word, link: nil)
                 elements.append((match, element, type))
             }
         }

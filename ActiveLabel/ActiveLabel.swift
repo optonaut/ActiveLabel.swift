@@ -211,7 +211,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             switch selectedElement.element {
             case .mention(let userHandle): didTapMention(userHandle)
             case .hashtag(let hashtag): didTapHashtag(hashtag)
-            case .url(let originalURL, _): didTapStringURL(originalURL)
+            case .url(let originalText, _, let url): didTapStringURL(url?.absoluteString ?? originalText)
             case .custom(let element): didTap(element, for: selectedElement.type)
             }
             

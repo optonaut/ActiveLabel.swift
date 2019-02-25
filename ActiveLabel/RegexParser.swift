@@ -20,13 +20,8 @@ struct RegexParser {
 
     static func getElements(from text: NSAttributedString, with pattern: String, range: NSRange) -> [NSRange]{
         guard let elementRegex = regularExpression(for: pattern) else { return [] }
-        var matches = elementRegex.matches(in: text.string, options: [], range: range).map { $0.range }
+        let matches = elementRegex.matches(in: text.string, options: [], range: range).map { $0.range }
 
-        text.enumerateAttributes(in: NSRange(location: 0, length: text.length), options: .longestEffectiveRangeNotRequired, using: { (attribute, range, stop) in
-            if nil != attribute[.link] {
-                matches.append(range)
-            }
-        })
         return matches
     }
 
