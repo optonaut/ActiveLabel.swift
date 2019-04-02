@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
 	s.name    = 'ActiveLabel'
-	s.version = '1.0.1'
+	s.version = '1.1.0'
 
 	s.author      = { 'Optonaut' => 'hello@optonaut.co' }
 	s.homepage    = 'https://github.com/optonaut/ActiveLabel.swift'
@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
 		UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and custom regex patterns, written in Swift
 
 		Features
-			* Up-to-date: Swift 4.2 and Xcode 10
+			* Up-to-date: Swift 5 and Xcode 10.2
 			* Default support for Hashtags, Mentions, Links
 			* Support for custom types via regex
 			* Ability to enable highlighting only for the desired types

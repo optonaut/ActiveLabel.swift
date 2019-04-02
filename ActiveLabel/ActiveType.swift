@@ -40,23 +40,24 @@ public enum ActiveType {
     }
 }
 
-extension ActiveType: Hashable, Equatable {
-    public var hashValue: Int {
+extension ActiveType: Hashable {
+    public func hash(into hasher: inout Hasher) {
         switch self {
-        case .mention: return -1
-        case .hashtag: return -2
-        case .url: return -3
-        case .custom(let regex): return regex.hashValue
+        case .mention: hasher.combine(-1)
+        case .hashtag: hasher.combine(-2)
+        case .url: hasher.combine(-3)
+        case .custom(let regex): hasher.combine(regex)
+
         }
     }
-}
 
-public func ==(lhs: ActiveType, rhs: ActiveType) -> Bool {
-    switch (lhs, rhs) {
-    case (.mention, .mention): return true
-    case (.hashtag, .hashtag): return true
-    case (.url, .url): return true
-    case (.custom(let pattern1), .custom(let pattern2)): return pattern1 == pattern2
-    default: return false
+    public static func ==(lhs: ActiveType, rhs: ActiveType) -> Bool {
+        switch (lhs, rhs) {
+        case (.mention, .mention): return true
+        case (.hashtag, .hashtag): return true
+        case (.url, .url): return true
+        case (.custom(let pattern1), .custom(let pattern2)): return pattern1 == pattern2
+        default: return false
+        }
     }
 }
