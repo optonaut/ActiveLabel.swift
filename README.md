@@ -15,6 +15,28 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://
 
 ![](ActiveLabelDemo/demo.gif)
 
+
+## Install (iOS 10+)
+
+### Carthage
+
+Add the following to your `Cartfile` and follow [these instructions](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)
+
+```
+github "optonaut/ActiveLabel.swift"
+```
+
+### CocoaPods
+
+CocoaPods 0.36 adds supports for Swift and embedded frameworks. To integrate ActiveLabel into your project add the following to your `Podfile`:
+
+```ruby
+platform :ios, '10.0'
+use_frameworks!
+
+pod 'ActiveLabel'
+```
+
 ## Usage
 
 ```swift
@@ -134,27 +156,6 @@ label.filterHashtag { hashtag in validHashtags.contains(hashtag) }
 
 ```swift
 label.filterMention { mention in validMentions.contains(mention) }
-```
-
-## Install (iOS 8+)
-
-### Carthage
-
-Add the following to your `Cartfile` and follow [these instructions](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)
-
-```
-github "optonaut/ActiveLabel.swift"
-```
-
-### CocoaPods
-
-CocoaPods 0.36 adds supports for Swift and embedded frameworks. To integrate ActiveLabel into your project add the following to your `Podfile`:
-
-```ruby
-platform :ios, '10.0'
-use_frameworks!
-
-pod 'ActiveLabel'
 ```
 
 ## Alternatives
