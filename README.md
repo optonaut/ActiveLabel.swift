@@ -4,7 +4,7 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://
 
 ## Features
 
-* Swift 4.2 (+1.0) and 4.0 (0.9)
+* Swift 5.0 (1.1.0) and 4.2 (1.0.1)
 * Default support for **Hashtags, Mentions, Links**
 * Support for **custom types** via regex
 * Ability to enable highlighting only for the desired types
@@ -151,7 +151,7 @@ github "optonaut/ActiveLabel.swift"
 CocoaPods 0.36 adds supports for Swift and embedded frameworks. To integrate ActiveLabel into your project add the following to your `Podfile`:
 
 ```ruby
-platform :ios, '8.0'
+platform :ios, '10.0'
 use_frameworks!
 
 pod 'ActiveLabel'
