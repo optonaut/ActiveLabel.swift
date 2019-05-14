@@ -39,7 +39,7 @@ struct ActiveBuilder {
         
         let moreElements = self.createURLElements(fromString: attributedText.string, range: range, maximumLength: maximumLength)
         
-        return (elements + moreElements.0, attributedText.string)
+        return (elements + moreElements.0, moreElements.1)
     }
 
     static private func createURLElements(fromString text: String, range: NSRange, maximumLength: Int?) -> ([ElementTuple], String) {
