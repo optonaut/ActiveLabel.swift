@@ -22,8 +22,27 @@ struct ActiveBuilder {
             return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
         }
     }
+    
+    static func createURLElements(from attributedText: NSAttributedString, range: NSRange, maximumLength: Int?) -> ([ElementTuple], String) {
+        var elements: [ElementTuple] = []
+        
+        attributedText.enumerateAttribute(
+            .link,
+            in: NSMakeRange(0, attributedText.length),
+            options: .longestEffectiveRangeNotRequired) { value, range, stop in
+                guard let link = value as? URL else { return }
+                let string = attributedText.string as NSString
+                
+                let element = ActiveElement.url(original: link.absoluteString, trimmed: string.substring(with: range))
+                elements.append((range, element, .url))
+        }
+        
+        let moreElements = self.createURLElements(fromString: attributedText.string, range: range, maximumLength: maximumLength)
+        
+        return (elements + moreElements.0, attributedText.string)
+    }
 
-    static func createURLElements(from text: String, range: NSRange, maximumLength: Int?) -> ([ElementTuple], String) {
+    static private func createURLElements(fromString text: String, range: NSRange, maximumLength: Int?) -> ([ElementTuple], String) {
         let type = ActiveType.url
         var text = text
         let matches = RegexParser.getElements(from: text, with: type.pattern, range: range)
