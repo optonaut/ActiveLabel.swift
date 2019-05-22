@@ -222,7 +222,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             }
             avoidSuperCall = true
         case .stationary:
-            fallthrough
+            break
         @unknown default:
             break
         }
