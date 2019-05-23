@@ -33,3 +33,4 @@ DerivedData
 # Carthage/Checkouts
 
 Carthage/Build
+test_output/*
