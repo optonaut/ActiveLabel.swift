@@ -215,10 +215,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .custom(let element): didTap(element, for: selectedElement.type)
             }
             
-            let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
-            DispatchQueue.main.asyncAfter(deadline: when) {
-                self.updateAttributesWhenSelected(false)
-                self.selectedElement = nil
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {[weak self] in
+                self?.updateAttributesWhenSelected(false)
+                self?.selectedElement = nil
             }
             avoidSuperCall = true
         case .cancelled:
