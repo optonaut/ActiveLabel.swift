@@ -27,6 +27,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     open var configureLinkAttribute: ConfigureLinkAttribute?
     
+    open var shouldDelayRestoreColor: Bool = true
+    
     @IBInspectable open var mentionColor: UIColor = .blue {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -215,7 +217,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .custom(let element): didTap(element, for: selectedElement.type)
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {[weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + (shouldDelayRestoreColor ? 0.25 : 0.0)) {[weak self] in
                 self?.updateAttributesWhenSelected(false)
                 self?.selectedElement = nil
             }
