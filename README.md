@@ -1,11 +1,11 @@
 # ActiveLabel.swift [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage) [![Build Status](https://travis-ci.org/optonaut/ActiveLabel.swift.svg)](https://travis-ci.org/optonaut/ActiveLabel.swift)
 
-UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and custom regex patterns, written in Swift
+UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://), Emails and custom regex patterns, written in Swift
 
 ## Features
 
 * Swift 5.0 (1.1.0) and 4.2 (1.0.1)
-* Default support for **Hashtags, Mentions, Links**
+* Default support for **Hashtags, Mentions, Links, Emails**
 * Support for **custom types** via regex
 * Ability to enable highlighting only for the desired types
 * Ability to trim urls
@@ -44,7 +44,7 @@ import ActiveLabel
 
 let label = ActiveLabel()
 label.numberOfLines = 0
-label.enabledTypes = [.mention, .hashtag, .url]
+label.enabledTypes = [.mention, .hashtag, .url, .email]
 label.text = "This is a post with #hashtags and a @userhandle."
 label.textColor = .black
 label.handleHashtagTap { hashtag in
@@ -56,7 +56,7 @@ label.handleHashtagTap { hashtag in
 
 ```swift
 let customType = ActiveType.custom(pattern: "\\swith\\b") //Regex that looks for "with"
-label.enabledTypes = [.mention, .hashtag, .url, customType]
+label.enabledTypes = [.mention, .hashtag, .url, .email, customType]
 label.text = "This is a post with #hashtags and a @userhandle."
 label.customColor[customType] = UIColor.purple
 label.customSelectedColor[customType] = UIColor.green
@@ -71,7 +71,7 @@ label.handleCustomTap(for: customType) { element in
 By default, an ActiveLabel instance has the following configuration
 
 ```swift
-label.enabledTypes = [.mention, .hashtag, .url]
+label.enabledTypes = [.mention, .hashtag, .url, .email]
 ```
 
 But feel free to enable/disable to fit your requirements
@@ -138,6 +138,12 @@ label.handleHashtagTap { hashtag in print("\(hashtag) tapped") }
 
 ```swift
 label.handleURLTap { url in UIApplication.shared.openURL(url) }
+```
+
+##### `handleEmailTap: (String) -> ()`
+
+```swift
+label.handleEmailTap { email in print("\(email) tapped") }
 ```
 
 ##### `handleCustomTap(for type: ActiveType, handler: (String) -> ())`
