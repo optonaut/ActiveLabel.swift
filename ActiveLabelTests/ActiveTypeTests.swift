@@ -37,6 +37,7 @@ class ActiveTypeTests: XCTestCase {
         case .hashtag(let hashtag): return hashtag
         case .url(let url, _): return url
         case .custom(let element): return element
+        case .email(let element): return element
         }
     }
     
@@ -47,6 +48,7 @@ class ActiveTypeTests: XCTestCase {
         case .hashtag: return .hashtag
         case .url: return .url
         case .custom: return customEmptyType
+        case .email: return .email
         }
     }
     
