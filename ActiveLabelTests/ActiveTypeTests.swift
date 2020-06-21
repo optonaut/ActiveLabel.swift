@@ -196,6 +196,9 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(currentElementString, "pic.twitter.com/YUGdEbUx")
         XCTAssertEqual(currentElementType, ActiveType.url)
 
+        label.text = "http://www.google.com http://example.com"
+        XCTAssertEqual(activeElements.count, 2)
+
         label.text = "google.com"
         XCTAssertEqual(activeElements.count, 0)
     }
@@ -432,5 +435,48 @@ class ActiveTypeTests: XCTestCase {
             XCTAssert(false)
         }
 
+    }
+
+    func testMultipleSameURL() {
+        label.urlMaximumLength = nil
+        label.text = "This is the first link http://google.com/. This is same link again repeated http://google.com/."
+        XCTAssertEqual(activeElements.count, 2)
+        activeElements.forEach { element in
+            switch element {
+            case .url(let original, let trimmed):
+                XCTAssertEqual(original, trimmed)
+                XCTAssertEqual(original, "http://google.com/")
+            default:
+                XCTAssert(false)
+            }
+        }
+
+        label.urlMaximumLength = 30
+        label.text = "This is the first link http://google.com/. This is same link again repeated http://google.com/."
+        XCTAssertEqual(activeElements.count, 2)
+        activeElements.forEach { element in
+            switch element {
+            case .url(let original, let trimmed):
+                XCTAssertEqual(original, trimmed)
+                XCTAssertEqual(original, "http://google.com/")
+            default:
+                XCTAssert(false)
+            }
+        }
+
+        let trimLimit = 10
+        label.urlMaximumLength = trimLimit
+        label.text = "This is the first link http://google.com/. This is same link again repeated http://google.com/."
+        let trimmedURL = "http://google.com/".trim(to: trimLimit)
+        XCTAssertEqual(activeElements.count, 2)
+        activeElements.forEach { element in
+            switch element {
+            case .url(let original, let trimmed):
+                XCTAssertEqual(original, "http://google.com/")
+                XCTAssertEqual(trimmed, trimmedURL)
+            default:
+                XCTAssert(false)
+            }
+        }
     }
 }
