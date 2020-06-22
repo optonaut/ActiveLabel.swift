@@ -441,42 +441,22 @@ class ActiveTypeTests: XCTestCase {
         label.urlMaximumLength = nil
         label.text = "This is the first link http://google.com/. This is same link again repeated http://google.com/."
         XCTAssertEqual(activeElements.count, 2)
-        activeElements.forEach { element in
-            switch element {
-            case .url(let original, let trimmed):
-                XCTAssertEqual(original, trimmed)
-                XCTAssertEqual(original, "http://google.com/")
-            default:
-                XCTAssert(false)
-            }
-        }
+        var ranges = label.activeElements.flatMap { $0.1.map { $0.range } }
+        XCTAssertEqual(ranges.count, 2)
+        XCTAssertNotEqual(ranges[0], ranges[1])
 
         label.urlMaximumLength = 30
         label.text = "This is the first link http://google.com/. This is same link again repeated http://google.com/."
         XCTAssertEqual(activeElements.count, 2)
-        activeElements.forEach { element in
-            switch element {
-            case .url(let original, let trimmed):
-                XCTAssertEqual(original, trimmed)
-                XCTAssertEqual(original, "http://google.com/")
-            default:
-                XCTAssert(false)
-            }
-        }
+        ranges = label.activeElements.flatMap { $0.1.map { $0.range } }
+        XCTAssertEqual(ranges.count, 2)
+        XCTAssertNotEqual(ranges[0], ranges[1])
 
-        let trimLimit = 10
-        label.urlMaximumLength = trimLimit
+        label.urlMaximumLength = 10
         label.text = "This is the first link http://google.com/. This is same link again repeated http://google.com/."
-        let trimmedURL = "http://google.com/".trim(to: trimLimit)
         XCTAssertEqual(activeElements.count, 2)
-        activeElements.forEach { element in
-            switch element {
-            case .url(let original, let trimmed):
-                XCTAssertEqual(original, "http://google.com/")
-                XCTAssertEqual(trimmed, trimmedURL)
-            default:
-                XCTAssert(false)
-            }
-        }
+        ranges = label.activeElements.flatMap { $0.1.map { $0.range } }
+        XCTAssertEqual(ranges.count, 2)
+        XCTAssertNotEqual(ranges[0], ranges[1])
     }
 }
