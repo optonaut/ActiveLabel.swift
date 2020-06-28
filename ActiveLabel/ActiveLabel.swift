@@ -181,6 +181,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     // MARK: - Auto layout
     
     open override var intrinsicContentSize: CGSize {
+        guard let text = text, !text.isEmpty else {
+            return .zero
+        }
+
         let superSize = super.intrinsicContentSize
         textContainer.size = CGSize(width: superSize.width, height: CGFloat.greatestFiniteMagnitude)
         let size = layoutManager.usedRect(for: textContainer)
