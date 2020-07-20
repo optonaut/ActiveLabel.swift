@@ -185,8 +185,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return .zero
         }
 
-        let superSize = super.intrinsicContentSize
-        textContainer.size = CGSize(width: superSize.width, height: CGFloat.greatestFiniteMagnitude)
+        textContainer.size = CGSize(width: self.preferredMaxLayoutWidth, height: CGFloat.greatestFiniteMagnitude)
         let size = layoutManager.usedRect(for: textContainer)
         return CGSize(width: ceil(size.width), height: ceil(size.height))
     }
@@ -197,7 +196,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var avoidSuperCall = false
         
         switch touch.phase {
-        case .began, .moved:
+        case .began, .moved, .regionEntered, .regionMoved:
             if let element = element(at: location) {
                 if element.range.location != selectedElement?.range.location || element.range.length != selectedElement?.range.length {
                     updateAttributesWhenSelected(false)
@@ -209,7 +208,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 updateAttributesWhenSelected(false)
                 selectedElement = nil
             }
-        case .ended:
+        case .ended, .regionExited:
             guard let selectedElement = selectedElement else { return avoidSuperCall }
             
             switch selectedElement.element {
