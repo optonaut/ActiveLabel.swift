@@ -1,5 +1,5 @@
 language: objective-c
-osx_image: xcode11.4
+osx_image: xcode12.2
 before_install:
 - gem install bundler
 - gem update bundler
