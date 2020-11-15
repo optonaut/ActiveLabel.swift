@@ -4,7 +4,7 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://
 
 ## Features
 
-* Swift 5.0 (1.1.0) and 4.2 (1.0.1)
+* Swift 5.0 (1.1.0+) and 4.2 (1.0.1)
 * Default support for **Hashtags, Mentions, Links, Emails**
 * Support for **custom types** via regex
 * Ability to enable highlighting only for the desired types
@@ -15,14 +15,13 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://
 
 ![](ActiveLabelDemo/demo.gif)
 
-
 ## Install (iOS 10+)
 
 ### Carthage
 
 Add the following to your `Cartfile` and follow [these instructions](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)
 
-```
+```sh
 github "optonaut/ActiveLabel.swift"
 ```
 
@@ -60,9 +59,8 @@ label.enabledTypes = [.mention, .hashtag, .url, .email, customType]
 label.text = "This is a post with #hashtags and a @userhandle."
 label.customColor[customType] = UIColor.purple
 label.customSelectedColor[customType] = UIColor.green
-    
-label.handleCustomTap(for: customType) { element in 
-    print("Custom type tapped: \(element)") 
+label.handleCustomTap(for: customType) { element in
+    print("Custom type tapped: \(element)")
 }
 ```
 
@@ -75,7 +73,6 @@ label.enabledTypes = [.mention, .hashtag, .url, .email]
 ```
 
 But feel free to enable/disable to fit your requirements
-
 
 ## Batched customization
 
