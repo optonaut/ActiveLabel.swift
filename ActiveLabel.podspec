@@ -12,8 +12,8 @@ Pod::Spec.new do |s|
 		UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://) and custom regex patterns, written in Swift
 
 		Features
-			* Up-to-date: Swift 5.0 and Xcode 10.2
-			* Default support for Hashtags, Mentions, Links
+			* Swift 5.0 (1.1.0+) and 4.2 (1.0.1)
+			* Default support for **Hashtags, Mentions, Links, Emails**
 			* Support for custom types via regex
 			* Ability to enable highlighting only for the desired types
 			* Ability to trim urls
