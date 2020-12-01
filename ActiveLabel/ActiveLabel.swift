@@ -450,12 +450,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         
         var correctLocation = location
         correctLocation.y -= heightCorrection
-        let boundingRect = layoutManager.boundingRect(forGlyphRange: NSRange(location: 0, length: textStorage.length), in: textContainer)
-        guard boundingRect.contains(correctLocation) else {
-            return nil
-        }
         
         let index = layoutManager.glyphIndex(for: correctLocation, in: textContainer)
+        var range = NSRange(location: 0, length: textStorage.length)
+        let line = layoutManager.lineFragmentUsedRect(forGlyphAt: index, effectiveRange: &range)
+ 
+        guard line.contains(correctLocation) else {
+            return nil
+        }
         
         for element in activeElements.map({ $0.1 }).joined() {
             if index >= element.range.location && index <= element.range.location + element.range.length {
