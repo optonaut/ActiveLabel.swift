@@ -64,11 +64,11 @@ struct ActiveBuilder {
         var elements: [ElementTuple] = []
 
         for match in matches where match.range.length > minLength {
-            let word = nsstring.substring(with: match.range)
+            let word = nsstring.substring(with: match.range(at: type.captureGroup))
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.create(with: type, text: word)
-                elements.append((match.range, element, type))
+                elements.append((match.range(at: type.captureGroup), element, type))
             }
         }
         return elements

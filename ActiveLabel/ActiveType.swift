@@ -31,7 +31,7 @@ public enum ActiveType {
     case hashtag
     case url
     case email
-    case custom(pattern: String)
+    case custom(pattern: String, captureGroup: Int = 0)
     
     var pattern: String {
         switch self {
@@ -39,7 +39,14 @@ public enum ActiveType {
         case .hashtag: return RegexParser.hashtagPattern
         case .url: return RegexParser.urlPattern
         case .email: return RegexParser.emailPattern
-        case .custom(let regex): return regex
+        case .custom(let regex, _): return regex
+        }
+    }
+    
+    var captureGroup: Int {
+        switch self {
+        case .custom(_, let captureGroup): return captureGroup
+        default: return 0
         }
     }
 }
@@ -51,7 +58,7 @@ extension ActiveType: Hashable, Equatable {
         case .hashtag: hasher.combine(-2)
         case .url: hasher.combine(-3)
         case .email: hasher.combine(-4)
-        case .custom(let regex): hasher.combine(regex)
+        case .custom(let regex, _): hasher.combine(regex)
         }
     }
 }

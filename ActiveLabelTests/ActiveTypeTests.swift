@@ -225,6 +225,29 @@ class ActiveTypeTests: XCTestCase {
         XCTAssertEqual(activeElements.count, 0)
     }
     
+    func testCustomTypeCaptureGroup() {
+        let newType = ActiveType.custom(pattern: "\\s(are).*", captureGroup: 1)
+        label.enabledTypes.append(newType)
+
+        label.text = "we are one"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "are")
+        XCTAssertEqual(currentElementType, customEmptyType)
+
+        label.text = "are. are"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "are")
+        XCTAssertEqual(currentElementType, customEmptyType)
+
+        label.text = "helloare are"
+        XCTAssertEqual(activeElements.count, 1)
+        XCTAssertEqual(currentElementString, "are")
+        XCTAssertEqual(currentElementType, customEmptyType)
+
+        label.text = "google"
+        XCTAssertEqual(activeElements.count, 0)
+    }
+    
     func testConfigureLinkAttributes() {
         // Customize label
         let newType = ActiveType.custom(pattern: "\\sare\\b")
