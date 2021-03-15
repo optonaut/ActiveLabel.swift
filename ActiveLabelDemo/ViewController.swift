@@ -27,9 +27,10 @@ class ViewController: UIViewController {
         label.urlMaximumLength = 31
 
         label.customize { label in
-            label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
-            " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
-                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+            label.text = "This is a post with #multiple #hashtags and a @userhandle. Linksare#Hashtag #해시태그#테스트 are also supported like\n" +
+              "Test00#Test01#Test테스트02.helloWorld!\n" +
+              " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
+                  "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
             label.numberOfLines = 0
             label.lineSpacing = 4
             
@@ -50,16 +51,16 @@ class ViewController: UIViewController {
             label.customColor[customType2] = UIColor.magenta
             label.customSelectedColor[customType2] = UIColor.green
             
-            label.configureLinkAttribute = { (type, attributes, isSelected) in
-                var atts = attributes
-                switch type {
-                case customType3:
-                    atts[NSAttributedString.Key.font] = isSelected ? UIFont.boldSystemFont(ofSize: 16) : UIFont.boldSystemFont(ofSize: 14)
-                default: ()
-                }
-                
-                return atts
-            }
+//            label.configureLinkAttribute = { (type, attributes, isSelected) in
+//                var atts = attributes
+//                switch type {
+//                case customType3:
+//                    atts[NSAttributedString.Key.font] = isSelected ? UIFont.boldSystemFont(ofSize: 16) : UIFont.boldSystemFont(ofSize: 14)
+//                default: ()
+//                }
+//
+//                return atts
+//            }
 
             label.handleCustomTap(for: customType) { self.alert("Custom type", message: $0) }
             label.handleCustomTap(for: customType2) { self.alert("Custom type", message: $0) }
