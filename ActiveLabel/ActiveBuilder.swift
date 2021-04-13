@@ -92,6 +92,10 @@ struct ActiveBuilder {
                 word.remove(at: word.startIndex)
             }
 
+            if word.hasSuffix(".") {
+              word.removeLast()
+            }
+
             if filterPredicate?(word) ?? true {
                 let element = ActiveElement.create(with: type, text: word)
                 elements.append((match.range, element, type))
