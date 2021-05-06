@@ -20,6 +20,8 @@ struct ActiveBuilder {
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         case .custom:
             return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
+        case .email:
+            return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         }
     }
 
