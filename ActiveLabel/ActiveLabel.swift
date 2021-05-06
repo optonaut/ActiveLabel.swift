@@ -226,6 +226,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             selectedElement = nil
         case .stationary:
             break
+        default:
+            if #available(iOS 13.4, *) {
+                if touch.phase == .regionEntered || touch.phase == .regionMoved || touch.phase == .regionExited {
+                    break
+                }
+            }
+            break
         }
 
         return avoidSuperCall
