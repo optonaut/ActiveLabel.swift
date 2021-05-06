@@ -7,9 +7,11 @@
 //
 
 import Foundation
+#if canImport(UIKit)
 import UIKit
+#endif
 
-public protocol ActiveLabelDelegate: class {
+public protocol ActiveLabelDelegate: AnyObject {
     func didSelect(_ text: String, type: ActiveType)
 }
 
