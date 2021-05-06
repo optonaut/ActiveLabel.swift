@@ -17,10 +17,6 @@ let package = Package(
             name: "ActiveLabel",
             path: "ActiveLabel",
             exclude: ["ActiveLabelDemo"]),
-        .testTarget(
-            name: "ActiveLabelTests",
-            path: "ActiveLabelTests"
-        ),
     ],
     swiftLanguageVersions: [.v5]
 )
