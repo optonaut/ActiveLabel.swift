@@ -17,6 +17,11 @@ UILabel drop-in replacement supporting Hashtags (#), Mentions (@), URLs (http://
 
 ## Install (iOS 10+)
 
+### Swift Package Manager
+
+In Xcode 11+, select _File > Packages > Add Package Dependency_
+Next, enter URL: https://github.com/optonaut/ActiveLabel.swift
+
 ### Carthage
 
 Add the following to your `Cartfile` and follow [these instructions](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)

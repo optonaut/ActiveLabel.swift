@@ -238,10 +238,6 @@
 				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = Optonaut;
 				TargetAttributes = {
-					8F0249A11B9989B1005D8035 = {
-						CreatedOnToolsVersion = 7.0;
-						LastSwiftMigration = 1020;
-					};
 					8F0249AB1B9989B1005D8035 = {
 						CreatedOnToolsVersion = 7.0;
 						DevelopmentTeam = G9KGF559KJ;
