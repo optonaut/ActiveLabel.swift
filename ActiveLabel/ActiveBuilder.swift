@@ -18,6 +18,8 @@ struct ActiveBuilder {
             return createElementsIgnoringFirstCharacter(from: text, for: type, range: range, filterPredicate: filterPredicate)
         case .url:
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
+        case .phone:
+            return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         case .custom:
             return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
         case .email:

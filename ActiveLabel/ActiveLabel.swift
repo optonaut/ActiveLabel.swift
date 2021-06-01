@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-public protocol ActiveLabelDelegate: class {
+public protocol ActiveLabelDelegate: AnyObject {
     func didSelect(_ text: String, type: ActiveType)
 }
 
@@ -22,7 +22,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open weak var delegate: ActiveLabelDelegate?
     
     open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url]
-    
+
     open var urlMaximumLength: Int?
     
     open var configureLinkAttribute: ConfigureLinkAttribute?
@@ -37,6 +37,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var hashtagSelectedColor: UIColor? {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable open var phoneColor: UIColor = .blue {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable open var phoneSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
     @IBInspectable open var URLColor: UIColor = .blue {
@@ -78,7 +84,11 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open func handleHashtagTap(_ handler: @escaping (String) -> ()) {
         hashtagTapHandler = handler
     }
-    
+
+    open func handlePhoneTap(_ handler: @escaping (String) -> ()) {
+        phoneTapHandler = handler
+    }
+
     open func handleURLTap(_ handler: @escaping (URL) -> ()) {
         urlTapHandler = handler
     }
@@ -103,6 +113,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             customTapHandlers[type] = nil
         case .email:
             emailTapHandler = nil
+        case .phone:
+            phoneTapHandler = nil
         }
     }
     
@@ -220,6 +232,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             switch selectedElement.element {
             case .mention(let userHandle): didTapMention(userHandle)
             case .hashtag(let hashtag): didTapHashtag(hashtag)
+            case .phone(let number): didTapPhone(number)
             case .url(let originalURL, _): didTapStringURL(originalURL)
             case .custom(let element): didTap(element, for: selectedElement.type)
             case .email(let element): didTapStringEmail(element)
@@ -249,6 +262,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     internal var mentionTapHandler: ((String) -> ())?
     internal var hashtagTapHandler: ((String) -> ())?
+    internal var phoneTapHandler: ((String) -> ())?
     internal var urlTapHandler: ((URL) -> ())?
     internal var emailTapHandler: ((String) -> ())?
     internal var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
@@ -331,6 +345,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .mention: attributes[NSAttributedString.Key.foregroundColor] = mentionColor
             case .hashtag: attributes[NSAttributedString.Key.foregroundColor] = hashtagColor
             case .url: attributes[NSAttributedString.Key.foregroundColor] = URLColor
+            case .phone: attributes[NSAttributedString.Key.foregroundColor] = phoneColor
             case .custom: attributes[NSAttributedString.Key.foregroundColor] = customColor[type] ?? defaultCustomColor
             case .email: attributes[NSAttributedString.Key.foregroundColor] = URLColor
             }
@@ -354,7 +369,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var textString = attrString.string
         var textLength = textString.utf16.count
         var textRange = NSRange(location: 0, length: textLength)
-        
+
         if enabledTypes.contains(.url) {
             let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLength: urlMaximumLength)
             let urlElements = tuple.0
@@ -364,16 +379,19 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             textRange = NSRange(location: 0, length: textLength)
             activeElements[.url] = urlElements
         }
-        
+
         for type in enabledTypes where type != .url {
             var filter: ((String) -> Bool)? = nil
+           
             if type == .mention {
                 filter = mentionFilterPredicate
             } else if type == .hashtag {
                 filter = hashtagFilterPredicate
             }
-            let hashtagElements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
-            activeElements[type] = hashtagElements
+            
+            let otherElements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
+            
+            activeElements[type] = otherElements
         }
         
         return textString
@@ -412,6 +430,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .mention: selectedColor = mentionSelectedColor ?? mentionColor
             case .hashtag: selectedColor = hashtagSelectedColor ?? hashtagColor
             case .url: selectedColor = URLSelectedColor ?? URLColor
+            case .phone: selectedColor = phoneSelectedColor ?? phoneColor
             case .custom:
                 let possibleSelectedColor = customSelectedColor[selectedElement.type] ?? customColor[selectedElement.type]
                 selectedColor = possibleSelectedColor ?? defaultCustomColor
@@ -424,6 +443,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .mention: unselectedColor = mentionColor
             case .hashtag: unselectedColor = hashtagColor
             case .url: unselectedColor = URLColor
+            case .phone: unselectedColor = phoneColor
             case .custom: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
             case .email: unselectedColor = URLColor
             }
@@ -508,7 +528,15 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         hashtagHandler(hashtag)
     }
-    
+
+    fileprivate func didTapPhone(_ number: String) {
+        guard let phoneHandler = phoneTapHandler else {
+            delegate?.didSelect(number, type: .phone)
+            return
+        }
+        phoneHandler(number)
+    }
+
     fileprivate func didTapStringURL(_ stringURL: String) {
         guard let urlHandler = urlTapHandler, let url = URL(string: stringURL) else {
             delegate?.didSelect(stringURL, type: .url)
