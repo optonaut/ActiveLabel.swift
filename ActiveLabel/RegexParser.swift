@@ -8,30 +8,66 @@
 
 import Foundation
 
-struct RegexParser {
+protocol RegexParserInterface {
+    func getElements(from text: String, with pattern: ActiveType, range: NSRange) -> [NSTextCheckingResult]
+}
 
-    static let hashtagPattern = "(?:^|\\s|$)#[\\p{L}0-9_]*"
-    static let mentionPattern = "(?:^|\\s|$|[.])@[\\p{L}0-9_]*"
-    static let emailPattern = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
-    static let urlPattern = "(^|[\\s.:;?\\-\\]<\\(])" +
+final class RegexParser: RegexParserInterface {
+
+    private let hashtagPattern = "(?:^|\\s|$)#[\\p{L}0-9_]*"
+    private let mentionPattern = "(?:^|\\s|$|[.])@[\\p{L}0-9_]*"
+    private let emailPattern = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+    private let urlPattern = "(^|[\\s.:;?\\-\\]<\\(])" +
         "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
     "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"
+    
+    /** Global cache that stores all the shared regexes across all of the ActiveLabel instances
+        we need to share them across different ActiveLabels because creating new NSRegularExpression and NSDataDetector objects is expensive and we want  to reuse them instead.
+     */
+    private static var cachedRegularExpressions: [ActiveType : NSRegularExpression] = [:]
 
-    private static var cachedRegularExpressions: [String : NSRegularExpression] = [:]
-
-    static func getElements(from text: String, with pattern: String, range: NSRange) -> [NSTextCheckingResult]{
-        guard let elementRegex = regularExpression(for: pattern) else { return [] }
-        return elementRegex.matches(in: text, options: [], range: range)
+    func getElements(from text: String, with pattern: ActiveType, range: NSRange) -> [NSTextCheckingResult] {
+        guard let regexForElement = getRegex(forActiveType: pattern) else { return [] }
+        return regexForElement.matches(in: text, options: [], range: range)
     }
 
-    private static func regularExpression(for pattern: String) -> NSRegularExpression? {
-        if let regex = cachedRegularExpressions[pattern] {
-            return regex
-        } else if let createdRegex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) {
-            cachedRegularExpressions[pattern] = createdRegex
-            return createdRegex
-        } else {
-            return nil
+    private func getRegex(forActiveType activeType: ActiveType) -> NSRegularExpression? {
+        // TODO: UT the equality of two custom patterns
+        if let cachedRegex = RegexParser.cachedRegularExpressions[activeType] {
+            return cachedRegex
         }
+        
+        var regularExpression: NSRegularExpression?
+        
+        switch activeType {
+        case .phone:
+            regularExpression = buildDataDetector(forTypes: [.phoneNumber])
+        case .address:
+            regularExpression = buildDataDetector(forTypes: [.address])
+        case .date:
+            regularExpression = buildDataDetector(forTypes: [.date])
+        case .url:
+            regularExpression = buildRegularExpression(forPattern: urlPattern)
+        case .email:
+            regularExpression = buildRegularExpression(forPattern: emailPattern)
+        case .mention:
+            regularExpression = buildRegularExpression(forPattern: mentionPattern)
+        case .hashtag:
+            regularExpression = buildRegularExpression(forPattern: hashtagPattern)
+        case .custom(pattern: let pattern):
+            regularExpression = buildRegularExpression(forPattern: pattern)
+        }
+        
+        RegexParser.cachedRegularExpressions[activeType] = regularExpression
+        
+        return regularExpression
+    }
+    
+    private func buildRegularExpression(forPattern pattern: String) -> NSRegularExpression? {
+        return try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive])
+    }
+    
+    private func buildDataDetector(forTypes types: NSTextCheckingResult.CheckingType) -> NSDataDetector? {
+        return try? NSDataDetector(types: types.rawValue)
     }
 }

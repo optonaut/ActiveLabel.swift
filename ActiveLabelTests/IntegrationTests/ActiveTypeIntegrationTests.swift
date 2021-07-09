@@ -9,49 +9,8 @@
 import XCTest
 @testable import ActiveLabel
 
-extension ActiveElement: Equatable {}
+class ActiveTypeIntegrationTests: BaseIntegrationTestCase {
 
-public func ==(a: ActiveElement, b: ActiveElement) -> Bool {
-    switch (a, b) {
-    case (.mention(let a), .mention(let b)) where a == b: return true
-    case (.hashtag(let a), .hashtag(let b)) where a == b: return true
-    case (.url(let a), .url(let b)) where a == b: return true
-    case (.custom(let a), .custom(let b)) where a == b: return true
-    default: return false
-    }
-}
-
-class ActiveTypeTests: XCTestCase {
-    
-    let label = ActiveLabel()
-    let customEmptyType = ActiveType.custom(pattern: "")
-    
-    var activeElements: [ActiveElement] {
-        return label.activeElements.flatMap({$0.1.compactMap({$0.element})})
-    }
-    
-    var currentElementString: String? {
-        guard let currentElement = activeElements.first else { return nil }
-        switch currentElement {
-        case .mention(let mention): return mention
-        case .hashtag(let hashtag): return hashtag
-        case .url(let url, _): return url
-        case .custom(let element): return element
-        case .email(let element): return element
-        }
-    }
-    
-    var currentElementType: ActiveType? {
-        guard let currentElement = activeElements.first else { return nil }
-        switch currentElement {
-        case .mention: return .mention
-        case .hashtag: return .hashtag
-        case .url: return .url
-        case .custom: return customEmptyType
-        case .email: return .email
-        }
-    }
-    
     override func setUp() {
         super.setUp()
         label.enabledTypes = [.mention, .hashtag, .url]
