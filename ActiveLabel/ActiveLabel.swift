@@ -45,6 +45,28 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     @IBInspectable open var URLSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
+    
+    @IBInspectable public var phoneColor: UIColor = .blue {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var phoneSelectedColor: UIColor? {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    
+    @IBInspectable public var addressColor: UIColor = .blue {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var addressSelectedColor: UIColor? {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    
+    @IBInspectable public var dateColor: UIColor = .blue {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable public var dateSelectedColor: UIColor? {
+        didSet { updateTextStorage(parseText: false) }
+    }
+
     open var customColor: [ActiveType : UIColor] = [:] {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -63,7 +85,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     public var highlightFontSize: CGFloat? = nil {
         didSet { updateTextStorage(parseText: false) }
     }
-    
+
     // MARK: - Computed Properties
     private var hightlightFont: UIFont? {
         guard let highlightFontName = highlightFontName, let highlightFontSize = highlightFontSize else { return nil }
@@ -91,6 +113,18 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         emailTapHandler = handler
     }
     
+    open func handlePhoneTap(handler: @escaping (String) -> ()) {
+        phoneTapHandler = handler
+    }
+    
+    open func handleAddressTap(handler: @escaping (String) -> ()) {
+        addressTapHandler = handler
+    }
+    
+    open func handleDateTap(handler: @escaping (String) -> ()) {
+        dateTapHandler = handler
+    }
+    
     open func removeHandle(for type: ActiveType) {
         switch type {
         case .hashtag:
@@ -103,6 +137,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             customTapHandlers[type] = nil
         case .email:
             emailTapHandler = nil
+        case .phone:
+            phoneTapHandler = nil
+        case .address:
+            addressTapHandler = nil
+        case .date:
+            dateTapHandler = nil
         }
     }
     
@@ -145,17 +185,30 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         didSet { textContainer.lineBreakMode = lineBreakMode }
     }
     
-    // MARK: - init functions
-    override public init(frame: CGRect) {
-        super.init(frame: frame)
+    private let activeBuilder: ActiveBuilderInterface
+    
+    init(activeBuilder: ActiveBuilderInterface = ActiveBuilder(regexParser: RegexParser())) {
+        self.activeBuilder = activeBuilder
+        super.init(frame: .zero)
+        commonInit()
+    }
+    
+    private func commonInit() {
         _customizing = false
         setupLabel()
     }
     
+    // MARK: - init functions
+    override public init(frame: CGRect) {
+        activeBuilder = ActiveBuilder(regexParser: RegexParser())
+        super.init(frame: frame)
+        commonInit()
+    }
+    
     required public init?(coder aDecoder: NSCoder) {
+        activeBuilder = ActiveBuilder(regexParser: RegexParser())
         super.init(coder: aDecoder)
-        _customizing = false
-        setupLabel()
+        commonInit()
     }
     
     open override func awakeFromNib() {
@@ -223,6 +276,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .url(let originalURL, _): didTapStringURL(originalURL)
             case .custom(let element): didTap(element, for: selectedElement.type)
             case .email(let element): didTapStringEmail(element)
+            case .phone(let phoneText): didTapPhone(phoneText)
+            case .address(let addressText): didTapAddress(addressText)
+            case .date(let dateText): didTapDate(dateText)
             }
             
             let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
@@ -251,6 +307,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     internal var hashtagTapHandler: ((String) -> ())?
     internal var urlTapHandler: ((URL) -> ())?
     internal var emailTapHandler: ((String) -> ())?
+    internal var phoneTapHandler: ((String) -> ())?
+    internal var addressTapHandler: ((String) -> ())?
+    internal var dateTapHandler: ((String) -> ())?
     internal var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
     
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
@@ -333,6 +392,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .url: attributes[NSAttributedString.Key.foregroundColor] = URLColor
             case .custom: attributes[NSAttributedString.Key.foregroundColor] = customColor[type] ?? defaultCustomColor
             case .email: attributes[NSAttributedString.Key.foregroundColor] = URLColor
+            case .phone: attributes[NSAttributedString.Key.foregroundColor] = phoneColor
+            case .address: attributes[NSAttributedString.Key.foregroundColor] = addressColor
+            case .date: attributes[NSAttributedString.Key.foregroundColor] = dateColor
             }
             
             if let highlightFont = hightlightFont {
@@ -356,7 +418,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         var textRange = NSRange(location: 0, length: textLength)
         
         if enabledTypes.contains(.url) {
-            let tuple = ActiveBuilder.createURLElements(from: textString, range: textRange, maximumLength: urlMaximumLength)
+            let tuple = activeBuilder.createURLElements(from: textString, range: textRange, maximumLength: urlMaximumLength)
             let urlElements = tuple.0
             let finalText = tuple.1
             textString = finalText
@@ -372,7 +434,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             } else if type == .hashtag {
                 filter = hashtagFilterPredicate
             }
-            let hashtagElements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
+            let hashtagElements = activeBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
             activeElements[type] = hashtagElements
         }
         
@@ -416,6 +478,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 let possibleSelectedColor = customSelectedColor[selectedElement.type] ?? customColor[selectedElement.type]
                 selectedColor = possibleSelectedColor ?? defaultCustomColor
             case .email: selectedColor = URLSelectedColor ?? URLColor
+            case .phone: selectedColor = phoneSelectedColor ?? phoneColor
+            case .address: selectedColor = addressSelectedColor ?? addressColor
+            case .date: selectedColor = dateSelectedColor ?? dateColor
             }
             attributes[NSAttributedString.Key.foregroundColor] = selectedColor
         } else {
@@ -426,6 +491,9 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .url: unselectedColor = URLColor
             case .custom: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
             case .email: unselectedColor = URLColor
+            case .phone: unselectedColor = phoneColor
+            case .address: unselectedColor = addressColor
+            case .date: unselectedColor = dateColor
             }
             attributes[NSAttributedString.Key.foregroundColor] = unselectedColor
         }
@@ -524,6 +592,30 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         emailHandler(stringEmail)
     }
+    
+    fileprivate func didTapPhone(_ phoneText: String) {
+        guard let phoneTapHandler = phoneTapHandler else {
+            delegate?.didSelect(phoneText, type: .phone)
+            return
+        }
+        phoneTapHandler(phoneText)
+    }
+    
+    fileprivate func didTapAddress(_ addressText: String) {
+        guard let addressTapHandler = addressTapHandler else {
+            delegate?.didSelect(addressText, type: .address)
+            return
+        }
+        addressTapHandler(addressText)
+    }
+  
+  fileprivate func didTapDate(_ dateText: String) {
+      guard let dateTapHandler = dateTapHandler else {
+          delegate?.didSelect(dateText, type: .date)
+          return
+      }
+      dateTapHandler(dateText)
+  }
     
     fileprivate func didTap(_ element: String, for type: ActiveType) {
         guard let elementHandler = customTapHandlers[type] else {
