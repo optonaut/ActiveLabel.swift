@@ -13,14 +13,16 @@ enum ActiveElement {
     case hashtag(String)
     case email(String)
     case url(original: String, trimmed: String)
+    case timestamp(Timestamp)
     case custom(String)
     
-    static func create(with activeType: ActiveType, text: String) -> ActiveElement {
+    static func create(with activeType: ActiveType, range: NSRange, text: String, fullText: String) -> ActiveElement {
         switch activeType {
         case .mention: return mention(text)
         case .hashtag: return hashtag(text)
         case .email: return email(text)
         case .url: return url(original: text, trimmed: text)
+        case .timestamp: return timestamp(.create(text, range: range, in: fullText))
         case .custom: return custom(text)
         }
     }
@@ -31,6 +33,7 @@ public enum ActiveType {
     case hashtag
     case url
     case email
+    case timestamp
     case custom(pattern: String)
     
     var pattern: String {
@@ -39,6 +42,7 @@ public enum ActiveType {
         case .hashtag: return RegexParser.hashtagPattern
         case .url: return RegexParser.urlPattern
         case .email: return RegexParser.emailPattern
+        case .timestamp: return RegexParser.timestampPattern
         case .custom(let regex): return regex
         }
     }
@@ -51,6 +55,7 @@ extension ActiveType: Hashable, Equatable {
         case .hashtag: hasher.combine(-2)
         case .url: hasher.combine(-3)
         case .email: hasher.combine(-4)
+        case .timestamp: hasher.combine(-5)
         case .custom(let regex): hasher.combine(regex)
         }
     }
@@ -62,6 +67,7 @@ public func ==(lhs: ActiveType, rhs: ActiveType) -> Bool {
     case (.hashtag, .hashtag): return true
     case (.url, .url): return true
     case (.email, .email): return true
+    case (.timestamp, .timestamp): return true
     case (.custom(let pattern1), .custom(let pattern2)): return pattern1 == pattern2
     default: return false
     }

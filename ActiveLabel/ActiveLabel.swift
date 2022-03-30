@@ -39,6 +39,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     @IBInspectable open var hashtagSelectedColor: UIColor? {
         didSet { updateTextStorage(parseText: false) }
     }
+    @IBInspectable open var timestampColor: UIColor = .blue {
+        didSet { updateTextStorage(parseText: false) }
+    }
+    @IBInspectable open var timestampSelectedColor: UIColor? {
+        didSet { updateTextStorage(parseText: false) }
+    }
     @IBInspectable open var URLColor: UIColor = .blue {
         didSet { updateTextStorage(parseText: false) }
     }
@@ -90,6 +96,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open func handleEmailTap(_ handler: @escaping (String) -> ()) {
         emailTapHandler = handler
     }
+
+    open func handleTimestampTap(_ handler: @escaping (Timestamp) -> ()) {
+        timestampTapHandler = handler
+    }
     
     open func removeHandle(for type: ActiveType) {
         switch type {
@@ -103,6 +113,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             customTapHandlers[type] = nil
         case .email:
             emailTapHandler = nil
+        case .timestamp:
+            timestampTapHandler = nil
         }
     }
     
@@ -113,6 +125,11 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     
     open func filterHashtag(_ predicate: @escaping (String) -> Bool) {
         hashtagFilterPredicate = predicate
+        updateTextStorage()
+    }
+
+    open func filterTimestamp(_ predicate: @escaping (String) -> Bool) {
+        timestampFilterPredicate = predicate
         updateTextStorage()
     }
     
@@ -223,6 +240,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .url(let originalURL, _): didTapStringURL(originalURL)
             case .custom(let element): didTap(element, for: selectedElement.type)
             case .email(let element): didTapStringEmail(element)
+            case .timestamp(let element): didTapTimestamp(element)
             }
             
             let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
@@ -251,10 +269,12 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     internal var hashtagTapHandler: ((String) -> ())?
     internal var urlTapHandler: ((URL) -> ())?
     internal var emailTapHandler: ((String) -> ())?
+    internal var timestampTapHandler: ((Timestamp) -> ())?
     internal var customTapHandlers: [ActiveType : ((String) -> ())] = [:]
     
     fileprivate var mentionFilterPredicate: ((String) -> Bool)?
     fileprivate var hashtagFilterPredicate: ((String) -> Bool)?
+    fileprivate var timestampFilterPredicate: ((String) -> Bool)?
     
     fileprivate var selectedElement: ElementTuple?
     fileprivate var heightCorrection: CGFloat = 0
@@ -333,6 +353,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .url: attributes[NSAttributedString.Key.foregroundColor] = URLColor
             case .custom: attributes[NSAttributedString.Key.foregroundColor] = customColor[type] ?? defaultCustomColor
             case .email: attributes[NSAttributedString.Key.foregroundColor] = URLColor
+            case .timestamp: attributes[NSAttributedString.Key.foregroundColor] = timestampColor
             }
             
             if let highlightFont = hightlightFont {
@@ -371,8 +392,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 filter = mentionFilterPredicate
             } else if type == .hashtag {
                 filter = hashtagFilterPredicate
+            } else if type == .timestamp {
+                filter = timestampFilterPredicate
             }
-            let hashtagElements = ActiveBuilder.createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
+            let hashtagElements = ActiveBuilder
+                .createElements(type: type, from: textString, range: textRange, filterPredicate: filter)
+                .filter { $0.type != .timestamp || Timestamp.filter(at: $0.range, with: textString) }
+
             activeElements[type] = hashtagElements
         }
         
@@ -416,6 +442,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 let possibleSelectedColor = customSelectedColor[selectedElement.type] ?? customColor[selectedElement.type]
                 selectedColor = possibleSelectedColor ?? defaultCustomColor
             case .email: selectedColor = URLSelectedColor ?? URLColor
+            case .timestamp: selectedColor = timestampSelectedColor ?? timestampColor
             }
             attributes[NSAttributedString.Key.foregroundColor] = selectedColor
         } else {
@@ -426,6 +453,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             case .url: unselectedColor = URLColor
             case .custom: unselectedColor = customColor[selectedElement.type] ?? defaultCustomColor
             case .email: unselectedColor = URLColor
+            case .timestamp: unselectedColor = timestampColor
             }
             attributes[NSAttributedString.Key.foregroundColor] = unselectedColor
         }
@@ -523,6 +551,14 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
             return
         }
         emailHandler(stringEmail)
+    }
+
+    fileprivate func didTapTimestamp(_ timestamp: Timestamp) {
+        guard let timestampTapHandler = timestampTapHandler else {
+            delegate?.didSelect(timestamp.timeString, type: .timestamp)
+            return
+        }
+        timestampTapHandler(timestamp)
     }
     
     fileprivate func didTap(_ element: String, for type: ActiveType) {

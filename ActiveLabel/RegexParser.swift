@@ -13,6 +13,8 @@ struct RegexParser {
     static let hashtagPattern = "(?:^|\\s|$)#[\\p{L}0-9_]*"
     static let mentionPattern = "(?:^|\\s|$|[.])@[\\p{L}0-9_]*"
     static let emailPattern = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+    static let timestampPattern = "([0-9][0-9]{0,1}:)?[0-5]{0,1}[0-9]{1}:[0-5]{1}[0-9]{1}"
+    static let timestampChapterTitlePattern = "[^\\s](.*[^\\s])(\n|$)"
     static let urlPattern = "(^|[\\s.:;?\\-\\]<\\(])" +
         "((https?://|www\\.|pic\\.)[-\\w;/?:@&=+$\\|\\_.!~*\\|'()\\[\\]%#,☺]+[\\w/#](\\(\\))?)" +
     "(?=$|[\\s',\\|\\(\\).:;?\\-\\[\\]>\\)])"
@@ -22,6 +24,12 @@ struct RegexParser {
     static func getElements(from text: String, with pattern: String, range: NSRange) -> [NSTextCheckingResult]{
         guard let elementRegex = regularExpression(for: pattern) else { return [] }
         return elementRegex.matches(in: text, options: [], range: range)
+    }
+
+    static func isMatchToAnyPatterns(from text: String, range: NSRange) -> Bool {
+        [hashtagPattern, mentionPattern, emailPattern, timestampPattern, urlPattern]
+            .compactMap { getElements(from: text, with: $0, range: range).first }
+            .count > 0
     }
 
     private static func regularExpression(for pattern: String) -> NSRegularExpression? {
