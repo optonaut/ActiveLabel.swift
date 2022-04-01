@@ -23,13 +23,15 @@ class ViewController: UIViewController {
         label.enabledTypes.append(customType)
         label.enabledTypes.append(customType2)
         label.enabledTypes.append(customType3)
+        label.enabledTypes.append(.timestamp)
 
         label.urlMaximumLength = 31
 
         label.customize { label in
             label.text = "This is a post with #multiple #hashtags and a @userhandle. Links are also supported like" +
             " this one: http://optonaut.co. Now it also supports custom patterns -> are\n\n" +
-                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601"
+                "Let's trim a long link: \nhttps://twitter.com/twicket_app/status/649678392372121601\n\n" +
+                    "01:00 00:01:00\n1. (00:00) Timestamp test\n60:01\n100:01:01\n00:07 chapter"
             label.numberOfLines = 0
             label.lineSpacing = 4
             
@@ -38,10 +40,21 @@ class ViewController: UIViewController {
             label.mentionColor = UIColor(red: 238.0/255, green: 85.0/255, blue: 96.0/255, alpha: 1)
             label.URLColor = UIColor(red: 85.0/255, green: 238.0/255, blue: 151.0/255, alpha: 1)
             label.URLSelectedColor = UIColor(red: 82.0/255, green: 190.0/255, blue: 41.0/255, alpha: 1)
+            label.timestampColor = UIColor.systemRed
+            label.timestampSelectedColor = UIColor.red
 
             label.handleMentionTap { self.alert("Mention", message: $0) }
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
             label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
+            label.handleTimestampTap {
+                let message = """
+                    timeString: \($0.timeString),
+                    timeInterval: \($0.timeInterval)s,
+                    prettyTimeString: \($0.prettyTimeString),
+                    description: \($0.description)
+                """
+                self.alert("Timestamp", message: message)
+            }
 
             //Custom types
 
@@ -66,7 +79,7 @@ class ViewController: UIViewController {
             label.handleCustomTap(for: customType3) { self.alert("Custom type", message: $0) }
         }
 
-        label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 300)
+        label.frame = CGRect(x: 20, y: 40, width: view.frame.width - 40, height: 400)
         view.addSubview(label)
         
         

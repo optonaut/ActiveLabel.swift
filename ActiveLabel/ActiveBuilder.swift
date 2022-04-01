@@ -22,6 +22,8 @@ struct ActiveBuilder {
             return createElements(from: text, for: type, range: range, minLength: 1, filterPredicate: filterPredicate)
         case .email:
             return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
+        case .timestamp:
+            return createElements(from: text, for: type, range: range, filterPredicate: filterPredicate)
         }
     }
 
@@ -38,7 +40,7 @@ struct ActiveBuilder {
 
             guard let maxLength = maximumLength, word.count > maxLength else {
                 let range = maximumLength == nil ? match.range : (text as NSString).range(of: word)
-                let element = ActiveElement.create(with: type, text: word)
+                let element = ActiveElement.create(with: type, range: range, text: word, fullText: text)
                 elements.append((range, element, type))
                 continue
             }
@@ -67,7 +69,7 @@ struct ActiveBuilder {
             let word = nsstring.substring(with: match.range)
                 .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if filterPredicate?(word) ?? true {
-                let element = ActiveElement.create(with: type, text: word)
+                let element = ActiveElement.create(with: type, range: match.range, text: word, fullText: text)
                 elements.append((match.range, element, type))
             }
         }
@@ -93,7 +95,7 @@ struct ActiveBuilder {
             }
 
             if filterPredicate?(word) ?? true {
-                let element = ActiveElement.create(with: type, text: word)
+                let element = ActiveElement.create(with: type, range: match.range, text: word, fullText: text)
                 elements.append((match.range, element, type))
             }
         }

@@ -20,6 +20,8 @@
 		C1D15C791D7C9B610041D119 /* StringTrimExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */; };
 		C1D15C7B1D7C9B7E0041D119 /* ActiveBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */; };
 		C1E867D61C3D7AEA00FD687A /* RegexParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E867D51C3D7AEA00FD687A /* RegexParser.swift */; };
+		CE3BE94027F4F509006A3145 /* StringSubscriptExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BE93E27F4F509006A3145 /* StringSubscriptExtension.swift */; };
+		CE3BE94127F4F509006A3145 /* Timestamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BE93F27F4F509006A3145 /* Timestamp.swift */; };
 		E267FA251DB3A34900EEAC4C /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
 		E267FA261DB3A34900EEAC4C /* ActiveLabel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -74,6 +76,8 @@
 		C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringTrimExtension.swift; sourceTree = "<group>"; };
 		C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveBuilder.swift; sourceTree = "<group>"; };
 		C1E867D51C3D7AEA00FD687A /* RegexParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegexParser.swift; sourceTree = "<group>"; };
+		CE3BE93E27F4F509006A3145 /* StringSubscriptExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringSubscriptExtension.swift; sourceTree = "<group>"; };
+		CE3BE93F27F4F509006A3145 /* Timestamp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Timestamp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,7 +135,9 @@
 				8F0249D21B998C00005D8035 /* ActiveLabel.swift */,
 				C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */,
 				C1E867D51C3D7AEA00FD687A /* RegexParser.swift */,
+				CE3BE93E27F4F509006A3145 /* StringSubscriptExtension.swift */,
 				C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */,
+				CE3BE93F27F4F509006A3145 /* Timestamp.swift */,
 				8F0249A71B9989B1005D8035 /* Info.plist */,
 			);
 			path = ActiveLabel;
@@ -305,6 +311,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE3BE94127F4F509006A3145 /* Timestamp.swift in Sources */,
+				CE3BE94027F4F509006A3145 /* StringSubscriptExtension.swift in Sources */,
 				C1D15C791D7C9B610041D119 /* StringTrimExtension.swift in Sources */,
 				8F0249D31B998C00005D8035 /* ActiveLabel.swift in Sources */,
 				8F0249D51B998D21005D8035 /* ActiveType.swift in Sources */,
