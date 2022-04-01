@@ -72,13 +72,16 @@ extension Timestamp {
             return timeInterval(from: timeString)
         }
     }
-    public var presentableText: String {
+    public var description: String {
         switch self {
         case .`default`(_):
-            return timeString(from: timeInterval)
+            return prettyTimeString
         case .chapter(_, let title):
-            return title ?? timeString(from: timeInterval)
+            return title ?? prettyTimeString
         }
+    }
+    public var prettyTimeString: String {
+        timeString(from: timeInterval)
     }
     public var timeString: String {
         switch self {

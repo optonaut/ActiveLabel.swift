@@ -47,12 +47,13 @@ class ViewController: UIViewController {
             label.handleHashtagTap { self.alert("Hashtag", message: $0) }
             label.handleURLTap { self.alert("URL", message: $0.absoluteString) }
             label.handleTimestampTap {
-                let text = """
+                let message = """
                     timeString: \($0.timeString),
                     timeInterval: \($0.timeInterval)s,
-                    presentableText: \($0.presentableText)
+                    prettyTimeString: \($0.prettyTimeString),
+                    description: \($0.description)
                 """
-                self.alert("Timestamp", message: text)
+                self.alert("Timestamp", message: message)
             }
 
             //Custom types
