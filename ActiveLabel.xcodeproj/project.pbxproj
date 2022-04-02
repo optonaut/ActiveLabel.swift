@@ -20,7 +20,6 @@
 		C1D15C791D7C9B610041D119 /* StringTrimExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */; };
 		C1D15C7B1D7C9B7E0041D119 /* ActiveBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */; };
 		C1E867D61C3D7AEA00FD687A /* RegexParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1E867D51C3D7AEA00FD687A /* RegexParser.swift */; };
-		CE3BE93D27F4F34D006A3145 /* RegexParserTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE3BE93C27F4F34D006A3145 /* RegexParserTest.swift */; };
 		E267FA251DB3A34900EEAC4C /* ActiveLabel.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; };
 		E267FA261DB3A34900EEAC4C /* ActiveLabel.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8F0249A21B9989B1005D8035 /* ActiveLabel.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -75,7 +74,6 @@
 		C1D15C781D7C9B610041D119 /* StringTrimExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StringTrimExtension.swift; sourceTree = "<group>"; };
 		C1D15C7A1D7C9B7E0041D119 /* ActiveBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActiveBuilder.swift; sourceTree = "<group>"; };
 		C1E867D51C3D7AEA00FD687A /* RegexParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegexParser.swift; sourceTree = "<group>"; };
-		CE3BE93C27F4F34D006A3145 /* RegexParserTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegexParserTest.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -143,7 +141,6 @@
 			isa = PBXGroup;
 			children = (
 				8F0249B11B9989B1005D8035 /* ActiveTypeTests.swift */,
-				CE3BE93C27F4F34D006A3145 /* RegexParserTest.swift */,
 				8F0249B31B9989B1005D8035 /* Info.plist */,
 			);
 			path = ActiveLabelTests;
@@ -320,7 +317,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CE3BE93D27F4F34D006A3145 /* RegexParserTest.swift in Sources */,
 				8F0249B21B9989B1005D8035 /* ActiveTypeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
