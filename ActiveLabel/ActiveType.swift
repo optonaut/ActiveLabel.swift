@@ -9,66 +9,60 @@
 import Foundation
 
 enum ActiveElement {
-    case Mention(String)
-    case Hashtag(String)
-    case URL(String)
-    case None
+    case mention(String)
+    case hashtag(String)
+    case email(String)
+    case url(original: String, trimmed: String)
+    case custom(String)
+    
+    static func create(with activeType: ActiveType, text: String) -> ActiveElement {
+        switch activeType {
+        case .mention: return mention(text)
+        case .hashtag: return hashtag(text)
+        case .email: return email(text)
+        case .url: return url(original: text, trimmed: text)
+        case .custom: return custom(text)
+        }
+    }
 }
 
 public enum ActiveType {
-    case Mention
-    case Hashtag
-    case URL
-    case None
+    case mention
+    case hashtag
+    case url
+    case email
+    case custom(pattern: String)
+    
+    var pattern: String {
+        switch self {
+        case .mention: return RegexParser.mentionPattern
+        case .hashtag: return RegexParser.hashtagPattern
+        case .url: return RegexParser.urlPattern
+        case .email: return RegexParser.emailPattern
+        case .custom(let regex): return regex
+        }
+    }
 }
 
-struct ActiveBuilder {
-    
-    static func createMentionElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
-        let mentions = RegexParser.getMentions(fromText: text, range: range)
-        let nsstring = text as NSString
-        var elements: [(range: NSRange, element: ActiveElement)] = []
-        
-        for mention in mentions where mention.range.length > 2 {
-            let range = NSRange(location: mention.range.location + 1, length: mention.range.length - 1)
-            var word = nsstring.substringWithRange(range)
-            if word.hasPrefix("@") {
-                word.removeAtIndex(word.startIndex)
-            }
-            let element = ActiveElement.Mention(word)
-            elements.append((mention.range, element))
+extension ActiveType: Hashable, Equatable {
+    public func hash(into hasher: inout Hasher) {
+        switch self {
+        case .mention: hasher.combine(-1)
+        case .hashtag: hasher.combine(-2)
+        case .url: hasher.combine(-3)
+        case .email: hasher.combine(-4)
+        case .custom(let regex): hasher.combine(regex)
         }
-        return elements
     }
-    
-    static func createHashtagElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
-        let hashtags = RegexParser.getHashtags(fromText: text, range: range)
-        let nsstring = text as NSString
-        var elements: [(range: NSRange, element: ActiveElement)] = []
-        
-        for hashtag in hashtags where hashtag.range.length > 2 {
-            let range = NSRange(location: hashtag.range.location + 1, length: hashtag.range.length - 1)
-            var word = nsstring.substringWithRange(range)
-            if word.hasPrefix("#") {
-                word.removeAtIndex(word.startIndex)
-            }
-            let element = ActiveElement.Hashtag(word)
-            elements.append((hashtag.range, element))
-        }
-        return elements
-    }
-    
-    static func createURLElements(fromText text: String, range: NSRange) -> [(range: NSRange, element: ActiveElement)] {
-        let urls = RegexParser.getURLs(fromText: text, range: range)
-        let nsstring = text as NSString
-        var elements: [(range: NSRange, element: ActiveElement)] = []
-        
-        for url in urls where url.range.length > 2 {
-            let word = nsstring.substringWithRange(url.range)
-                .stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
-            let element = ActiveElement.URL(word)
-            elements.append((url.range, element))
-        }
-        return elements
+}
+
+public func ==(lhs: ActiveType, rhs: ActiveType) -> Bool {
+    switch (lhs, rhs) {
+    case (.mention, .mention): return true
+    case (.hashtag, .hashtag): return true
+    case (.url, .url): return true
+    case (.email, .email): return true
+    case (.custom(let pattern1), .custom(let pattern2)): return pattern1 == pattern2
+    default: return false
     }
 }
