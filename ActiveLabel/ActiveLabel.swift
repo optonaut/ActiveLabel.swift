@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-public protocol ActiveLabelDelegate: class {
+public protocol ActiveLabelDelegate: AnyObject {
     func didSelect(_ text: String, type: ActiveType)
 }
 
@@ -22,6 +22,8 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     open weak var delegate: ActiveLabelDelegate?
     
     open var enabledTypes: [ActiveType] = [.mention, .hashtag, .url]
+    
+    open var accessibleType: ActiveType?
     
     open var urlMaximumLength: Int?
     
@@ -62,6 +64,10 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
     }
     public var highlightFontSize: CGFloat? = nil {
         didSet { updateTextStorage(parseText: false) }
+    }
+    
+    public var isAccessibilityEnabled: Bool = true {
+        didSet { updateAccessibility(isEnabled: isAccessibilityEnabled) }
     }
     
     // MARK: - Computed Properties
@@ -145,6 +151,11 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         didSet { textContainer.lineBreakMode = lineBreakMode }
     }
     
+    open override func accessibilityActivate() -> Bool {
+        setAccessibilityElement()
+        return isAccessibilityEnabled
+    }
+    
     // MARK: - init functions
     override public init(frame: CGRect) {
         super.init(frame: frame)
@@ -215,22 +226,7 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
                 selectedElement = nil
             }
         case .ended, .regionExited:
-            guard let selectedElement = selectedElement else { return avoidSuperCall }
-            
-            switch selectedElement.element {
-            case .mention(let userHandle): didTapMention(userHandle)
-            case .hashtag(let hashtag): didTapHashtag(hashtag)
-            case .url(let originalURL, _): didTapStringURL(originalURL)
-            case .custom(let element): didTap(element, for: selectedElement.type)
-            case .email(let element): didTapStringEmail(element)
-            }
-            
-            let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
-            DispatchQueue.main.asyncAfter(deadline: when) {
-                self.updateAttributesWhenSelected(false)
-                self.selectedElement = nil
-            }
-            avoidSuperCall = true
+            avoidSuperCall = setSelectedElement(avoidSuperCall: avoidSuperCall)
         case .cancelled:
             updateAttributesWhenSelected(false)
             selectedElement = nil
@@ -241,6 +237,38 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         }
         
         return avoidSuperCall
+    }
+    
+    @discardableResult
+    private func setSelectedElement(avoidSuperCall: Bool) -> Bool {
+        guard let selectedElement = selectedElement else { return avoidSuperCall }
+        
+        switch selectedElement.element {
+        case .mention(let userHandle): didTapMention(userHandle)
+        case .hashtag(let hashtag): didTapHashtag(hashtag)
+        case .url(let originalURL, _): didTapStringURL(originalURL)
+        case .custom(let element): didTap(element, for: selectedElement.type)
+        case .email(let element): didTapStringEmail(element)
+        }
+        
+        let when = DispatchTime.now() + Double(Int64(0.25 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: when) {
+            self.updateAttributesWhenSelected(false)
+            self.selectedElement = nil
+        }
+        
+        return true
+    }
+    
+    private func setAccessibilityElement() {
+        guard isAccessibilityEnabled else { return }
+
+        if let accessibleType = accessibleType {
+            selectedElement = ElementTuple(range: NSRange(location: 0, length: 0), element: ActiveElement.create(with: accessibleType, text: ""), type: accessibleType)
+        } else {
+            selectedElement = activeElements.values.filter{ $0.count>0 }.flatMap{ $0 }.first
+        }
+        setSelectedElement(avoidSuperCall: true)
     }
     
     // MARK: - private properties
@@ -298,6 +326,13 @@ typealias ElementTuple = (range: NSRange, element: ActiveElement, type: ActiveTy
         text = mutAttrString.string
         _customizing = false
         setNeedsDisplay()
+    }
+    
+    fileprivate func updateAccessibility(isEnabled: Bool) {
+        if isEnabled {
+            isAccessibilityElement = isEnabled
+            accessibilityTraits = UIAccessibilityTraits.button
+        }
     }
     
     fileprivate func clearActiveElements() {
